@@ -8,10 +8,12 @@
 #pragma once
 #include "AGraphical.hpp"
 
-class SFML : public AGraphical {
-    public:
-        SFML();
-        ~SFML();
+namespace arc {
+    class SFML : public AGraphical {
+        public:
+            SFML();
+            ~SFML();
 
-        // To be implemented
-};
+            // To be implemented
+    };
+}

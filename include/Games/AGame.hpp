@@ -8,11 +8,13 @@
 #pragma once
 #include "IGame.hpp"
 
-class AGame {
-    public:
-        AGame();
-        ~AGame();
+namespace arc {
+    class AGame {
+        public:
+            AGame();
+            ~AGame();
 
-    private:
+        private:
 
-};
+    };
+}

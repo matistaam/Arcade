@@ -7,17 +7,17 @@
 
 #pragma once
 #include "Element.hpp"
-#include <string>
-#include <vector>
 
-class IGraphical {
-    public:
-        virtual ~IGraphical() = default;
+namespace arc {
+    class IGraphical {
+        public:
+            virtual ~IGraphical() = default;
 
-        virtual void init() = 0;
-        virtual void close() = 0;
-        virtual std::string update() = 0;
+            virtual void init() = 0;
+            virtual void close() = 0;
+            virtual std::string update() = 0;
 
-        protected:
-        std::vector<element_t> _elements;
-};
+            protected:
+            std::vector<element_t> _elements;
+    };
+}

@@ -7,3 +7,6 @@
 
 #include "SFML.hpp"
 
+namespace arc {
+    // To be implemented
+}

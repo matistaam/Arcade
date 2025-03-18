@@ -7,34 +7,36 @@
 
 #include "AGraphical.hpp"
 
-AGraphical::AGraphical(std::string path)
-{
-    (void)path;
-    // To be implemented
-}
+namespace arc {
+    AGraphical::AGraphical(std::string path)
+    {
+        (void)path;
+        // To be implemented
+    }
 
-AGraphical::~AGraphical()
-{
-    // To be implemented
-}
+    AGraphical::~AGraphical()
+    {
+        // To be implemented
+    }
 
-void AGraphical::init()
-{
-    // To be implemented
-}
+    void AGraphical::init()
+    {
+        // To be implemented
+    }
 
-void AGraphical::close()
-{
-    // To be implemented
-}
+    void AGraphical::close()
+    {
+        // To be implemented
+    }
 
-std::string AGraphical::update()
-{
-    // To be implemented
-    return ("");
-}
+    std::string AGraphical::update()
+    {
+        // To be implemented
+        return ("");
+    }
 
-void AGraphical::draw()
-{
-    // To be implemented
+    void AGraphical::draw()
+    {
+        // To be implemented
+    }
 }

@@ -7,19 +7,20 @@
 
 #pragma once
 #include "AGraphical.hpp"
-#include <ncurses.h>
 
-class Ncurses : public AGraphical {
-    public:
-        Ncurses();
-        ~Ncurses();
+namespace arc {
+    class Ncurses : public AGraphical {
+        public:
+            Ncurses();
+            ~Ncurses();
 
-        void init();
-        void close();
-        void draw_text(element_t element);
-        void draw_image(element_t element);
-        void draw_circle(element_t element);
-        void draw_rectangle(element_t element);
-        void draw();
-        std::string update();
-};
+            void init();
+            void close();
+            void draw_text(element_t element);
+            void draw_image(element_t element);
+            void draw_circle(element_t element);
+            void draw_rectangle(element_t element);
+            void draw();
+            std::string update();
+    };
+}

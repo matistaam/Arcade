@@ -6,8 +6,9 @@
 */
 
 #pragma once
+#include <ncurses.h>
 #include <string>
-#include <tuple>
+#include <vector>
 
 enum ELEMENT_TYPE {
     TEXT,

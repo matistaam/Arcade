@@ -7,12 +7,14 @@
 
 #include "AGame.hpp"
 
-AGame::AGame()
-{
-    // To be implemented
-}
+namespace arc {
+    AGame::AGame()
+    {
+        // To be implemented
+    }
 
-AGame::~AGame()
-{
-    // To be implemented
+    AGame::~AGame()
+    {
+        // To be implemented
+    }
 }

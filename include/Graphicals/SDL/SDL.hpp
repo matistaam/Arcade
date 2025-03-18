@@ -8,10 +8,12 @@
 #pragma once
 #include "AGraphical.hpp"
 
-class SDL : public AGraphical {
-    public:
-        SDL();
-        ~SDL();
+namespace arc {
+    class SDL : public AGraphical {
+        public:
+            SDL();
+            ~SDL();
 
-        // To be implemented
-};
+            // To be implemented
+    };
+}

@@ -7,32 +7,34 @@
 
 #include "ACore.hpp"
 
-ACore::ACore(std::string path)
-{
-    //this->_graphical = new AGraphical(path);
-    (void)path;
-    // To be implemented
-}
+namespace arc {
+    ACore::ACore(std::string path)
+    {
+        //this->_graphical = new AGraphical(path);
+        (void)path;
+        // To be implemented
+    }
 
-ACore::~ACore()
-{
-    // To be implemented
-}
+    ACore::~ACore()
+    {
+        // To be implemented
+    }
 
-void ACore::setGraphical(IGraphical *Graphical)
-{
-    (void)Graphical;
-    // To be implemented
-}
+    void ACore::setGraphical(IGraphical *Graphical)
+    {
+        (void)Graphical;
+        // To be implemented
+    }
 
-void ACore::setGame(IGame *Game)
-{
-    (void)Game;
-    // To be implemented
-}
+    void ACore::setGame(IGame *Game)
+    {
+        (void)Game;
+        // To be implemented
+    }
 
-void ACore::display(std::vector<element_t> elements)
-{
-    (void)elements;
-    // To be implemented
+    void ACore::display(std::vector<element_t> elements)
+    {
+        (void)elements;
+        // To be implemented
+    }
 }

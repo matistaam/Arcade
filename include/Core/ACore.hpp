@@ -7,20 +7,19 @@
 
 #pragma once
 #include "ICore.hpp"
-#include "AGraphical.hpp"
-#include "AGame.hpp"
-#include <string>
 
-class ACore : public ICore {
-    public:
-        ACore(std::string path);
-        ~ACore();
+namespace arc {
+    class ACore : public ICore {
+        public:
+            ACore(std::string path);
+            ~ACore();
 
-        void setGraphical(IGraphical *Graphical);
-        void setGame(IGame *Game);
-        void display(std::vector<element_t> elements);
+            void setGraphical(IGraphical *Graphical);
+            void setGame(IGame *Game);
+            void display(std::vector<element_t> elements);
 
-    private:
-        IGraphical *_graphical;
-        IGame *_game;
-};
+        private:
+            IGraphical *_graphical;
+            IGame *_game;
+    };
+}

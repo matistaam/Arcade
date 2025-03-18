@@ -8,16 +8,18 @@
 #pragma once
 #include "IGraphical.hpp"
 
-class AGraphical : public IGraphical {
-    public:
-        AGraphical(std::string path);
-        ~AGraphical();
+namespace arc {
+    class AGraphical : public IGraphical {
+        public:
+            AGraphical(std::string path);
+            ~AGraphical();
 
-        void init();
-        void close();
-        std::string update();
-        void draw();
+            void init();
+            void close();
+            std::string update();
+            void draw();
 
-    private:
+        private:
 
-};
+    };
+}

@@ -7,3 +7,6 @@
 
 #include "SDL.hpp"
 
+namespace arc {
+    // To be implemented
+}

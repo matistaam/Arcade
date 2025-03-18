@@ -1,7 +1,9 @@
 /*
 ** EPITECH PROJECT, 2025
-** arcade
+** *
 ** File description:
-** NCurses
+** SFML
 */
+
+#include "SFML.hpp"
 

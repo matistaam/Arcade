@@ -17,9 +17,11 @@ namespace arc {
             void setGraphical(IGraphical *Graphical);
             void setGame(IGame *Game);
             void display(std::vector<element_t> elements);
+            std::string update();
 
         private:
             IGraphical *_graphical;
             IGame *_game;
+            void *_handle;
     };
 }

@@ -16,8 +16,12 @@ namespace arc {
             virtual void init() = 0;
             virtual void close() = 0;
             virtual std::string update() = 0;
+            virtual void draw() = 0;
 
-            protected:
+            virtual void clearElements() { _elements.clear(); }
+            virtual void addElements(const std::vector<element_t> &elements) { _elements = elements; }
+
+        protected:
             std::vector<element_t> _elements;
     };
 }

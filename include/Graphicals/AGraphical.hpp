@@ -14,10 +14,10 @@ namespace arc {
             AGraphical(std::string path);
             ~AGraphical();
 
-            void init();
-            void close();
-            std::string update();
-            void draw();
+            void init() override;
+            void close() override;
+            std::string update() override;
+            void draw() override;
 
         private:
 

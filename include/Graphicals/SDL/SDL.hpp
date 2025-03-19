@@ -7,6 +7,9 @@
 
 #pragma once
 #include "AGraphical.hpp"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
 
 namespace arc {
     class SDL : public AGraphical {
@@ -14,6 +17,21 @@ namespace arc {
             SDL();
             ~SDL();
 
-            // To be implemented
+            void init() override;
+            void close() override;
+            std::string update() override;
+            void draw() override;
+
+            void draw_text(element_t element);
+            void draw_image(element_t element);
+            void draw_circle(element_t element);
+            void draw_rectangle(element_t element);
+
+        private:
+            SDL_Window *_window;
+            SDL_Renderer *_renderer;
+            TTF_Font *_font;
+            int _width;
+            int _height;
     };
 }

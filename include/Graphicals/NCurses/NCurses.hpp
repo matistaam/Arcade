@@ -14,13 +14,14 @@ namespace arc {
             Ncurses();
             ~Ncurses();
 
-            void init();
-            void close();
+            void init() override;
+            void close() override;
+            std::string update() override;
+            void draw() override;
+
             void draw_text(element_t element);
             void draw_image(element_t element);
             void draw_circle(element_t element);
             void draw_rectangle(element_t element);
-            void draw();
-            std::string update();
     };
 }

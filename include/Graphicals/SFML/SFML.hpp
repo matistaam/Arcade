@@ -7,6 +7,7 @@
 
 #pragma once
 #include "AGraphical.hpp"
+#include <SFML/Graphics.hpp>
 
 namespace arc {
     class SFML : public AGraphical {
@@ -14,6 +15,21 @@ namespace arc {
             SFML();
             ~SFML();
 
-            // To be implemented
+            void init() override;
+            void close() override;
+            std::string update() override;
+            void draw() override;
+
+            void draw_text(element_t element);
+            void draw_image(element_t element);
+            void draw_circle(element_t element);
+            void draw_rectangle(element_t element);
+
+        private:
+            sf::RenderWindow *_window;
+            sf::Font _font;
+            sf::Texture _texture;
+            int _width;
+            int _height;
     };
 }

@@ -8,6 +8,14 @@
 #include "NCurses.hpp"
 
 namespace arc {
+    Ncurses::Ncurses() : AGraphical("")
+    {
+    }
+
+    Ncurses::~Ncurses()
+    {
+    }
+
     void Ncurses::init()
     {
         initscr();
@@ -38,16 +46,20 @@ namespace arc {
 
     void Ncurses::draw_circle(element_t element)
     {
-        attron(COLOR_PAIR(std::stoi(element._color)));
-        int radius = std::get<0>(element._size) / 2;
-        int centerY = std::get<0>(element._position);
-        int centerX = std::get<1>(element._position);
+        int radius = 0;
+        int centerY = 0;
+        int centerX = 0;
+        int x = 0;
+        int y = 0;
 
-        for (int y = -radius; y <= radius; y++) {
-            for (int x = -radius; x <= radius; x++) {
-                if (x*x + y*y <= radius*radius) {
+        attron(COLOR_PAIR(std::stoi(element._color)));
+        radius = std::get<0>(element._size) / 2;
+        centerY = std::get<0>(element._position);
+        centerX = std::get<1>(element._position);
+        for (y = -radius; y <= radius; y++) {
+            for (x = -radius; x <= radius; x++) {
+                if (x*x + y*y <= radius*radius)
                     mvprintw(centerY + y, centerX + x, " ");
-                }
             }
         }
         attroff(COLOR_PAIR(std::stoi(element._color)));
@@ -55,17 +67,24 @@ namespace arc {
 
     void Ncurses::draw_rectangle(element_t element)
     {
+        int width = 0;
+        int height = 0;
+        int centerY = 0;
+        int centerX = 0;
+        int startY = 0;
+        int startX = 0;
+        int x = 0;
+        int y = 0;
+
         attron(COLOR_PAIR(std::stoi(element._color)));
-        int width = std::get<1>(element._size);
-        int height = std::get<0>(element._size);
-        int centerY = std::get<0>(element._position);
-        int centerX = std::get<1>(element._position);
-
-        int startY = centerY - height/2;
-        int startX = centerX - width/2;
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        width = std::get<1>(element._size);
+        height = std::get<0>(element._size);
+        centerY = std::get<0>(element._position);
+        centerX = std::get<1>(element._position);
+        startY = centerY - height/2;
+        startX = centerX - width/2;
+        for (y = 0; y < height; y++) {
+            for (x = 0; x < width; x++) {
                 mvprintw(startY + y, startX + x, " ");
             }
         }
@@ -97,11 +116,24 @@ namespace arc {
 
     std::string Ncurses::update()
     {
-        draw();
-        int ch = getch();
+        int ch = 0;
 
+        draw();
+        ch = getch();
         if (ch == KEY_RESIZE)
             return ("RESIZE");
         return ("");
+    }
+}
+
+extern "C" {
+    arc::IGraphical *create()
+    {
+        return (new arc::Ncurses());
+    }
+
+    void destroy(arc::IGraphical *instance)
+    {
+        delete instance;
     }
 }

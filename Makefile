@@ -22,25 +22,19 @@ LIB_DIR					=	lib
 GAMES_DIR				=	games
 GRAPH_DIR				=	graphicals
 
-# NCurses library
-NCURSES_NAME			=	arcade_ncurses.so
-NCURSES_SRC				=	$(shell find src/Graphicals/NCurses -name "*.cpp") \
-            				src/Graphicals/AGraphical.cpp
-NCURSES_OBJ				=	$(NCURSES_SRC:.cpp=.o)
+# Dynamic library sources
+GRAPHICAL_DIRS			=	$(shell find src/Graphicals/* -maxdepth 0 -type d ! -name ".*")
+GRAPHICAL_NAMES			=	$(notdir $(GRAPHICAL_DIRS))
+GRAPHICAL_LIBS			=	$(addprefix $(LIB_DIR)/$(GRAPH_DIR)/arcade_, $(addsuffix .so, $(shell echo $(GRAPHICAL_NAMES) | tr '[:upper:]' '[:lower:]')))
+
+# Specific folder names for graphics libraries
+NCURSES_DIR			=	NCurses
+SDL_DIR				=	SDL
+SFML_DIR			=	SFML
+
+# Library flags
 NCURSES_FLAGS			=	-lncurses
-
-# SDL2 library
-SDL_NAME				=	arcade_sdl2.so
-SDL_SRC					=	$(shell find src/Graphicals/SDL -name "*.cpp") \
-                            src/Graphicals/AGraphical.cpp
-SDL_OBJ					=	$(SDL_SRC:.cpp=.o)
 SDL_FLAGS				=	-lSDL2 -lSDL2_ttf -lSDL2_image
-
-# SFML library
-SFML_NAME				=	arcade_sfml.so
-SFML_SRC				=	$(shell find src/Graphicals/SFML -name "*.cpp") \
-                            src/Graphicals/AGraphical.cpp
-SFML_OBJ				=	$(SFML_SRC:.cpp=.o)
 SFML_FLAGS				=	-lsfml-graphics -lsfml-window -lsfml-system
 
 all: directories $(NAME) graphicals games
@@ -55,19 +49,11 @@ $(NAME): $(OBJ_CORE)
 	@$(CXX) $(CXXFLAGS) $^ -o $@ -ldl
 	@echo "Done!"
 
-graphicals: directories $(LIB_DIR)/$(GRAPH_DIR)/$(NCURSES_NAME) $(LIB_DIR)/$(GRAPH_DIR)/$(SFML_NAME) $(LIB_DIR)/$(GRAPH_DIR)/$(SDL_NAME)
+graphicals: directories $(GRAPHICAL_LIBS)
 
-$(LIB_DIR)/$(GRAPH_DIR)/$(NCURSES_NAME): $(NCURSES_OBJ)
-	@echo "Building NCurses graphical library..."
-	@$(CXX) -shared $(CXXFLAGS) $^ -o $@ $(NCURSES_FLAGS)
-
-$(LIB_DIR)/$(GRAPH_DIR)/$(SDL_NAME): $(SDL_OBJ)
-	@echo "Building SDL2 graphical library..."
-	@$(CXX) -shared $(CXXFLAGS) $^ -o $@ $(SDL_FLAGS)
-
-$(LIB_DIR)/$(GRAPH_DIR)/$(SFML_NAME): $(SFML_OBJ)
-	@echo "Building SFML graphical library..."
-	@$(CXX) -shared $(CXXFLAGS) $^ -o $@ $(SFML_FLAGS)
+$(LIB_DIR)/$(GRAPH_DIR)/arcade_%.so:
+	@echo "Building $* graphical library..."
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/$($(shell echo $* | tr '[:lower:]' '[:upper:]')_DIR) -name "*.cpp") src/Graphicals/AGraphical.cpp -o $@ $($(shell echo $* | tr '[:lower:]' '[:upper:]')_FLAGS)
 
 games: directories
 	@echo "Building games..."
@@ -79,7 +65,8 @@ games: directories
 
 clean:
 	@echo "Cleaning object files..."
-	@$(RM) $(OBJ_CORE) $(NCURSES_OBJ) $(SDL_OBJ) $(SFML_OBJ)
+	@$(RM) $(OBJ_CORE)
+	@find . -name "*.o" -type f -delete
 
 fclean: clean
 	@echo "Cleaning executable and libraries..."

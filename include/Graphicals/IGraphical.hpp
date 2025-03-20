@@ -6,7 +6,7 @@
 */
 
 #pragma once
-#include "Element.hpp"
+#include "Includes.hpp"
 
 namespace arc {
     class IGraphical {
@@ -18,8 +18,8 @@ namespace arc {
             virtual std::string update() = 0;
             virtual void draw() = 0;
 
-            virtual void clearElements() { _elements.clear(); }
-            virtual void addElements(const std::vector<element_t> &elements) { _elements = elements; }
+            virtual void clearElements() = 0;
+            virtual void addElements(const std::vector<element_t> &elements) = 0;
 
         protected:
             std::vector<element_t> _elements;

@@ -5,8 +5,7 @@
 ** SFML
 */
 
-#include "SFML.hpp"
-#include <stdexcept>
+#include "Includes.hpp"
 
 namespace arc {
     SFML::SFML() : AGraphical(""), _window(nullptr)
@@ -24,9 +23,9 @@ namespace arc {
     {
         this->_window = new sf::RenderWindow(sf::VideoMode(this->_width, this->_height), "Arcade");
         if (!this->_window)
-            throw std::runtime_error("Window creation failed");
+            throw GraphicalError("Window creation failed");
         if (!this->_font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
-            throw std::runtime_error("Font loading failed");
+            throw GraphicalError("Font loading failed");
         this->_window->setFramerateLimit(60);
     }
 
@@ -67,17 +66,13 @@ namespace arc {
     void SFML::draw_image(element_t element)
     {
         sf::Sprite sprite = sf::Sprite();
-        float scaleX = 0.0f;
-        float scaleY = 0.0f;
 
-        if (element._image_path.empty())
-            return;
-        if (!this->_texture.loadFromFile(element._image_path))
+        if (element._image_path.empty() || !this->_texture.loadFromFile(element._image_path))
             return;
         sprite.setTexture(this->_texture);
         sprite.setPosition(std::get<1>(element._position), std::get<0>(element._position));
-        scaleX = static_cast<float>(std::get<1>(element._size)) / this->_texture.getSize().x;
-        scaleY = static_cast<float>(std::get<0>(element._size)) / this->_texture.getSize().y;
+        float scaleX = static_cast<float>(std::get<1>(element._size)) / this->_texture.getSize().x;
+        float scaleY = static_cast<float>(std::get<0>(element._size)) / this->_texture.getSize().y;
         sprite.setScale(scaleX, scaleY);
         this->_window->draw(sprite);
     }
@@ -88,7 +83,7 @@ namespace arc {
         sf::Color color = sf::Color::White;
 
         circle.setPosition(std::get<1>(element._position) - std::get<0>(element._size) / 2,
-        std::get<0>(element._position) - std::get<0>(element._size) / 2);
+            std::get<0>(element._position) - std::get<0>(element._size) / 2);
         if (element._color == "1")
             color = sf::Color::Red;
         else if (element._color == "2")
@@ -108,11 +103,11 @@ namespace arc {
     void SFML::draw_rectangle(element_t element)
     {
         sf::RectangleShape rectangle(sf::Vector2f(std::get<1>(element._size),
-        std::get<0>(element._size)));
+            std::get<0>(element._size)));
         sf::Color color = sf::Color::White;
 
         rectangle.setPosition(std::get<1>(element._position) - std::get<1>(element._size) / 2,
-        std::get<0>(element._position) - std::get<0>(element._size) / 2);
+            std::get<0>(element._position) - std::get<0>(element._size) / 2);
         if (element._color == "1")
             color = sf::Color::Red;
         else if (element._color == "2")
@@ -131,28 +126,32 @@ namespace arc {
 
     void SFML::draw()
     {
-        this->_window->clear(sf::Color::Black);
-        for (auto &element : this->_elements) {
-            switch (element._type) {
-                case TEXT:
-                    draw_text(element);
-                    break;
-                case IMAGE:
-                    draw_image(element);
-                    break;
-                case CIRCLE:
-                    draw_circle(element);
-                    break;
-                case RECTANGLE:
-                    draw_rectangle(element);
-                    break;
-                case BUTTON:
-                    draw_rectangle(element);
-                    draw_text(element);
-                    break;
+        try {
+            this->_window->clear(sf::Color::Black);
+            for (auto &element : this->_elements) {
+                switch (element._type) {
+                    case TEXT:
+                        draw_text(element);
+                        break;
+                    case IMAGE:
+                        draw_image(element);
+                        break;
+                    case CIRCLE:
+                        draw_circle(element);
+                        break;
+                    case RECTANGLE:
+                        draw_rectangle(element);
+                        break;
+                    case BUTTON:
+                        draw_rectangle(element);
+                        draw_text(element);
+                        break;
+                }
             }
+            this->_window->display();
+        } catch (const std::exception &e) {
+            throw GraphicalError("SFML drawing error: " + std::string(e.what()));
         }
-        this->_window->display();
     }
 
     std::string SFML::update()

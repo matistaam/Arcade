@@ -19,45 +19,63 @@ OBJ_CORE				=	$(SRC_CORE:.cpp=.o)
 
 # Libraries
 LIB_DIR					=	lib
-GAMES_DIR				=	games
-GRAPH_DIR				=	graphicals
 
-# Dynamic library sources
-GRAPHICAL_DIRS			=	$(shell find src/Graphicals/* -maxdepth 0 -type d ! -name ".*")
-GRAPHICAL_NAMES			=	$(notdir $(GRAPHICAL_DIRS))
-GRAPHICAL_LIBS			=	$(addprefix $(LIB_DIR)/$(GRAPH_DIR)/arcade_, $(addsuffix .so, $(shell echo $(GRAPHICAL_NAMES) | tr '[:upper:]' '[:lower:]')))
+# Graphics libraries configuration
+NCURSES_LIB				=	$(LIB_DIR)/arcade_ncurses.so
+SDL_LIB					=	$(LIB_DIR)/arcade_sdl2.so
+SFML_LIB				=	$(LIB_DIR)/arcade_sfml.so
+
+GRAPHICAL_LIBS			=	$(NCURSES_LIB) $(SDL_LIB) $(SFML_LIB)
+
+# Games configuration
+SNAKE_LIB				=	$(LIB_DIR)/arcade_snake.so
+NIBBLER_LIB				=	$(LIB_DIR)/arcade_nibbler.so
+
+GAMES_LIBS				=	$(SNAKE_LIB) $(NIBBLER_LIB)
 
 # Specific folder names for graphics libraries
 NCURSES_DIR			=	NCurses
-SDL_DIR				=	SDL
+SDL2_DIR			=	SDL
 SFML_DIR			=	SFML
 
 # Library flags
 NCURSES_FLAGS			=	-lncurses
-SDL_FLAGS				=	-lSDL2 -lSDL2_ttf -lSDL2_image
+SDL2_FLAGS				=	-lSDL2 -lSDL2_ttf -lSDL2_image
 SFML_FLAGS				=	-lsfml-graphics -lsfml-window -lsfml-system
 
-all: directories $(NAME) graphicals games
+all: directory $(NAME) graphicals games
 
-directories:
+directory:
 	@mkdir -p $(LIB_DIR)
-	@mkdir -p $(LIB_DIR)/$(GAMES_DIR)
-	@mkdir -p $(LIB_DIR)/$(GRAPH_DIR)
 
 $(NAME): $(OBJ_CORE)
 	@echo "Linking $(NAME)..."
 	@$(CXX) $(CXXFLAGS) $^ -o $@ -ldl
 	@echo "Done!"
 
-graphicals: directories $(GRAPHICAL_LIBS)
+graphicals: directory $(GRAPHICAL_LIBS)
 
-$(LIB_DIR)/$(GRAPH_DIR)/arcade_%.so:
-	@echo "Building $* graphical library..."
-	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/$($(shell echo $* | tr '[:lower:]' '[:upper:]')_DIR) -name "*.cpp") src/Graphicals/AGraphical.cpp -o $@ $($(shell echo $* | tr '[:lower:]' '[:upper:]')_FLAGS)
+$(NCURSES_LIB):
+	@echo "Building NCurses library..."
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/NCurses -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp -o $@ $(NCURSES_FLAGS)
 
-games: directories
-	@echo "Building games..."
-    # Add your games compilation here
+$(SDL_LIB):
+	@echo "Building SDL2 library..."
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/SDL -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp -o $@ $(SDL2_FLAGS)
+
+$(SFML_LIB):
+	@echo "Building SFML library..."
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/SFML -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp -o $@ $(SFML_FLAGS)
+
+games: directory $(GAMES_LIBS)
+
+$(SNAKE_LIB):
+	@echo "Building Snake game..."
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Games/Snake -name "*.cpp") src/Games/AGame.cpp src/Core/ArcadeException.cpp -o $@
+
+$(NIBBLER_LIB):
+	@echo "Building Nibbler game..."
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Games/Nibbler -name "*.cpp") src/Games/AGame.cpp src/Core/ArcadeException.cpp -o $@
 
 %.o: %.cpp
 	@echo "Compiling $<"
@@ -75,4 +93,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re games graphicals directories
+.PHONY: all clean fclean re games graphicals directory

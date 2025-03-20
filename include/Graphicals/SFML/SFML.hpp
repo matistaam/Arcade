@@ -6,8 +6,7 @@
 */
 
 #pragma once
-#include "AGraphical.hpp"
-#include <SFML/Graphics.hpp>
+#include "Includes.hpp"
 
 namespace arc {
     class SFML : public AGraphical {

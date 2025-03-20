@@ -6,10 +6,7 @@
 */
 
 #pragma once
-#include <ncurses.h>
-#include <string>
-#include <vector>
-#include <tuple>
+#include "Includes.hpp"
 
 namespace arc {
     enum ELEMENT_TYPE {

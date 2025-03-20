@@ -6,7 +6,7 @@
 */
 
 #pragma once
-#include "ICore.hpp"
+#include "Includes.hpp"
 
 namespace arc {
     class ACore : public ICore {
@@ -14,14 +14,12 @@ namespace arc {
             ACore(std::string path);
             ~ACore();
 
-            void setGraphical(IGraphical *Graphical);
-            void setGame(IGame *Game);
-            void display(std::vector<element_t> elements);
+            void setGraphical(IGraphical *Graphical) override;
+            void setGame(IGame *Game) override;
+            void display(std::vector<element_t> elements) override;
             std::string update();
 
         private:
-            IGraphical *_graphical;
-            IGame *_game;
             void *_handle;
     };
 }

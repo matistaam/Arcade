@@ -2,19 +2,21 @@
 ** EPITECH PROJECT, 2025
 ** B-OOP-400-LYN-4-1-arcade-youssef.mehili
 ** File description:
-** AGame
+** Snake
 */
 
 #pragma once
 #include "Includes.hpp"
 
 namespace arc {
-    class AGame : public IGame {
+    class Snake : public AGame {
         public:
-            AGame();
-            ~AGame();
+            Snake();
+            ~Snake();
+
+            // To be implemented
 
         private:
-
+            // To be implemented
     };
 }

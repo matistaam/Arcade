@@ -5,17 +5,17 @@
 ** main
 */
 
-#include "ACore.hpp"
-#include <iostream>
-#include <thread>
+#include "Includes.hpp"
 
 int display_help(void)
 {
     std::cout << "USAGE\n";
-    std::cout << "\t./arcade library_path\n\n";
+    std::cout << "\t./arcade library_path\n";
+    std::cout << "\t./arcade -h\n\n";
     std::cout << "DESCRIPTION\n";
     std::cout << "\tlibrary_path\tpath to the initial graphical library to load\n";
-    return (84);
+    std::cout << "\t-h\t\tdisplay this help\n";
+    return (0);
 }
 
 std::vector<arc::element_t> create_test_elements(void)
@@ -48,7 +48,12 @@ int main(int ac, char **av)
     std::vector<arc::element_t> elements = {};
     std::string event = "";
 
-    if (ac != 2)
+    if (ac != 2) {
+        std::cerr << "Error: Invalid number of arguments" << std::endl;
+        return (84);
+    }
+    std::string arg(av[1]);
+    if (arg == "-h")
         return (display_help());
     try {
         arc::ACore core = arc::ACore(av[1]);

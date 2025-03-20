@@ -6,7 +6,7 @@
 */
 
 #pragma once
-#include "AGraphical.hpp"
+#include "Includes.hpp"
 
 namespace arc {
     class Ncurses : public AGraphical {

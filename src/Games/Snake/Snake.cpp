@@ -2,18 +2,18 @@
 ** EPITECH PROJECT, 2025
 ** B-OOP-400-LYN-4-1-arcade-youssef.mehili
 ** File description:
-** AGame
+** Snake
 */
 
 #include "Includes.hpp"
 
 namespace arc {
-    AGame::AGame()
+    Snake::Snake()
     {
         // To be implemented
     }
 
-    AGame::~AGame()
+    Snake::~Snake()
     {
         // To be implemented
     }

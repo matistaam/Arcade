@@ -5,38 +5,42 @@
 ** AGraphical
 */
 
-#include "AGraphical.hpp"
+#include "Includes.hpp"
 
 namespace arc {
     AGraphical::AGraphical(std::string path)
     {
         (void)path;
-        // To be implemented
     }
 
     AGraphical::~AGraphical()
     {
-        // To be implemented
     }
 
     void AGraphical::init()
     {
-        // To be implemented
     }
 
     void AGraphical::close()
     {
-        // To be implemented
     }
 
     std::string AGraphical::update()
     {
-        // To be implemented
         return ("");
     }
 
     void AGraphical::draw()
     {
-        // To be implemented
+    }
+
+    void AGraphical::clearElements()
+    {
+        this->_elements.clear();
+    }
+
+    void AGraphical::addElements(const std::vector<element_t> &elements)
+    {
+        this->_elements = elements;
     }
 }

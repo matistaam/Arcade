@@ -5,9 +5,7 @@
 ** ACore
 */
 
-#include "ACore.hpp"
-#include <dlfcn.h>
-#include <stdexcept>
+#include "Includes.hpp"
 
 namespace arc {
     typedef IGraphical* (*create_t)();
@@ -17,18 +15,18 @@ namespace arc {
     {
         create_t create = nullptr;
 
-        this->_handle = dlopen(path.c_str(), RTLD_LAZY);
+        this->_handle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
         if (!this->_handle)
-            throw std::runtime_error(dlerror());
+            throw LibraryError(std::string(path) + ": " + std::string(dlerror()));
         create = (create_t)dlsym(this->_handle, "create");
         if (!create) {
             dlclose(this->_handle);
-            throw std::runtime_error("Could not find create symbol");
+            throw InvalidLibraryError(path);
         }
         this->_graphical = create();
         if (!this->_graphical) {
             dlclose(this->_handle);
-            throw std::runtime_error("Could not create graphical instance");
+            throw InvalidLibraryError(path);
         }
         this->_graphical->init();
         this->_game = nullptr;

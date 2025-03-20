@@ -6,8 +6,7 @@
 */
 
 #pragma once
-#include "IGraphical.hpp"
-#include "IGame.hpp"
+#include "Includes.hpp"
 
 namespace arc {
     class ICore {

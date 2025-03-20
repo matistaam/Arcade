@@ -23,6 +23,10 @@ Your graphics library must:
 2. Implement all required virtual methods
 3. Provide `create()` and `destroy()` external C functions
 
+Default window dimensions should be:
+- Width: 800 pixels
+- Height: 600 pixels
+
 Example header structure:
 ```cpp
 namespace arc {
@@ -54,7 +58,10 @@ namespace arc {
 #### init()
 - Initialize your graphics context
 - Set up windows, renderers, or other required resources
+- Set window dimensions (default: 800x600)
+- Set framerate limit (60 FPS recommended)
 - Handle any necessary error checking
+- Initialize color support if needed (for NCurses)
 
 #### close()
 - Clean up all resources
@@ -99,6 +106,7 @@ Your game must:
 1. Inherit from `arc::AGame` or implement `arc::IGame`
 2. Implement all required virtual methods
 3. Provide `create()` and `destroy()` external C functions
+4. Include virtual destructor
 
 Example header structure:
 ```cpp
@@ -106,7 +114,7 @@ namespace arc {
     class YourGame : public AGame {
         public:
             YourGame();
-            ~YourGame();
+            ~YourGame() override;
 
             // Required override from IGame
             std::vector<element_t> handleEvents(std::string command) override;
@@ -119,11 +127,12 @@ namespace arc {
 
 ### 3. Required Method Implementation
 
-#### handleEvents()
-- Process the input command
-- Update game state
+#### handleEvents(std::string command)
+- Process the input command (empty string means no input)
+- Update game state based on command
+- Perform game logic (movement, collisions, etc.)
 - Return vector of elements to be rendered
-- Handle game logic and collision detection
+- Implement proper cleanup in destructor
 
 ### 4. Element Structure
 Use the `element_t` struct for rendering:
@@ -138,12 +147,29 @@ struct element_s {
 };
 ```
 
+Color codes:
+- "1": Red
+- "2": Green
+- "3": Yellow
+- "4": Blue
+- "5": Magenta
+- "6": Cyan
+Default: White
+
+For TEXT elements, position represents the top-left corner.
+For CIRCLE elements, position represents the center and size.x is used as diameter.
+For RECTANGLE elements, position represents the center and size represents width/height.
+
 ## Building and Loading Libraries
 
 ### 1. Directory Structure
 Place your files in:
 - Graphics libraries: `src/Graphicals/YourLib/` and `include/Graphicals/YourLib/`
 - Games: `src/Games/YourGame/` and `include/Games/YourGame/`
+
+Font files should be accessed from:
+- Default path: `/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf`
+- Fallback path: `assets/fonts/DejaVuSans.ttf`
 
 ### 2. Compilation
 Add your library to the Makefile:

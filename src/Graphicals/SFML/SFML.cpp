@@ -24,7 +24,7 @@ namespace arc {
         this->_window = new sf::RenderWindow(sf::VideoMode(this->_width, this->_height), "Arcade");
         if (!this->_window)
             throw GraphicalError("Window creation failed");
-        if (!this->_font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
+        if (!this->_font.loadFromFile("assets/fonts/DejaVuSans.ttf"))
             throw GraphicalError("Font loading failed");
         this->_window->setFramerateLimit(60);
     }

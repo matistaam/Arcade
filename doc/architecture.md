@@ -1,4 +1,4 @@
-# Architecture Arcade
+# Arcade Architecture
 
 ```mermaid
 classDiagram
@@ -6,45 +6,114 @@ classDiagram
 
     class ICore {
         <<Interface>>
+        +setGraphical(IGraphical*)
+        +setGame(IGame*)
+        +display(vector~element_t~)
+        #_graphical: IGraphical*
+        #_game: IGame*
     }
     class ACore {
-        +load_lib()
-        +load_game()
-        +display()
-        +update()
+        -_handle: void*
+        -_graphical: IGraphical*
+        -_game: IGame*
+        +ACore(string path)
+        +~ACore()
+        +setGraphical(IGraphical*)
+        +setGame(IGame*)
+        +display(vector~element_t~)
+        +update() string
     }
     
     class IGraphical {
         <<Interface>>
         +init()
         +close()
-        +update()
+        +update() string
         +draw()
+        +clearElements()
+        +addElements(vector~element_t~)
+        #_elements: vector~element_t~
     }
     class AGraphical {
-        +clearElements()
-        +addElements()
+        +AGraphical(string path)
+        +~AGraphical()
+        +init()
+        +close()
+        +update() string
+        +draw()
     }
     
     class IGame {
         <<Interface>>
-        +handleEvents()
+        +handleEvents(string) vector~element_t~
+        #_elements: vector~element_t~
     }
     class AGame {
-        #elements
+        +AGame()
+        +~AGame()
+        #_elements: vector~element_t~
     }
 
-    %% Implémentations Graphiques
-    class SFML
-    class SDL
-    class NCurses
+    %% Graphics Libraries Implementations
+    class SFML {
+        -_window: RenderWindow*
+        -_font: Font
+        -_texture: Texture
+        -_width: int
+        -_height: int
+        +init()
+        +close()
+        +update() string
+        +draw()
+        -draw_text(element_t)
+        -draw_image(element_t)
+        -draw_circle(element_t)
+        -draw_rectangle(element_t)
+    }
+    class SDL {
+        -_window: Window*
+        -_renderer: Renderer*
+        -_font: Font*
+        -_width: int
+        -_height: int
+        +init()
+        +close()
+        +update() string
+        +draw()
+        -draw_text(element_t)
+        -draw_image(element_t)
+        -draw_circle(element_t)
+        -draw_rectangle(element_t)
+    }
+    class NCurses {
+        +init()
+        +close()
+        +update() string
+        +draw()
+        -draw_text(element_t)
+        -draw_image(element_t)
+        -draw_circle(element_t)
+        -draw_rectangle(element_t)
+    }
 
-    %% Implémentations Jeux
-    class Snake
-    class Pacman
-    class Nibbler
+    %% Game Implementations
+    class Snake {
+        +handleEvents(string) vector~element_t~
+        -updateGame()
+        -checkCollision()
+    }
+    class Pacman {
+        +handleEvents(string) vector~element_t~
+        -updateGame()
+        -checkCollision()
+    }
+    class Nibbler {
+        +handleEvents(string) vector~element_t~
+        -updateGame()
+        -checkCollision()
+    }
 
-    %% Relations d'héritage
+    %% Inheritance relationships
     ICore <|-- ACore
     IGraphical <|-- AGraphical
     AGraphical <|-- SFML
@@ -55,24 +124,24 @@ classDiagram
     AGame <|-- Pacman
     AGame <|-- Nibbler
 
-    %% Relations de composition
-    ACore o-- IGraphical : utilise
-    ACore o-- IGame : utilise
+    %% Composition relationships
+    ACore o-- IGraphical : uses
+    ACore o-- IGame : uses
 
-    %% Structure Element
+    %% Element Structure
     class element_t {
         +ELEMENT_TYPE type
         +string text
-        +tuple position
+        +tuple~int,int~ position
         +string color
-        +tuple size
+        +tuple~int,int~ size
         +string image_path
     }
 
-    IGame --> element_t : crée
-    IGraphical --> element_t : affiche
+    IGame --> element_t : creates
+    IGraphical --> element_t : displays
 
-    %% Description des types d'éléments
+    %% Element Types
     class ELEMENT_TYPE {
         <<enumeration>>
         TEXT
@@ -82,38 +151,40 @@ classDiagram
         BUTTON
     }
 
-    element_t --> ELEMENT_TYPE : utilise
+    element_t --> ELEMENT_TYPE : uses
 ```
 
-## Explication de l'Architecture
+## Architecture Explanation
 
 ### Core System
-- **ACore** est le composant central qui :
-  - Charge les bibliothèques graphiques (*.so)
-  - Gère le chargement des jeux
-  - Coordonne l'affichage et les mises à jour
+- **ACore** is the central component that:
+  - Dynamically loads graphic libraries (*.so)
+  - Manages game loading
+  - Coordinates display and updates
+  - Handles library switching
 
-### Interface Graphique
-- **IGraphical** définit l'interface commune pour toutes les bibliothèques graphiques
-- **AGraphical** fournit l'implémentation de base
-- Trois bibliothèques implémentées : SFML, SDL, NCurses
-- Chaque bibliothèque peut être chargée dynamiquement
+### Graphics Interface
+- **IGraphical** defines the common interface for all graphic libraries
+- **AGraphical** provides the base implementation
+- Three libraries implemented: SFML, SDL, NCurses
+- Each library can be loaded dynamically at runtime
 
-### Système de Jeux
-- **IGame** définit l'interface commune pour tous les jeux
-- **AGame** fournit la base pour l'implémentation des jeux
-- Les jeux sont indépendants de la bibliothèque graphique utilisée
-- Communication via la structure element_t
+### Game System
+- **IGame** defines the common interface for all games
+- **AGame** provides the base implementation for games
+- Games are independent of the graphic library used
+- Communication through element_t structure
 
-### Flux de Données
-1. Le Core charge une bibliothèque graphique
-2. Le Core charge un jeu
-3. Le jeu reçoit les événements via handleEvents()
-4. Le jeu génère des éléments (element_t)
-5. Le Core transmet ces éléments à la bibliothèque graphique
-6. La bibliothèque graphique affiche les éléments
+### Data Flow
+1. Core loads a graphic library
+2. Core loads a game
+3. Game receives events through handleEvents()
+4. Game generates elements (element_t)
+5. Core passes these elements to the graphic library
+6. Graphic library displays the elements
 
-### Structure element_t
-- Structure commune utilisée pour la communication
-- Définit tous les types d'éléments affichables
-- Permet une abstraction entre les jeux et l'affichage
+### element_t Structure
+- Common structure used for communication
+- Defines all displayable element types
+- Provides abstraction between games and display
+- Ensures consistency across different graphics libraries

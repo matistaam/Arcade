@@ -90,11 +90,18 @@ namespace arc {
         event = this->_graphical->update();
         if (event == "EXIT")
             return (event);
+        if (event == "PREV_LIB") {
+            std::cout << "Previous library" << std::endl;
+            // TODO: Implement library switching
+        }
+        if (event == "NEXT_LIB") {
+            std::cout << "Next library" << std::endl;
+            // TODO: Implement library switching
+        }
         if (!this->_inGame) {
             this->_menu.handleInput(event);
-            if (this->_menu.isAuthenticated() && !this->_menu.getSelectedGame().empty()) {
+            if (this->_menu.isAuthenticated() && !this->_menu.getSelectedGame().empty())
                 this->_inGame = true;
-            }
         } else {
             if (event == "m") {
                 this->_isPaused = true;

@@ -19,9 +19,11 @@ A modular arcade gaming platform that supports multiple display libraries and ga
 - Dynamic switching between display libraries at runtime
 - Real-time game rendering with 60 FPS target
 - Robust event handling system
-- Window management (800x600 default resolution)
-- Error handling and resource management
-- Menu system with game selection
+- Window management (800x600 resolution)
+- Error handling with custom exception classes
+- Menu system with authentication and game selection
+- Pause menu functionality with resume/quit options
+- Support for text, images, shapes, and buttons rendering
 
 ## 🛠️ Installation
 ### Dependencies
@@ -58,20 +60,20 @@ make re
 ./arcade -h
 
 # Run with a specific graphical library
-./arcade lib/graphicals/arcade_sfml.so
+./arcade lib/arcade_sfml.so
 ```
 
 ## 🎮 Game Controls
 | Key | Action |
 |-----|--------|
-| Q | Previous graphical library |
-| E | Next graphical library |
-| Z | Previous game |
-| C | Next game |
-| R | Restart game |
-| M | Return to menu |
-| Escape | Quit |
+| 1 | Previous graphical library |
+| 2 | Next graphical library |
+| Enter | Confirm selection |
+| Tab | Navigate menu options |
+| M | Toggle pause menu |
+| Escape | Exit game/menu |
 | Arrow keys | Movement/Navigation |
+| Backspace | Delete text input |
 
 ## 📁 Project Structure
 ```
@@ -122,3 +124,20 @@ Comprehensive documentation for implementing new libraries is available in:
 - RAII-compliant resource management
 - Graceful error recovery
 - Detailed error messages
+
+## 🎨 Supported Elements
+### Display Elements
+- TEXT: Rendered text with customizable font size and color
+- IMAGE: Image display with scaling support
+- CIRCLE: Filled circle shapes
+- RECTANGLE: Filled rectangle shapes
+- BUTTON: Interactive buttons (combination of rectangle and text)
+
+### Color Support
+- WHITE (default)
+- RED (code: "1")
+- GREEN (code: "2")
+- YELLOW (code: "3")
+- BLUE (code: "4")
+- MAGENTA (code: "5")
+- CYAN (code: "6")

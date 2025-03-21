@@ -24,7 +24,7 @@ namespace arc {
         this->_window = new sf::RenderWindow(sf::VideoMode(this->_width, this->_height), "Arcade");
         if (!this->_window)
             throw GraphicalError("Window creation failed");
-        if (!this->_font.loadFromFile("assets/fonts/DejaVuSans.ttf"))
+        if (!this->_font.loadFromFile("assets/fonts/ByteBounce.ttf"))
             throw GraphicalError("Font loading failed");
         this->_window->setFramerateLimit(60);
     }
@@ -42,10 +42,11 @@ namespace arc {
     {
         sf::Text text = sf::Text();
         sf::Color color = sf::Color::White;
+        auto [x, y] = convertPositionToPixels(std::get<0>(element._position), std::get<1>(element._position));
 
         text.setFont(this->_font);
         text.setString(element._text);
-        text.setCharacterSize(24);
+        text.setCharacterSize(element._font_size);
         if (element._color == "1")
             color = sf::Color::Red;
         else if (element._color == "2")
@@ -59,7 +60,7 @@ namespace arc {
         else if (element._color == "6")
             color = sf::Color::Cyan;
         text.setFillColor(color);
-        text.setPosition(std::get<1>(element._position), std::get<0>(element._position));
+        text.setPosition(x, y);
         this->_window->draw(text);
     }
 
@@ -156,13 +157,27 @@ namespace arc {
 
     std::string SFML::update()
     {
-        sf::Event event = sf::Event();
+        sf::Event event;
 
         while (this->_window->pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 return ("EXIT");
             if (event.type == sf::Event::Resized)
                 return ("RESIZE");
+            if (event.type == sf::Event::TextEntered) {
+                if (event.text.unicode < 128 && event.text.unicode >= 32)
+                    return (std::string(1, static_cast<char>(event.text.unicode)));
+            }
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Return)
+                    return ("ENTER");
+                if (event.key.code == sf::Keyboard::Tab)
+                    return ("TAB");
+                if (event.key.code == sf::Keyboard::BackSpace)
+                    return ("BACKSPACE");
+                if (event.key.code == sf::Keyboard::Escape)
+                    return ("EXIT");
+            }
         }
         draw();
         return ("");

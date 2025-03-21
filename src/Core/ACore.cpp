@@ -11,7 +11,7 @@ namespace arc {
     typedef IGraphical* (*create_t)();
     typedef void (*destroy_t)(IGraphical*);
 
-    ACore::ACore(std::string path)
+    ACore::ACore(std::string path) : _inGame(false)
     {
         create_t create = nullptr;
 
@@ -64,6 +64,7 @@ namespace arc {
     void ACore::setGame(IGame *Game)
     {
         this->_game = Game;
+        this->_inGame = (Game != nullptr);
     }
 
     void ACore::display(std::vector<element_t> elements)
@@ -71,14 +72,32 @@ namespace arc {
         if (!this->_graphical)
             return;
         this->_graphical->clearElements();
-        this->_graphical->addElements(elements);
+        if (!_inGame) {
+            this->_graphical->addElements(_menu.getElements());
+        } else {
+            this->_graphical->addElements(elements);
+        }
         this->_graphical->draw();
     }
 
     std::string ACore::update()
     {
+        std::string event;
+
         if (!this->_graphical)
             return ("EXIT");
-        return (this->_graphical->update());
+        event = this->_graphical->update();
+        if (event == "EXIT")
+            return (event);
+        if (!this->_inGame) {
+            this->_menu.handleInput(event);
+            if (this->_menu.isAuthenticated() && !_menu.getSelectedGame().empty()) {
+                this->_inGame = true;
+            }
+        } else if (this->_game) {
+            auto gameElements = this->_game->handleEvents(event);
+            display(gameElements);
+        }
+        return ("");
     }
 }

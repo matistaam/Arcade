@@ -32,7 +32,7 @@ namespace arc {
         this->_renderer = SDL_CreateRenderer(this->_window, -1, SDL_RENDERER_ACCELERATED);
         if (!this->_renderer)
             throw GraphicalError(std::string("Renderer creation failed: ") + SDL_GetError());
-        this->_font = TTF_OpenFont("assets/fonts/DejaVuSans.ttf", 24);
+        this->_font = TTF_OpenFont("assets/fonts/ByteBounce.ttf", 24);
         if (!this->_font)
             throw GraphicalError(std::string("Font loading failed: ") + TTF_GetError());
     }
@@ -61,9 +61,15 @@ namespace arc {
         SDL_Surface *surface = nullptr;
         SDL_Texture *texture = nullptr;
         SDL_Rect rect = {0, 0, 0, 0};
+        auto [x, y] = convertPositionToPixels(std::get<0>(element._position), std::get<1>(element._position));
 
         if (!this->_font)
             return;
+        TTF_CloseFont(this->_font);
+        this->_font = TTF_OpenFont("assets/fonts/ByteBounce.ttf", element._font_size);
+        if (!this->_font)
+            return;
+
         if (element._color == "1")
             color = {255, 0, 0, 255};
         else if (element._color == "2")
@@ -84,7 +90,7 @@ namespace arc {
             SDL_FreeSurface(surface);
             return;
         }
-        rect = {std::get<1>(element._position), std::get<0>(element._position), surface->w, surface->h};
+        rect = {x, y, surface->w, surface->h};
         SDL_RenderCopy(this->_renderer, texture, NULL, &rect);
         SDL_FreeSurface(surface);
         SDL_DestroyTexture(texture);
@@ -205,13 +211,28 @@ namespace arc {
 
     std::string SDL::update()
     {
-        SDL_Event event = SDL_Event();
+        SDL_Event event;
+        char c = 0;
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT)
                 return ("EXIT");
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED)
                 return ("RESIZE");
+            if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == SDLK_RETURN)
+                    return ("ENTER");
+                if (event.key.keysym.sym == SDLK_TAB)
+                    return ("TAB");
+                if (event.key.keysym.sym == SDLK_BACKSPACE)
+                    return ("BACKSPACE");
+                if (event.key.keysym.sym == SDLK_ESCAPE)
+                    return ("EXIT");
+                if (event.key.keysym.sym >= SDLK_SPACE && event.key.keysym.sym <= SDLK_z) {
+                    c = event.key.keysym.sym;
+                    return (std::string(1, c));
+                }
+            }
         }
         draw();
         return ("");

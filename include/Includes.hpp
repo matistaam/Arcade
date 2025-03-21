@@ -28,6 +28,7 @@
 #include "AGraphical.hpp"
 #include "IGame.hpp"
 #include "AGame.hpp"
+#include "Menu.hpp"
 #include "ICore.hpp"
 #include "ACore.hpp"
 #include "Nibbler.hpp"

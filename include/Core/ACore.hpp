@@ -21,5 +21,7 @@ namespace arc {
 
         private:
             void *_handle;
+            Menu _menu;
+            bool _inGame;
     };
 }

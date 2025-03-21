@@ -48,12 +48,13 @@ namespace arc {
     void Ncurses::draw_text(element_t element)
     {
         int color = std::stoi(element._color);
+        auto [x, y] = convertPositionToPixels(std::get<0>(element._position), std::get<1>(element._position));
+        float scale = static_cast<float>(element._font_size) / 24.0f;
 
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
-        mvprintw(std::get<0>(element._position), std::get<1>(element._position),
-            "%s", element._text.c_str());
+        mvprintw(static_cast<int>(x / (12 / scale)), static_cast<int>(y / (24 / scale)), "%s", element._text.c_str());
         attroff(COLOR_PAIR(color));
     }
 
@@ -133,13 +134,27 @@ namespace arc {
 
     std::string Ncurses::update()
     {
-        int ch = 0;
+        int ch = getch();
 
-        draw();
-        ch = getch();
+        if (ch == ERR)
+            return ("");
         if (ch == KEY_RESIZE)
             return ("RESIZE");
-        return ("");
+        switch (ch) {
+            case 27:
+                return ("EXIT");
+            case '\n':
+                return ("ENTER");
+            case '\t':
+                return ("TAB");
+            case KEY_BACKSPACE:
+            case 127:
+                return ("BACKSPACE");
+            default:
+                if (ch >= 32 && ch <= 126)
+                    return (std::string(1, (char)ch));
+                return ("");
+        }
     }
 }
 

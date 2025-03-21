@@ -35,5 +35,6 @@ namespace arc {
         std::string _color;
         std::tuple<int, int> _size;
         std::string _image_path;
+        int _font_size = 24;
     } element_t;
 }

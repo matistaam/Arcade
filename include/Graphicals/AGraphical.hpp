@@ -21,7 +21,9 @@ namespace arc {
             void clearElements() override;
             void addElements(const std::vector<element_t> &elements) override;
 
-        private:
-
+        protected:
+            std::tuple<int, int> convertPositionToPixels(int percentX, int percentY);
+            int _width = 800;
+            int _height = 600;
     };
 }

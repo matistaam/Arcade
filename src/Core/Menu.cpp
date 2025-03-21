@@ -8,7 +8,7 @@
 #include "Includes.hpp"
 
 namespace arc {
-    Menu::Menu() : _state(LOGIN), _authenticated(false), _selectedButton(0)
+    Menu::Menu() : _state(LOGIN), _authenticated(false), _selectedButton(0), _resume(false), _quit(false), _returnToMenu(false)
     {
         createLoginElements();
     }
@@ -24,8 +24,16 @@ namespace arc {
 
     void Menu::handleInput(const std::string &input)
     {
+        if ((input == "m" || input == "ESCAPE") && this->_authenticated && !this->_selectedGame.empty()) {
+            this->_state = PAUSE;
+            this->_selectedButton = 0;
+            createPauseElements();
+            return;
+        }
         if (this->_state == LOGIN)
             handleLoginInput(input);
+        else if (this->_state == PAUSE)
+            handlePauseInput(input);
         else
             handleGameSelectInput(input);
     }
@@ -38,6 +46,21 @@ namespace arc {
     std::string Menu::getSelectedGame() const
     {
         return (this->_selectedGame);
+    }
+
+    bool Menu::shouldResume() const
+    {
+        return (this->_resume);
+    }
+
+    bool Menu::shouldQuit() const
+    {
+        return (this->_quit);
+    }
+
+    bool Menu::shouldReturnToMenu() const
+    {
+        return (this->_returnToMenu);
     }
 
     void Menu::createLoginElements()
@@ -122,6 +145,54 @@ namespace arc {
         this->_elements.push_back(nibblerText);
     }
 
+    void Menu::createPauseElements()
+    {
+        element_t background = {};
+        element_t title = {};
+        element_t resumeText = {};
+        element_t menuText = {};
+        element_t quitText = {};
+
+        this->_elements.clear();
+        this->_resume = false;
+        this->_quit = false;
+        this->_returnToMenu = false;
+
+        background._type = IMAGE;
+        background._image_path = "assets/pause_menu.jpg";
+        background._position = std::make_tuple(0, 0);
+        background._size = std::make_tuple(600, 800);
+        this->_elements.push_back(background);
+
+        title._type = TEXT;
+        title._text = "PAUSE";
+        title._position = std::make_tuple(45, 20);
+        title._color = "0";
+        title._font_size = 72;
+        this->_elements.push_back(title);
+
+        resumeText._type = TEXT;
+        resumeText._text = "Resume";
+        resumeText._position = std::make_tuple(45, 45);
+        resumeText._color = this->_selectedButton == 0 ? "2" : "0";
+        resumeText._font_size = 40;
+        this->_elements.push_back(resumeText);
+
+        menuText._type = TEXT;
+        menuText._text = "Return to Menu";
+        menuText._position = std::make_tuple(45, 55);
+        menuText._color = this->_selectedButton == 1 ? "2" : "0";
+        menuText._font_size = 40;
+        this->_elements.push_back(menuText);
+
+        quitText._type = TEXT;
+        quitText._text = "Quit";
+        quitText._position = std::make_tuple(45, 65);
+        quitText._color = this->_selectedButton == 2 ? "2" : "0";
+        quitText._font_size = 40;
+        this->_elements.push_back(quitText);
+    }
+
     void Menu::handleLoginInput(const std::string &input)
     {
         if (input == "ENTER") {
@@ -156,6 +227,31 @@ namespace arc {
         } else if (input == "TAB") {
             this->_selectedButton = (this->_selectedButton + 1) % 2;
             createGameSelectElements();
+        }
+    }
+
+    void Menu::handlePauseInput(const std::string &input)
+    {
+        if (input == "ENTER") {
+            switch (this->_selectedButton) {
+                case 0:
+                    this->_resume = true;
+                    this->_state = GAME_SELECT;
+                    break;
+                case 1:
+                    this->_returnToMenu = true;
+                    this->_state = GAME_SELECT;
+                    this->_selectedButton = 0;
+                    this->_selectedGame = "";
+                    createGameSelectElements();
+                    break;
+                case 2:
+                    this->_quit = true;
+                    break;
+            }
+        } else if (input == "TAB") {
+            this->_selectedButton = (this->_selectedButton + 1) % 3;
+            createPauseElements();
         }
     }
 }

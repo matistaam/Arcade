@@ -11,7 +11,7 @@ namespace arc {
     typedef IGraphical* (*create_t)();
     typedef void (*destroy_t)(IGraphical*);
 
-    ACore::ACore(std::string path) : _inGame(false)
+    ACore::ACore(std::string path) : _inGame(false), _isPaused(false)
     {
         create_t create = nullptr;
 
@@ -72,7 +72,7 @@ namespace arc {
         if (!this->_graphical)
             return;
         this->_graphical->clearElements();
-        if (!_inGame) {
+        if (!this->_inGame || this->_isPaused) {
             this->_graphical->addElements(this->_menu.getElements());
         } else {
             this->_graphical->addElements(elements);
@@ -83,6 +83,7 @@ namespace arc {
     std::string ACore::update()
     {
         std::string event;
+        std::vector<element_t> gameElements;
 
         if (!this->_graphical)
             return ("EXIT");
@@ -94,9 +95,25 @@ namespace arc {
             if (this->_menu.isAuthenticated() && !this->_menu.getSelectedGame().empty()) {
                 this->_inGame = true;
             }
-        } else if (this->_game) {
-            auto gameElements = this->_game->handleEvents(event);
-            display(gameElements);
+        } else {
+            if (event == "m") {
+                this->_isPaused = true;
+                this->_menu.handleInput(event);
+            }
+            if (this->_isPaused) {
+                this->_menu.handleInput(event);
+                if (this->_menu.shouldResume()) {
+                    this->_isPaused = false;
+                } else if (this->_menu.shouldQuit()) {
+                    return ("EXIT");
+                } else if (this->_menu.shouldReturnToMenu()) {
+                    this->_isPaused = false;
+                    this->_inGame = false;
+                }
+            } else if (this->_game) {
+                gameElements = this->_game->handleEvents(event);
+                display(gameElements);
+            }
         }
         return ("");
     }

@@ -23,5 +23,6 @@ namespace arc {
             void *_handle;
             Menu _menu;
             bool _inGame;
+            bool _isPaused;
     };
 }

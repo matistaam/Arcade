@@ -16,19 +16,25 @@ namespace arc {
 
             enum MenuState {
                 LOGIN,
-                GAME_SELECT
+                GAME_SELECT,
+                PAUSE
             };
 
             std::vector<element_t> getElements() const;
             void handleInput(const std::string &input);
             bool isAuthenticated() const;
             std::string getSelectedGame() const;
+            bool shouldResume() const;
+            bool shouldQuit() const;
+            bool shouldReturnToMenu() const;
 
         private:
             void createLoginElements();
             void createGameSelectElements();
+            void createPauseElements();
             void handleLoginInput(const std::string &input);
             void handleGameSelectInput(const std::string &input);
+            void handlePauseInput(const std::string &input);
 
             MenuState _state;
             std::vector<element_t> _elements;
@@ -37,5 +43,8 @@ namespace arc {
             bool _authenticated;
             std::string _selectedGame;
             size_t _selectedButton;
+            bool _resume;
+            bool _quit;
+            bool _returnToMenu;
     };
 }

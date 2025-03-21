@@ -8,17 +8,19 @@
 #include "Includes.hpp"
 
 namespace arc {
-    typedef IGraphical* (*create_t)();
-    typedef void (*destroy_t)(IGraphical*);
+    typedef IGraphical* (*create_graphical_t)();
+    typedef void (*destroy_graphical_t)(IGraphical*);
+    typedef IGame* (*create_game_t)();
+    typedef void (*destroy_game_t)(IGame*);
 
-    ACore::ACore(std::string path) : _inGame(false), _isPaused(false)
+    ACore::ACore(std::string path) : _handle(nullptr), _gameHandle(nullptr), _menu(), _inGame(false), _isPaused(false)
     {
-        create_t create = nullptr;
+        create_graphical_t create = nullptr;
 
         this->_handle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
         if (!this->_handle)
             throw LibraryError(std::string(path) + ": " + std::string(dlerror()));
-        create = (create_t)dlsym(this->_handle, "create");
+        create = (create_graphical_t)dlsym(this->_handle, "create");
         if (!create) {
             dlclose(this->_handle);
             throw InvalidLibraryError(path);
@@ -34,25 +36,35 @@ namespace arc {
 
     ACore::~ACore()
     {
-        destroy_t destroy = nullptr;
+        destroy_graphical_t destroy = nullptr;
 
         if (this->_graphical) {
             this->_graphical->close();
-            destroy = (destroy_t)dlsym(this->_handle, "destroy");
+            destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
             if (destroy)
                 destroy(this->_graphical);
         }
         if (this->_handle)
             dlclose(this->_handle);
+            
+        // Clean up game library resources
+        if (this->_game) {
+            destroy_game_t destroy_game = nullptr;
+            destroy_game = (destroy_game_t)dlsym(this->_gameHandle, "destroy");
+            if (destroy_game)
+                destroy_game(this->_game);
+        }
+        if (this->_gameHandle)
+            dlclose(this->_gameHandle);
     }
 
     void ACore::setGraphical(IGraphical *Graphical)
     {
-        destroy_t destroy = nullptr;
+        destroy_graphical_t destroy = nullptr;
 
         if (this->_graphical) {
             this->_graphical->close();
-            destroy = (destroy_t)dlsym(this->_handle, "destroy");
+            destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
             if (destroy)
                 destroy(this->_graphical);
         }
@@ -61,22 +73,67 @@ namespace arc {
             this->_graphical->init();
     }
 
+    void ACore::loadGame(const std::string &name)
+    {
+        if (this->_game) {
+            destroy_game_t destroy_game = nullptr;
+            destroy_game = (destroy_game_t)dlsym(this->_gameHandle, "destroy");
+            if (destroy_game)
+                destroy_game(this->_game);
+            this->_game = nullptr;
+        }
+        if (this->_gameHandle) {
+            dlclose(this->_gameHandle);
+            this->_gameHandle = nullptr;
+        }
+        
+        std::string lib_path = "lib/arcade_" + name + ".so";
+        
+        this->_gameHandle = dlopen(lib_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+        if (!this->_gameHandle)
+            throw GameError(std::string("Cannot load game library '") + lib_path + "': " + std::string(dlerror()));
+            
+        create_game_t create = (create_game_t)dlsym(this->_gameHandle, "create");
+        if (!create) {
+            dlclose(this->_gameHandle);
+            this->_gameHandle = nullptr;
+            throw GameError(std::string("Invalid game library '") + lib_path + "'");
+        }
+        
+        this->_game = create();
+        if (!this->_game) {
+            dlclose(this->_gameHandle);
+            this->_gameHandle = nullptr;
+            throw GameError(std::string("Failed to create game instance from '") + lib_path + "'");
+        }
+        
+        this->_inGame = true;
+    }
+
     void ACore::setGame(IGame *Game)
     {
         this->_game = Game;
         this->_inGame = (Game != nullptr);
+
+        if (this->_game && this->_inGame) {
+            std::vector<element_t> initialElements = this->_game->handleEvents("");
+            this->display(initialElements);
+        }
     }
 
     void ACore::display(std::vector<element_t> elements)
     {
         if (!this->_graphical)
             return;
+        
         this->_graphical->clearElements();
+        
         if (!this->_inGame || this->_isPaused) {
             this->_graphical->addElements(this->_menu.getElements());
         } else {
             this->_graphical->addElements(elements);
         }
+        
         this->_graphical->draw();
     }
 
@@ -100,8 +157,18 @@ namespace arc {
         }
         if (!this->_inGame) {
             this->_menu.handleInput(event);
-            if (this->_menu.isAuthenticated() && !this->_menu.getSelectedGame().empty())
-                this->_inGame = true;
+            if (this->_menu.isAuthenticated() && !this->_menu.getSelectedGame().empty()) {
+                try {
+                    loadGame(this->_menu.getSelectedGame());
+                    if (this->_game) {
+                        gameElements = this->_game->handleEvents("");
+                        display(gameElements);
+                    }
+                } catch (const std::exception &e) {
+                    std::cerr << "Error: " << e.what() << std::endl;
+                    this->_menu.handleInput("ESCAPE"); // Return to menu
+                }
+            }
         } else {
             if (event == "m") {
                 this->_isPaused = true;
@@ -111,6 +178,10 @@ namespace arc {
                 this->_menu.handleInput(event);
                 if (this->_menu.shouldResume()) {
                     this->_isPaused = false;
+                    if (this->_game) {
+                        gameElements = this->_game->handleEvents("");
+                        display(gameElements);
+                    }
                 } else if (this->_menu.shouldQuit()) {
                     return ("EXIT");
                 } else if (this->_menu.shouldReturnToMenu()) {

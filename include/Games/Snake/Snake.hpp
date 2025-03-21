@@ -7,16 +7,48 @@
 
 #pragma once
 #include "Includes.hpp"
+#include <list>
+#include <chrono>
+#include <random>
 
 namespace arc {
+    enum Direction {
+        UP,
+        RIGHT,
+        DOWN,
+        LEFT
+    };
+
     class Snake : public AGame {
         public:
             Snake();
-            ~Snake();
+            ~Snake() override;
 
-            // To be implemented
+            std::vector<element_t> handleEvents(std::string command) override;
 
         private:
-            // To be implemented
+            void initGame();
+            void moveSnake();
+            void handleCollisions();
+            void spawnFood();
+            std::vector<element_t> createElements();
+            bool isPositionInSnake(int y, int x) const;
+
+            static const int WIDTH = 40;
+            static const int HEIGHT = 30;
+            static const int CELL_SIZE = 20;
+            static const int INITIAL_SNAKE_SIZE = 4;
+            
+            bool _gameOver;
+            int _score;
+            Direction _direction;
+            Direction _lastDirection;
+            std::list<std::tuple<int, int>> _snake;
+            std::tuple<int, int> _food;
+
+            std::chrono::time_point<std::chrono::steady_clock> _lastUpdateTime;
+            int _updateInterval;
+
+            std::mt19937 _rng;
     };
 }

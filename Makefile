@@ -90,6 +90,7 @@ fclean: clean
 	@echo "Cleaning executable and libraries..."
 	@$(RM) $(NAME)
 	@$(RM) -r $(LIB_DIR)
+	@mkdir -p $(LIB_DIR)
 
 re: fclean all
 

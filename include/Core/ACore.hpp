@@ -18,9 +18,11 @@ namespace arc {
             void setGame(IGame *Game) override;
             void display(std::vector<element_t> elements) override;
             std::string update();
+            void loadGame(const std::string &name);
 
         private:
             void *_handle;
+            void *_gameHandle;
             Menu _menu;
             bool _inGame;
             bool _isPaused;

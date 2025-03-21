@@ -60,7 +60,11 @@ namespace arc {
         else if (element._color == "6")
             color = sf::Color::Cyan;
         text.setFillColor(color);
+        
+        sf::FloatRect textBounds = text.getLocalBounds();
+        text.setOrigin(textBounds.width / 2, textBounds.height / 2);
         text.setPosition(x, y);
+        
         this->_window->draw(text);
     }
 

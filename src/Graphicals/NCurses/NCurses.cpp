@@ -50,11 +50,17 @@ namespace arc {
         int color = std::stoi(element._color);
         auto [x, y] = convertPositionToPixels(std::get<0>(element._position), std::get<1>(element._position));
         float scale = static_cast<float>(element._font_size) / 24.0f;
+        
+        int textLength = element._text.length();
+        int textHeight = 1;
+        
+        int startX = static_cast<int>(y / (24 / scale)) - textLength / 2;
+        int startY = static_cast<int>(x / (12 / scale));
 
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
-        mvprintw(static_cast<int>(x / (12 / scale)), static_cast<int>(y / (24 / scale)), "%s", element._text.c_str());
+        mvprintw(startY, startX, "%s", element._text.c_str());
         attroff(COLOR_PAIR(color));
     }
 

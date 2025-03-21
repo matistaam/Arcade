@@ -90,7 +90,9 @@ namespace arc {
             SDL_FreeSurface(surface);
             return;
         }
-        rect = {x, y, surface->w, surface->h};
+        
+        rect = {x - surface->w / 2, y - surface->h / 2, surface->w, surface->h};
+        
         SDL_RenderCopy(this->_renderer, texture, NULL, &rect);
         SDL_FreeSurface(surface);
         SDL_DestroyTexture(texture);

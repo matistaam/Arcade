@@ -177,6 +177,10 @@ namespace arc {
                     return ("BACKSPACE");
                 if (event.key.code == sf::Keyboard::Escape)
                     return ("EXIT");
+                if (event.key.code == sf::Keyboard::Num1)
+                    return ("PREV_LIB");
+                if (event.key.code == sf::Keyboard::Num2)
+                    return ("NEXT_LIB");
             }
         }
         draw();

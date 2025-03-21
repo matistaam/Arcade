@@ -85,7 +85,7 @@ namespace arc {
     void Ncurses::draw_rectangle(element_t element)
     {
         int color = std::stoi(element._color);
-        int width = std::get<1>(element._size);
+                int width = std::get<1>(element._size);
         int height = std::get<0>(element._size);
         int centerY = std::get<0>(element._position);
         int centerX = std::get<1>(element._position);
@@ -150,6 +150,10 @@ namespace arc {
             case KEY_BACKSPACE:
             case 127:
                 return ("BACKSPACE");
+            case '1':
+                return ("PREV_LIB");
+            case '2':
+                return ("NEXT_LIB");
             default:
                 if (ch >= 32 && ch <= 126)
                     return (std::string(1, (char)ch));

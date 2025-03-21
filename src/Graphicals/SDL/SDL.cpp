@@ -228,6 +228,10 @@ namespace arc {
                     return ("BACKSPACE");
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     return ("EXIT");
+                if (event.key.keysym.sym == SDLK_1)
+                    return ("PREV_LIB");
+                if (event.key.keysym.sym == SDLK_2)
+                    return ("NEXT_LIB");
                 if (event.key.keysym.sym >= SDLK_SPACE && event.key.keysym.sym <= SDLK_z) {
                     c = event.key.keysym.sym;
                     return (std::string(1, c));

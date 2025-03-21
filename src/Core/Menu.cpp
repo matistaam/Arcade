@@ -57,29 +57,30 @@ namespace arc {
 
         title._type = TEXT;
         title._text = "Please login and press ENTER";
-        title._position = std::make_tuple(30, 20);
+        title._position = std::make_tuple(25, 20);
         title._color = "0";
-        title._font_size = 36;
+        title._font_size = 42;
         this->_elements.push_back(title);
 
         usernameText._type = TEXT;
         usernameText._text = "Username: " + this->_username;
-        usernameText._position = std::make_tuple(30, 45);
-        usernameText._color = "0";
-        usernameText._font_size = 24;
+        usernameText._position = std::make_tuple(40, 45);
+        usernameText._color = this->_selectedButton == 0 ? "2" : "0";
+        usernameText._font_size = 28;
         this->_elements.push_back(usernameText);
 
         passwordText._type = TEXT;
         passwordText._text = "Password: " + std::string(this->_password.length(), '*');
-        passwordText._position = std::make_tuple(30, 55);
-        passwordText._color = "0";
-        passwordText._font_size = 24;
+        passwordText._position = std::make_tuple(40, 55);
+        passwordText._color = this->_selectedButton == 1 ? "2" : "0";
+        passwordText._font_size = 28;
         this->_elements.push_back(passwordText);
     }
 
     void Menu::createGameSelectElements()
     {
         element_t background = {};
+        element_t WelcomeText = {};
         element_t title = {};
         element_t snakeText = {};
         element_t nibblerText = {};
@@ -92,25 +93,32 @@ namespace arc {
         background._size = std::make_tuple(600, 800);
         this->_elements.push_back(background);
 
+        WelcomeText._type = TEXT;
+        WelcomeText._text = "Welcome " + this->_username + "!";
+        WelcomeText._position = std::make_tuple(25, 10);
+        WelcomeText._color = "0";
+        WelcomeText._font_size = 72;
+        this->_elements.push_back(WelcomeText);
+
         title._type = TEXT;
         title._text = "Select a game:";
-        title._position = std::make_tuple(40, 20);
+        title._position = std::make_tuple(25, 20);
         title._color = "0";
-        title._font_size = 36;
+        title._font_size = 72;
         this->_elements.push_back(title);
 
         snakeText._type = TEXT;
         snakeText._text = "Snake";
-        snakeText._position = std::make_tuple(40, 40);
+        snakeText._position = std::make_tuple(45, 45);
         snakeText._color = this->_selectedButton == 0 ? "2" : "0";
-        snakeText._font_size = 28;
+        snakeText._font_size = 40;
         this->_elements.push_back(snakeText);
 
         nibblerText._type = TEXT;
         nibblerText._text = "Nibbler";
-        nibblerText._position = std::make_tuple(40, 60);
+        nibblerText._position = std::make_tuple(45, 55);
         nibblerText._color = this->_selectedButton == 1 ? "2" : "0";
-        nibblerText._font_size = 28;
+        nibblerText._font_size = 40;
         this->_elements.push_back(nibblerText);
     }
 
@@ -133,9 +141,9 @@ namespace arc {
                 this->_password.pop_back();
             createLoginElements();
         } else if (!input.empty() && input.length() == 1) {
-            if (this->_selectedButton == 0)
+            if (this->_selectedButton == 0 && this->_username.length() < 16)
                 this->_username += input;
-            else if (this->_selectedButton == 1)
+            else if (this->_selectedButton == 1 && this->_password.length() < 16)
                 this->_password += input;
             createLoginElements();
         }

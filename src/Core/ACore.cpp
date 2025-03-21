@@ -73,7 +73,7 @@ namespace arc {
             return;
         this->_graphical->clearElements();
         if (!_inGame) {
-            this->_graphical->addElements(_menu.getElements());
+            this->_graphical->addElements(this->_menu.getElements());
         } else {
             this->_graphical->addElements(elements);
         }
@@ -91,7 +91,7 @@ namespace arc {
             return (event);
         if (!this->_inGame) {
             this->_menu.handleInput(event);
-            if (this->_menu.isAuthenticated() && !_menu.getSelectedGame().empty()) {
+            if (this->_menu.isAuthenticated() && !this->_menu.getSelectedGame().empty()) {
                 this->_inGame = true;
             }
         } else if (this->_game) {

@@ -181,9 +181,16 @@ namespace arc {
                     return ("PREV_LIB");
                 if (event.key.code == sf::Keyboard::Num2)
                     return ("NEXT_LIB");
+                if (event.key.code == sf::Keyboard::Up)
+                    return ("UP");
+                if (event.key.code == sf::Keyboard::Down)
+                    return ("DOWN");
+                if (event.key.code == sf::Keyboard::Left)
+                    return ("LEFT");
+                if (event.key.code == sf::Keyboard::Right)
+                    return ("RIGHT");
             }
         }
-        draw();
         return ("");
     }
 }

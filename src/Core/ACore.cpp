@@ -157,6 +157,8 @@ namespace arc {
         }
         if (!this->_inGame) {
             this->_menu.handleInput(event);
+            display(this->_menu.getElements());
+            
             if (this->_menu.isAuthenticated() && !this->_menu.getSelectedGame().empty()) {
                 try {
                     loadGame(this->_menu.getSelectedGame());

@@ -232,13 +232,20 @@ namespace arc {
                     return ("PREV_LIB");
                 if (event.key.keysym.sym == SDLK_2)
                     return ("NEXT_LIB");
+                if (event.key.keysym.sym == SDLK_UP)
+                    return ("UP");
+                if (event.key.keysym.sym == SDLK_RIGHT)
+                    return ("RIGHT");
+                if (event.key.keysym.sym == SDLK_DOWN)
+                    return ("DOWN");
+                if (event.key.keysym.sym == SDLK_LEFT)
+                    return ("LEFT");
                 if (event.key.keysym.sym >= SDLK_SPACE && event.key.keysym.sym <= SDLK_z) {
                     c = event.key.keysym.sym;
                     return (std::string(1, c));
                 }
             }
         }
-        draw();
         return ("");
     }
 }

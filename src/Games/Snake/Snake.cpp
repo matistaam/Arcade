@@ -21,8 +21,8 @@ namespace arc {
     {
         _gameOver = false;
         _score = 0;
-        _direction = RIGHT;
-        _lastDirection = RIGHT;
+        _direction = LEFT;
+        _lastDirection = LEFT;
         _updateInterval = 150;
         _lastUpdateTime = std::chrono::steady_clock::now();
         
@@ -178,6 +178,7 @@ namespace arc {
             gameOverText._text = "GAME OVER - Press R to restart";
             gameOverText._position = std::make_tuple(HEIGHT * CELL_SIZE / 2, WIDTH * CELL_SIZE / 2 - 100);
             gameOverText._color = "1";
+            gameOverText._size = std::make_tuple(HEIGHT * CELL_SIZE, WIDTH * CELL_SIZE);
             elements.push_back(gameOverText);
             
             element_t finalScoreText;
@@ -185,9 +186,10 @@ namespace arc {
             finalScoreText._text = "Final Score: " + std::to_string(_score);
             finalScoreText._position = std::make_tuple(HEIGHT * CELL_SIZE / 2 + 30, WIDTH * CELL_SIZE / 2 - 50);
             finalScoreText._color = "5";
+            finalScoreText._size = std::make_tuple(HEIGHT * CELL_SIZE, WIDTH * CELL_SIZE);
             elements.push_back(finalScoreText);
         }
-        
+
         return elements;
     }
 
@@ -195,6 +197,10 @@ namespace arc {
     {
         if (_gameOver && command == "R") {
             initGame();
+            return createElements();
+        }
+        
+        if (_gameOver) {
             return createElements();
         }
         

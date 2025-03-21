@@ -32,8 +32,8 @@ int main(int ac, char **av)
         return (display_help());
     try {
         arc::ACore core = arc::ACore(av[1]);
+        
         while (true) {
-            core.display(elements);
             event = core.update();
             if (event == "EXIT")
                 break;

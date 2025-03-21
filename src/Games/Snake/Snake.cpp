@@ -176,17 +176,17 @@ namespace arc {
             element_t gameOverText;
             gameOverText._type = TEXT;
             gameOverText._text = "GAME OVER - Press R to restart";
-            gameOverText._position = std::make_tuple(HEIGHT * CELL_SIZE / 2, WIDTH * CELL_SIZE / 2 - 100);
+            gameOverText._position = std::make_tuple(50, 40); // Center of screen
             gameOverText._color = "1";
-            gameOverText._size = std::make_tuple(HEIGHT * CELL_SIZE, WIDTH * CELL_SIZE);
+            gameOverText._font_size = 36;
             elements.push_back(gameOverText);
             
             element_t finalScoreText;
             finalScoreText._type = TEXT;
             finalScoreText._text = "Final Score: " + std::to_string(_score);
-            finalScoreText._position = std::make_tuple(HEIGHT * CELL_SIZE / 2 + 30, WIDTH * CELL_SIZE / 2 - 50);
+            finalScoreText._position = std::make_tuple(50, 50); // Below game over text
             finalScoreText._color = "5";
-            finalScoreText._size = std::make_tuple(HEIGHT * CELL_SIZE, WIDTH * CELL_SIZE);
+            finalScoreText._font_size = 28;
             elements.push_back(finalScoreText);
         }
 

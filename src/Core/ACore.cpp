@@ -223,10 +223,8 @@ namespace arc {
                 handle = dlopen(("lib/" + filename).c_str(), RTLD_LAZY | RTLD_GLOBAL);
                 if (handle) {
                     get_type = (get_type_t)dlsym(handle, "get_type");
-                    if (get_type && std::string(get_type()) == "game") {
-                        std::cout << "Game found: " << filename.substr(7, filename.length() - 10) << std::endl;
+                    if (get_type && std::string(get_type()) == "game")
                         this->_availableGames.push_back(filename.substr(7, filename.length() - 10));
-                    }
                     dlclose(handle);
                 }
             }

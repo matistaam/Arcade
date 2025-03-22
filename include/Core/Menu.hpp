@@ -7,10 +7,9 @@
 
 #pragma once
 #include "Includes.hpp"
-#include <map>
 
 namespace arc {
-    class Menu {
+    class Menu : public IScoreManager {
         public:
             Menu();
             ~Menu();
@@ -31,8 +30,9 @@ namespace arc {
             bool shouldResume() const;
             bool shouldQuit() const;
             bool shouldReturnToMenu() const;
-            void updateHighScore(const std::string &game, int score);
-            int getHighScore(const std::string &game) const;
+
+            void updateHighScore(const std::string &game, int score) override;
+            int getHighScore(const std::string &game) const override;
 
         private:
             bool saveAccount(const std::string &username, const std::string &password);

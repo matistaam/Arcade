@@ -8,13 +8,16 @@
 #include "Includes.hpp"
 
 namespace arc {
-    AGame::AGame()
+    AGame::AGame() : _scoreManager(nullptr)
     {
-        // To be implemented
     }
 
     AGame::~AGame()
     {
-        // To be implemented
+    }
+
+    void AGame::setScoreManager(IScoreManager *scoreManager)
+    {
+        this->_scoreManager = scoreManager;
     }
 }

@@ -14,7 +14,9 @@ namespace arc {
             AGame();
             ~AGame();
 
-        private:
+            virtual void setScoreManager(IScoreManager *scoreManager);
 
+        protected:
+            IScoreManager *_scoreManager;
     };
 }

@@ -12,7 +12,6 @@ namespace arc {
     class IGame {
         public:
             virtual ~IGame() = default;
-
             virtual std::vector<element_t> handleEvents(std::string command) = 0;
 
         protected:

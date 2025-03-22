@@ -71,7 +71,7 @@ games: directory $(GAMES_LIBS)
 
 $(SNAKE_LIB):
 	@echo "Building Snake game..."
-	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Games/Snake -name "*.cpp") src/Games/AGame.cpp src/Core/ArcadeException.cpp -o $@
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Games/Snake -name "*.cpp") src/Games/AGame.cpp src/Core/ArcadeException.cpp src/Core/Menu.cpp -o $@
 
 $(NIBBLER_LIB):
 	@echo "Building Nibbler game..."

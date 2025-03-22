@@ -16,12 +16,13 @@ namespace arc {
         LEFT
     };
 
-    class Snake : public AGame {
+    class Snake : public AGame, public IScorableGame {
         public:
             Snake();
             ~Snake() override;
 
             std::vector<element_t> handleEvents(std::string command) override;
+            void setScoreManager(IScoreManager *scoreManager) override;
 
         private:
             void initGame();
@@ -31,6 +32,8 @@ namespace arc {
             std::vector<element_t> createElements();
             bool isPositionInSnake(int y, int x) const;
             void updateHighScore();
+
+            IScoreManager *_scoreManager;
 
             static const int WIDTH = 40;
             static const int HEIGHT = 30;

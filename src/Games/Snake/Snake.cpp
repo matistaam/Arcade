@@ -8,13 +8,20 @@
 #include "Includes.hpp"
 
 namespace arc {
-    Snake::Snake() : _highScore(0), _rng(std::random_device{}())
+    Snake::Snake() : _scoreManager(nullptr), _highScore(0), _rng(std::random_device{}())
     {
         initGame();
     }
 
     Snake::~Snake()
     {
+    }
+
+    void Snake::setScoreManager(IScoreManager *scoreManager)
+    {
+        this->_scoreManager = scoreManager;
+        if (this->_scoreManager)
+            this->_highScore = this->_scoreManager->getHighScore("snake");
     }
 
     void Snake::initGame()
@@ -100,6 +107,8 @@ namespace arc {
     {
         if (this->_score > this->_highScore)
             this->_highScore = this->_score;
+        if (this->_scoreManager)
+            this->_scoreManager->updateHighScore("snake", this->_score);
     }
 
     void Snake::handleCollisions()

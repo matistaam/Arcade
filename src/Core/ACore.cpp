@@ -89,6 +89,7 @@ namespace arc {
         create_game_t create = nullptr;
         destroy_game_t destroy_game = nullptr;
         std::string lib_path = "lib/arcade_" + name + ".so";
+        IScorableGame *scorableGame = nullptr;
 
         if (this->_game) {
             destroy_game = (destroy_game_t)dlsym(this->_gameHandle, "destroy");
@@ -115,6 +116,9 @@ namespace arc {
             this->_gameHandle = nullptr;
             throw GameError(std::string("Failed to create game instance from '") + lib_path + "'");
         }
+        scorableGame = dynamic_cast<IScorableGame*>(this->_game);
+        if (scorableGame)
+            scorableGame->setScoreManager(&this->_menu);
         this->_inGame = true;
     }
 

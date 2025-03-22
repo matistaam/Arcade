@@ -96,10 +96,10 @@ namespace arc {
             accountFile << l << std::endl;
         accountFile << username << ":" << password;
         if (isNewAccount) {
-            for (const auto &game : _availableGames)
+            for (const auto &game : this->_availableGames)
                 accountFile << ":" << game << "=0";
         } else {
-            for (const auto &[game, score] : _highScores)
+            for (const auto &[game, score] : this->_highScores)
                 accountFile << ":" << game << "=" << score;
         }
         accountFile << std::endl;
@@ -515,16 +515,16 @@ namespace arc {
     {
         if (this->_highScores[game] < score) {
             this->_highScores[game] = score;
-            saveAccount(_username, _password);
+            saveAccount(this->_username, this->_password);
         }
     }
 
     int Menu::getHighScore(const std::string &game) const
     {
         auto it = this->_highScores.find(game);
-        if (it != this->_highScores.end()) {
-            return it->second;
-        }
-        return 0;
+
+        if (it != this->_highScores.end())
+            return (it->second);
+        return (0);
     }
 }

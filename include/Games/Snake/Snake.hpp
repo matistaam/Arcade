@@ -30,6 +30,7 @@ namespace arc {
             void spawnFood();
             std::vector<element_t> createElements();
             bool isPositionInSnake(int y, int x) const;
+            void updateHighScore();
 
             static const int WIDTH = 40;
             static const int HEIGHT = 30;
@@ -38,6 +39,7 @@ namespace arc {
 
             bool _gameOver;
             int _score;
+            int _highScore;
             Direction _direction;
             Direction _lastDirection;
             std::list<std::tuple<int, int>> _snake;

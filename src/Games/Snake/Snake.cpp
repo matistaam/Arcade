@@ -8,7 +8,7 @@
 #include "Includes.hpp"
 
 namespace arc {
-    Snake::Snake() : _rng(std::random_device{}())
+    Snake::Snake() : _highScore(0), _rng(std::random_device{}())
     {
         initGame();
     }
@@ -96,6 +96,12 @@ namespace arc {
         this->_lastDirection = this->_direction;
     }
 
+    void Snake::updateHighScore()
+    {
+        if (this->_score > this->_highScore)
+            this->_highScore = this->_score;
+    }
+
     void Snake::handleCollisions()
     {
         int headY = std::get<0>(this->_snake.front());
@@ -105,7 +111,8 @@ namespace arc {
         it++;
         while (it != this->_snake.end()) {
             if (headY == std::get<0>(*it) && headX == std::get<1>(*it)) {
-                _gameOver = true;
+                this->_gameOver = true;
+                updateHighScore();
                 return;
             }
             it++;
@@ -115,10 +122,11 @@ namespace arc {
     std::vector<element_t> Snake::createElements()
     {
         std::vector<element_t> elements = {};
-        element_t border = {};
+        element_t background = {};
         element_t snakeSegment = {};
         element_t food = {};
         element_t scoreText = {};
+        element_t highScoreText = {};
         element_t gameOverText = {};
         element_t finalScoreText = {};
         int segmentY = 0;
@@ -126,11 +134,11 @@ namespace arc {
         int foodY = 0;
         int foodX = 0;
 
-        border._type = RECTANGLE;
-        border._position = std::make_tuple(HEIGHT * CELL_SIZE / 2, WIDTH * CELL_SIZE / 2);
-        border._size = std::make_tuple(HEIGHT * CELL_SIZE, WIDTH * CELL_SIZE);
-        border._color = "6";
-        elements.push_back(border);
+        background._type = IMAGE;
+        background._image_path = "assets/snake_background.png";
+        background._position = std::make_tuple(0, 0);
+        background._size = std::make_tuple(600, 800);
+        elements.push_back(background);
         for (const auto &segment : this->_snake) {
             snakeSegment._type = RECTANGLE;
             segmentY = std::get<0>(segment) * CELL_SIZE + CELL_SIZE / 2;
@@ -152,9 +160,14 @@ namespace arc {
         elements.push_back(food);
         scoreText._type = TEXT;
         scoreText._text = "Score: " + std::to_string(this->_score);
-        scoreText._position = std::make_tuple(10, 10);
+        scoreText._position = std::make_tuple(10, 20);
         scoreText._color = "5";
         elements.push_back(scoreText);
+        highScoreText._type = TEXT;
+        highScoreText._text = "Highest Score: " + std::to_string(this->_highScore);
+        highScoreText._position = std::make_tuple(15, 5);
+        highScoreText._color = "5";
+        elements.push_back(highScoreText);
         if (this->_gameOver) {
             gameOverText._type = TEXT;
             gameOverText._text = "GAME OVER - Press R to restart";
@@ -174,7 +187,7 @@ namespace arc {
 
     std::vector<element_t> Snake::handleEvents(std::string command)
     {
-        if (this->_gameOver && command == "R") {
+        if (this->_gameOver && command == "r") {
             initGame();
             return (createElements());
         }

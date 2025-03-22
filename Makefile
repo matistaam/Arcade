@@ -89,8 +89,7 @@ clean:
 fclean: clean
 	@echo "Cleaning executable and libraries..."
 	@$(RM) $(NAME)
-	@$(RM) -r $(LIB_DIR)
-	@mkdir -p $(LIB_DIR)
+	@$(RM) -r $(LIB_DIR)/arcade_*.so
 
 re: fclean all
 

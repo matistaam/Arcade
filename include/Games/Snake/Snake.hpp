@@ -7,9 +7,6 @@
 
 #pragma once
 #include "Includes.hpp"
-#include <list>
-#include <chrono>
-#include <random>
 
 namespace arc {
     enum Direction {
@@ -38,7 +35,7 @@ namespace arc {
             static const int HEIGHT = 30;
             static const int CELL_SIZE = 20;
             static const int INITIAL_SNAKE_SIZE = 4;
-            
+
             bool _gameOver;
             int _score;
             Direction _direction;

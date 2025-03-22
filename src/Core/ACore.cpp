@@ -37,6 +37,7 @@ namespace arc {
     ACore::~ACore()
     {
         destroy_graphical_t destroy = nullptr;
+        destroy_game_t destroy_game = nullptr;
 
         if (this->_graphical) {
             this->_graphical->close();
@@ -46,10 +47,7 @@ namespace arc {
         }
         if (this->_handle)
             dlclose(this->_handle);
-            
-        // Clean up game library resources
         if (this->_game) {
-            destroy_game_t destroy_game = nullptr;
             destroy_game = (destroy_game_t)dlsym(this->_gameHandle, "destroy");
             if (destroy_game)
                 destroy_game(this->_game);
@@ -75,8 +73,11 @@ namespace arc {
 
     void ACore::loadGame(const std::string &name)
     {
+        create_game_t create = nullptr;
+        destroy_game_t destroy_game = nullptr;
+        std::string lib_path = "lib/arcade_" + name + ".so";
+
         if (this->_game) {
-            destroy_game_t destroy_game = nullptr;
             destroy_game = (destroy_game_t)dlsym(this->_gameHandle, "destroy");
             if (destroy_game)
                 destroy_game(this->_game);
@@ -86,37 +87,32 @@ namespace arc {
             dlclose(this->_gameHandle);
             this->_gameHandle = nullptr;
         }
-        
-        std::string lib_path = "lib/arcade_" + name + ".so";
-        
         this->_gameHandle = dlopen(lib_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
         if (!this->_gameHandle)
             throw GameError(std::string("Cannot load game library '") + lib_path + "': " + std::string(dlerror()));
-            
-        create_game_t create = (create_game_t)dlsym(this->_gameHandle, "create");
+        create = (create_game_t)dlsym(this->_gameHandle, "create");
         if (!create) {
             dlclose(this->_gameHandle);
             this->_gameHandle = nullptr;
             throw GameError(std::string("Invalid game library '") + lib_path + "'");
         }
-        
         this->_game = create();
         if (!this->_game) {
             dlclose(this->_gameHandle);
             this->_gameHandle = nullptr;
             throw GameError(std::string("Failed to create game instance from '") + lib_path + "'");
         }
-        
         this->_inGame = true;
     }
 
     void ACore::setGame(IGame *Game)
     {
+        std::vector<element_t> initialElements = {};
+
         this->_game = Game;
         this->_inGame = (Game != nullptr);
-
         if (this->_game && this->_inGame) {
-            std::vector<element_t> initialElements = this->_game->handleEvents("");
+            initialElements = this->_game->handleEvents("");
             this->display(initialElements);
         }
     }
@@ -125,15 +121,12 @@ namespace arc {
     {
         if (!this->_graphical)
             return;
-        
         this->_graphical->clearElements();
-        
         if (!this->_inGame || this->_isPaused) {
             this->_graphical->addElements(this->_menu.getElements());
         } else {
             this->_graphical->addElements(elements);
         }
-        
         this->_graphical->draw();
     }
 
@@ -158,7 +151,6 @@ namespace arc {
         if (!this->_inGame) {
             this->_menu.handleInput(event);
             display(this->_menu.getElements());
-            
             if (this->_menu.isAuthenticated() && !this->_menu.getSelectedGame().empty()) {
                 try {
                     loadGame(this->_menu.getSelectedGame());
@@ -168,16 +160,18 @@ namespace arc {
                     }
                 } catch (const std::exception &e) {
                     std::cerr << "Error: " << e.what() << std::endl;
-                    this->_menu.handleInput("ESCAPE"); // Return to menu
+                    this->_menu.handleInput("ESCAPE");
                 }
             }
         } else {
             if (event == "m") {
                 this->_isPaused = true;
                 this->_menu.handleInput(event);
+                display(this->_menu.getElements());
             }
             if (this->_isPaused) {
                 this->_menu.handleInput(event);
+                display(this->_menu.getElements());
                 if (this->_menu.shouldResume()) {
                     this->_isPaused = false;
                     if (this->_game) {

@@ -43,6 +43,7 @@ namespace arc {
         sf::Text text = sf::Text();
         sf::Color color = sf::Color::White;
         auto [x, y] = convertPositionToPixels(std::get<0>(element._position), std::get<1>(element._position));
+        sf::FloatRect textBounds = sf::FloatRect();
 
         text.setFont(this->_font);
         text.setString(element._text);
@@ -60,24 +61,24 @@ namespace arc {
         else if (element._color == "6")
             color = sf::Color::Cyan;
         text.setFillColor(color);
-        
-        sf::FloatRect textBounds = text.getLocalBounds();
+        textBounds = text.getLocalBounds();
         text.setOrigin(textBounds.width / 2, textBounds.height / 2);
         text.setPosition(x, y);
-        
         this->_window->draw(text);
     }
 
     void SFML::draw_image(element_t element)
     {
         sf::Sprite sprite = sf::Sprite();
+        float scaleX = 1.0f;
+        float scaleY = 1.0f;
 
         if (element._image_path.empty() || !this->_texture.loadFromFile(element._image_path))
             return;
         sprite.setTexture(this->_texture);
         sprite.setPosition(std::get<1>(element._position), std::get<0>(element._position));
-        float scaleX = static_cast<float>(std::get<1>(element._size)) / this->_texture.getSize().x;
-        float scaleY = static_cast<float>(std::get<0>(element._size)) / this->_texture.getSize().y;
+        scaleX = static_cast<float>(std::get<1>(element._size)) / this->_texture.getSize().x;
+        scaleY = static_cast<float>(std::get<0>(element._size)) / this->_texture.getSize().y;
         sprite.setScale(scaleX, scaleY);
         this->_window->draw(sprite);
     }
@@ -107,12 +108,11 @@ namespace arc {
 
     void SFML::draw_rectangle(element_t element)
     {
-        sf::RectangleShape rectangle(sf::Vector2f(std::get<1>(element._size),
-            std::get<0>(element._size)));
+        sf::RectangleShape rectangle(sf::Vector2f(std::get<1>(element._size), std::get<0>(element._size)));
         sf::Color color = sf::Color::White;
 
         rectangle.setPosition(std::get<1>(element._position) - std::get<1>(element._size) / 2,
-            std::get<0>(element._position) - std::get<0>(element._size) / 2);
+        std::get<0>(element._position) - std::get<0>(element._size) / 2);
         if (element._color == "1")
             color = sf::Color::Red;
         else if (element._color == "2")
@@ -161,7 +161,7 @@ namespace arc {
 
     std::string SFML::update()
     {
-        sf::Event event;
+        sf::Event event = sf::Event();
 
         while (this->_window->pollEvent(event)) {
             if (event.type == sf::Event::Closed)

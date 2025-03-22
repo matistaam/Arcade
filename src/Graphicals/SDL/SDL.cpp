@@ -26,7 +26,7 @@ namespace arc {
         if (TTF_Init() < 0)
             throw GraphicalError(std::string("SDL_ttf initialization failed: ") + TTF_GetError());
         this->_window = SDL_CreateWindow("Arcade", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            this->_width, this->_height, SDL_WINDOW_SHOWN);
+        this->_width, this->_height, SDL_WINDOW_SHOWN);
         if (!this->_window)
             throw GraphicalError(std::string("Window creation failed: ") + SDL_GetError());
         this->_renderer = SDL_CreateRenderer(this->_window, -1, SDL_RENDERER_ACCELERATED);
@@ -69,7 +69,6 @@ namespace arc {
         this->_font = TTF_OpenFont("assets/fonts/ByteBounce.ttf", element._font_size);
         if (!this->_font)
             return;
-
         if (element._color == "1")
             color = {255, 0, 0, 255};
         else if (element._color == "2")
@@ -90,9 +89,7 @@ namespace arc {
             SDL_FreeSurface(surface);
             return;
         }
-        
         rect = {x - surface->w / 2, y - surface->h / 2, surface->w, surface->h};
-        
         SDL_RenderCopy(this->_renderer, texture, NULL, &rect);
         SDL_FreeSurface(surface);
         SDL_DestroyTexture(texture);
@@ -115,7 +112,7 @@ namespace arc {
             return;
         }
         rect = {std::get<1>(element._position), std::get<0>(element._position),
-            std::get<1>(element._size), std::get<0>(element._size)};
+        std::get<1>(element._size), std::get<0>(element._size)};
         SDL_RenderCopy(this->_renderer, texture, NULL, &rect);
         SDL_FreeSurface(surface);
         SDL_DestroyTexture(texture);

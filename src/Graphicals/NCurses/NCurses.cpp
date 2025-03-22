@@ -50,10 +50,7 @@ namespace arc {
         int color = std::stoi(element._color);
         auto [x, y] = convertPositionToPixels(std::get<0>(element._position), std::get<1>(element._position));
         float scale = static_cast<float>(element._font_size) / 24.0f;
-        
         int textLength = element._text.length();
-        int textHeight = 1;
-        
         int startX = static_cast<int>(y / (24 / scale)) - textLength / 2;
         int startY = static_cast<int>(x / (12 / scale));
 
@@ -91,7 +88,7 @@ namespace arc {
     void Ncurses::draw_rectangle(element_t element)
     {
         int color = std::stoi(element._color);
-                int width = std::get<1>(element._size);
+        int width = std::get<1>(element._size);
         int height = std::get<0>(element._size);
         int centerY = std::get<0>(element._position);
         int centerX = std::get<1>(element._position);

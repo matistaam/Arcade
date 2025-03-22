@@ -24,7 +24,7 @@ namespace arc {
 
     void Menu::handleInput(const std::string &input)
     {
-        if ((input == "m" || input == "ESCAPE") && this->_authenticated && !this->_selectedGame.empty()) {
+        if (input == "m" && this->_authenticated && !this->_selectedGame.empty()) {
             this->_state = PAUSE;
             this->_selectedButton = 0;
             createPauseElements();
@@ -80,7 +80,7 @@ namespace arc {
 
         title._type = TEXT;
         title._text = "Please login and press ENTER";
-        title._position = std::make_tuple(25, 20);
+        title._position = std::make_tuple(40, 20);
         title._color = "0";
         title._font_size = 42;
         this->_elements.push_back(title);
@@ -118,14 +118,14 @@ namespace arc {
 
         WelcomeText._type = TEXT;
         WelcomeText._text = "Welcome " + this->_username + "!";
-        WelcomeText._position = std::make_tuple(25, 10);
+        WelcomeText._position = std::make_tuple(40, 10);
         WelcomeText._color = "0";
         WelcomeText._font_size = 72;
         this->_elements.push_back(WelcomeText);
 
         title._type = TEXT;
         title._text = "Select a game:";
-        title._position = std::make_tuple(25, 20);
+        title._position = std::make_tuple(40, 20);
         title._color = "0";
         title._font_size = 72;
         this->_elements.push_back(title);

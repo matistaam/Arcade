@@ -6,8 +6,6 @@
 */
 
 #include "Includes.hpp"
-#include <fstream>
-#include <sstream>
 
 namespace arc {
     Menu::Menu() : _state(LOGIN_SIGNUP), _authenticated(false), _selectedButton(0), _resume(false), _quit(false), _returnToMenu(false)
@@ -76,11 +74,35 @@ namespace arc {
 
     bool Menu::saveAccount(const std::string &username, const std::string &password)
     {
-        std::ofstream accountFile("accounts.txt", std::ios::app);
+        std::ifstream checkFile("accounts.txt");
+        std::vector<std::string> lines = {};
+        std::string line = "";
+        std::string storedUsername = "";
+        bool isNewAccount = true;
 
+        while (std::getline(checkFile, line)) {
+            std::istringstream iss(line);
+            std::getline(iss, storedUsername, ':');
+            if (storedUsername != username)
+                lines.push_back(line);
+            else
+                isNewAccount = false;
+        }
+        checkFile.close();
+        std::ofstream accountFile("accounts.txt");
         if (!accountFile.is_open())
             return (false);
-        accountFile << username << ":" << password << std::endl;
+        for (const auto &l : lines)
+            accountFile << l << std::endl;
+        accountFile << username << ":" << password;
+        if (isNewAccount) {
+            for (const auto &game : _availableGames)
+                accountFile << ":" << game << "=0";
+        } else {
+            for (const auto &[game, score] : _highScores)
+                accountFile << ":" << game << "=" << score;
+        }
+        accountFile << std::endl;
         accountFile.close();
         return (true);
     }
@@ -89,9 +111,46 @@ namespace arc {
     {
         std::ifstream accountFile("accounts.txt");
         std::string line = "";
+        std::string gameScore = "";
+        size_t equalPos = 0;
+        std::string game = "";
+        int score = 0;
+
+        if (!accountFile.is_open())
+            return (false);
+        while (std::getline(accountFile, line)) {
+            std::istringstream iss(line);
+            std::string storedUsername, storedPassword;
+            std::getline(iss, storedUsername, ':');
+            std::getline(iss, storedPassword, ':');
+            if (storedUsername == username && storedPassword == password) {
+                this->_highScores.clear();
+                while (std::getline(iss, gameScore, ':')) {
+                    equalPos = gameScore.find('=');
+                    if (equalPos != std::string::npos) {
+                        game = gameScore.substr(0, equalPos);
+                        try {
+                            score = std::stoi(gameScore.substr(equalPos + 1));
+                            this->_highScores[game] = score;
+                        } catch (const std::exception &e) {
+                            throw std::runtime_error("Invalid score format for game: " + game);
+                        }
+                    }
+                }
+                accountFile.close();
+                return (true);
+            }
+        }
+        accountFile.close();
+        return (false);
+    }
+
+    bool Menu::checkUsernameExists(const std::string &username)
+    {
+        std::ifstream accountFile("accounts.txt");
+        std::string line = "";
         size_t delimiterPos = 0;
         std::string storedUsername = "";
-        std::string storedPassword = "";
 
         if (!accountFile.is_open())
             return (false);
@@ -99,8 +158,7 @@ namespace arc {
             delimiterPos = line.find(":");
             if (delimiterPos != std::string::npos) {
                 storedUsername = line.substr(0, delimiterPos);
-                storedPassword = line.substr(delimiterPos + 1);
-                if (storedUsername == username && storedPassword == password) {
+                if (storedUsername == username) {
                     accountFile.close();
                     return (true);
                 }
@@ -329,6 +387,8 @@ namespace arc {
     void Menu::handleLoginSignUpInput(const std::string &input)
     {
         if (input == "ENTER") {
+            this->_username.clear();
+            this->_password.clear();
             if (this->_selectedButton == 0) {
                 this->_state = LOGIN;
                 this->_selectedButton = 0;
@@ -348,10 +408,10 @@ namespace arc {
     {
         if (input == "ENTER") {
             if (this->_selectedButton == 2) {
-                this->_state = LOGIN_SIGNUP;
-                this->_selectedButton = 0;
                 this->_username.clear();
                 this->_password.clear();
+                this->_state = LOGIN_SIGNUP;
+                this->_selectedButton = 0;
                 createLoginSignUpElements();
             } else if (!this->_username.empty() && !this->_password.empty()) {
                 if (verifyAccount(this->_username, this->_password)) {
@@ -383,17 +443,19 @@ namespace arc {
     {
         if (input == "ENTER") {
             if (this->_selectedButton == 2) {
-                this->_state = LOGIN_SIGNUP;
-                this->_selectedButton = 0;
                 this->_username.clear();
                 this->_password.clear();
+                this->_state = LOGIN_SIGNUP;
+                this->_selectedButton = 0;
                 createLoginSignUpElements();
             } else if (!this->_username.empty() && !this->_password.empty()) {
-                if (saveAccount(this->_username, this->_password)) {
-                    this->_authenticated = true;
-                    this->_state = GAME_SELECT;
-                    this->_selectedButton = 0;
-                    createGameSelectElements();
+                if (!checkUsernameExists(this->_username)) {
+                    if (saveAccount(this->_username, this->_password)) {
+                        this->_authenticated = true;
+                        this->_state = GAME_SELECT;
+                        this->_selectedButton = 0;
+                        createGameSelectElements();
+                    }
                 }
             }
         } else if (input == "TAB") {
@@ -447,5 +509,22 @@ namespace arc {
             this->_selectedButton = (this->_selectedButton + 1) % 3;
             createPauseElements();
         }
+    }
+
+    void Menu::updateHighScore(const std::string &game, int score)
+    {
+        if (this->_highScores[game] < score) {
+            this->_highScores[game] = score;
+            saveAccount(_username, _password);
+        }
+    }
+
+    int Menu::getHighScore(const std::string &game) const
+    {
+        auto it = this->_highScores.find(game);
+        if (it != this->_highScores.end()) {
+            return it->second;
+        }
+        return 0;
     }
 }

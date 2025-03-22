@@ -7,6 +7,7 @@
 
 #pragma once
 #include "Includes.hpp"
+#include <map>
 
 namespace arc {
     class Menu {
@@ -30,10 +31,13 @@ namespace arc {
             bool shouldResume() const;
             bool shouldQuit() const;
             bool shouldReturnToMenu() const;
+            void updateHighScore(const std::string &game, int score);
+            int getHighScore(const std::string &game) const;
 
         private:
             bool saveAccount(const std::string &username, const std::string &password);
             bool verifyAccount(const std::string &username, const std::string &password);
+            bool checkUsernameExists(const std::string &username);
             void createLoginSignUpElements();
             void createLoginElements();
             void createSignUpElements();
@@ -49,6 +53,7 @@ namespace arc {
             std::string _username;
             std::string _password;
             bool _authenticated;
+            std::map<std::string, int> _highScores;
             std::string _selectedGame;
             size_t _selectedButton;
             bool _resume;

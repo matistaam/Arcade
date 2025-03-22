@@ -12,14 +12,27 @@ namespace arc {
     typedef void (*destroy_graphical_t)(IGraphical*);
     typedef IGame* (*create_game_t)();
     typedef void (*destroy_game_t)(IGame*);
+    typedef const char* (*get_type_t)();
 
     ACore::ACore(std::string path) : _handle(nullptr), _gameHandle(nullptr), _menu(), _inGame(false), _isPaused(false)
     {
         create_graphical_t create = nullptr;
+        get_type_t get_type = nullptr;
 
+        getAvailableGames();
+        this->_menu.setAvailableGames(this->_availableGames);
         this->_handle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
         if (!this->_handle)
             throw LibraryError(std::string(path) + ": " + std::string(dlerror()));
+        get_type = (get_type_t)dlsym(this->_handle, "get_type");
+        if (!get_type) {
+            dlclose(this->_handle);
+            throw InvalidLibraryError(path);
+        }
+        if (std::string(get_type()) != "graphical") {
+            dlclose(this->_handle);
+            throw InvalidLibraryError(path + ": not a graphical library");
+        }
         create = (create_graphical_t)dlsym(this->_handle, "create");
         if (!create) {
             dlclose(this->_handle);
@@ -190,5 +203,35 @@ namespace arc {
             }
         }
         return ("");
+    }
+
+    std::vector<std::string> ACore::getAvailableGames()
+    {
+        DIR *dir = nullptr;
+        struct dirent *entry = nullptr;
+        std::string filename = "";
+        void *handle = nullptr;
+        get_type_t get_type = nullptr;
+
+        this->_availableGames.clear();
+        dir = opendir("lib");
+        if (dir == nullptr)
+            return (this->_availableGames);
+        while ((entry = readdir(dir)) != nullptr) {
+            filename = entry->d_name;
+            if ((filename.substr(0, 7) == "arcade_") && (filename.substr(filename.length() - 3) == ".so")) {
+                handle = dlopen(("lib/" + filename).c_str(), RTLD_LAZY | RTLD_GLOBAL);
+                if (handle) {
+                    get_type = (get_type_t)dlsym(handle, "get_type");
+                    if (get_type && std::string(get_type()) == "game") {
+                        std::cout << "Game found: " << filename.substr(7, filename.length() - 10) << std::endl;
+                        this->_availableGames.push_back(filename.substr(7, filename.length() - 10));
+                    }
+                    dlclose(handle);
+                }
+            }
+        }
+        closedir(dir);
+        return (this->_availableGames);
     }
 }

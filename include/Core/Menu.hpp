@@ -27,6 +27,7 @@ namespace arc {
             bool shouldResume() const;
             bool shouldQuit() const;
             bool shouldReturnToMenu() const;
+            void setAvailableGames(const std::vector<std::string> &games);
 
         private:
             void createLoginElements();
@@ -35,7 +36,6 @@ namespace arc {
             void handleLoginInput(const std::string &input);
             void handleGameSelectInput(const std::string &input);
             void handlePauseInput(const std::string &input);
-
             MenuState _state;
             std::vector<element_t> _elements;
             std::string _username;
@@ -46,5 +46,6 @@ namespace arc {
             bool _resume;
             bool _quit;
             bool _returnToMenu;
+            std::vector<std::string> _availableGames;
     };
 }

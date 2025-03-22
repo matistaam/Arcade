@@ -6,6 +6,8 @@
 */
 
 #include "Includes.hpp"
+#include "Core/ACore.hpp"
+#include "Core/Menu.hpp"
 
 namespace arc {
     Menu::Menu() : _state(LOGIN), _authenticated(false), _selectedButton(0), _resume(false), _quit(false), _returnToMenu(false)
@@ -15,6 +17,11 @@ namespace arc {
 
     Menu::~Menu()
     {
+    }
+
+    void Menu::setAvailableGames(const std::vector<std::string> &games)
+    {
+        this->_availableGames = games;
     }
 
     std::vector<element_t> Menu::getElements() const
@@ -80,21 +87,21 @@ namespace arc {
 
         title._type = TEXT;
         title._text = "Please login and press ENTER";
-        title._position = std::make_tuple(40, 20);
+        title._position = std::make_tuple(50, 20);
         title._color = "0";
         title._font_size = 42;
         this->_elements.push_back(title);
 
         usernameText._type = TEXT;
         usernameText._text = "Username: " + this->_username;
-        usernameText._position = std::make_tuple(40, 45);
+        usernameText._position = std::make_tuple(50, 45);
         usernameText._color = this->_selectedButton == 0 ? "2" : "0";
         usernameText._font_size = 28;
         this->_elements.push_back(usernameText);
 
         passwordText._type = TEXT;
         passwordText._text = "Password: " + std::string(this->_password.length(), '*');
-        passwordText._position = std::make_tuple(40, 55);
+        passwordText._position = std::make_tuple(50, 55);
         passwordText._color = this->_selectedButton == 1 ? "2" : "0";
         passwordText._font_size = 28;
         this->_elements.push_back(passwordText);
@@ -103,10 +110,10 @@ namespace arc {
     void Menu::createGameSelectElements()
     {
         element_t background = {};
-        element_t WelcomeText = {};
+        element_t welcomeText = {};
         element_t title = {};
-        element_t snakeText = {};
-        element_t nibblerText = {};
+        element_t gameText = {};
+        float yPosition = 30;
 
         this->_elements.clear();
 
@@ -116,33 +123,29 @@ namespace arc {
         background._size = std::make_tuple(600, 800);
         this->_elements.push_back(background);
 
-        WelcomeText._type = TEXT;
-        WelcomeText._text = "Welcome " + this->_username + "!";
-        WelcomeText._position = std::make_tuple(40, 10);
-        WelcomeText._color = "0";
-        WelcomeText._font_size = 72;
-        this->_elements.push_back(WelcomeText);
+        welcomeText._type = TEXT;
+        welcomeText._text = "Welcome " + this->_username + "!";
+        welcomeText._position = std::make_tuple(50, 10);
+        welcomeText._color = "0";
+        welcomeText._font_size = 72;
+        this->_elements.push_back(welcomeText);
 
         title._type = TEXT;
         title._text = "Select a game:";
-        title._position = std::make_tuple(40, 20);
+        title._position = std::make_tuple(50, 20);
         title._color = "0";
         title._font_size = 72;
         this->_elements.push_back(title);
 
-        snakeText._type = TEXT;
-        snakeText._text = "Snake";
-        snakeText._position = std::make_tuple(45, 45);
-        snakeText._color = this->_selectedButton == 0 ? "2" : "0";
-        snakeText._font_size = 40;
-        this->_elements.push_back(snakeText);
-
-        nibblerText._type = TEXT;
-        nibblerText._text = "Nibbler";
-        nibblerText._position = std::make_tuple(45, 55);
-        nibblerText._color = this->_selectedButton == 1 ? "2" : "0";
-        nibblerText._font_size = 40;
-        this->_elements.push_back(nibblerText);
+        for (size_t i = 0; i < this->_availableGames.size(); i++) {
+            gameText._type = TEXT;
+            gameText._text = this->_availableGames[i];
+            gameText._position = std::make_tuple(50, yPosition);
+            gameText._color = this->_selectedButton == i ? "2" : "0";
+            gameText._font_size = 40;
+            this->_elements.push_back(gameText);
+            yPosition += 10.0f;
+        }
     }
 
     void Menu::createPauseElements()
@@ -222,10 +225,10 @@ namespace arc {
 
     void Menu::handleGameSelectInput(const std::string &input)
     {
-        if (input == "ENTER") {
-            this->_selectedGame = this->_selectedButton == 0 ? "snake" : "nibbler";
-        } else if (input == "TAB") {
-            this->_selectedButton = (this->_selectedButton + 1) % 2;
+        if (input == "ENTER" && !this->_availableGames.empty()) {
+            this->_selectedGame = this->_availableGames[this->_selectedButton];
+        } else if (input == "TAB" && !this->_availableGames.empty()) {
+            this->_selectedButton = (this->_selectedButton + 1) % this->_availableGames.size();
             createGameSelectElements();
         }
     }

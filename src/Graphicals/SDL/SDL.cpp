@@ -259,4 +259,9 @@ extern "C" {
     {
         delete instance;
     }
+
+    const char* get_type()
+    {
+        return ("graphical");
+    }
 }

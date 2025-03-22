@@ -19,6 +19,8 @@ namespace arc {
             void display(std::vector<element_t> elements) override;
             std::string update();
             void loadGame(const std::string &name);
+            std::vector<std::string> getAvailableGames();
+            std::vector<std::string> _availableGames;
 
         private:
             void *_handle;

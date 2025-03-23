@@ -2,17 +2,17 @@
 ** EPITECH PROJECT, 2025
 ** B-OOP-400-LYN-4-1-arcade-youssef.mehili
 ** File description:
-** SFML
+** Sdl2
 */
 
 #pragma once
 #include "Includes.hpp"
 
 namespace arc {
-    class SFML : public AGraphical {
+    class SDL : public AGraphical {
         public:
-            SFML();
-            ~SFML();
+            SDL();
+            ~SDL();
 
             void init() override;
             void close() override;
@@ -25,9 +25,9 @@ namespace arc {
             void draw_rectangle(element_t element);
 
         private:
-            sf::RenderWindow *_window;
-            sf::Font _font;
-            sf::Texture _texture;
+            SDL_Window *_window;
+            SDL_Renderer *_renderer;
+            TTF_Font *_font;
             int _width;
             int _height;
     };

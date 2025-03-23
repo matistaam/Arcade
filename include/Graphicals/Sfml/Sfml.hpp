@@ -2,17 +2,17 @@
 ** EPITECH PROJECT, 2025
 ** B-OOP-400-LYN-4-1-arcade-youssef.mehili
 ** File description:
-** NCurses
+** Sfml
 */
 
 #pragma once
 #include "Includes.hpp"
 
 namespace arc {
-    class Ncurses : public AGraphical {
+    class SFML : public AGraphical {
         public:
-            Ncurses();
-            ~Ncurses();
+            SFML();
+            ~SFML();
 
             void init() override;
             void close() override;
@@ -23,5 +23,12 @@ namespace arc {
             void draw_image(element_t element);
             void draw_circle(element_t element);
             void draw_rectangle(element_t element);
+
+        private:
+            sf::RenderWindow *_window;
+            sf::Font _font;
+            sf::Texture _texture;
+            int _width;
+            int _height;
     };
 }

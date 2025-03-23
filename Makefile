@@ -24,19 +24,17 @@ LIB_DIR					=	lib
 NCURSES_LIB				=	$(LIB_DIR)/arcade_ncurses.so
 SDL_LIB					=	$(LIB_DIR)/arcade_sdl2.so
 SFML_LIB				=	$(LIB_DIR)/arcade_sfml.so
-
 GRAPHICAL_LIBS			=	$(NCURSES_LIB) $(SDL_LIB) $(SFML_LIB)
 
 # Games configuration
 SNAKE_LIB				=	$(LIB_DIR)/arcade_snake.so
 NIBBLER_LIB				=	$(LIB_DIR)/arcade_nibbler.so
-
 GAMES_LIBS				=	$(SNAKE_LIB) $(NIBBLER_LIB)
 
 # Specific folder names for graphics libraries
-NCURSES_DIR			=	NCurses
-SDL2_DIR			=	SDL
-SFML_DIR			=	SFML
+NCURSES_DIR				=	Ncurses
+SDL2_DIR				=	Sdl2
+SFML_DIR				=	Sfml
 
 # Library flags
 NCURSES_FLAGS			=	-lncurses
@@ -56,16 +54,16 @@ $(NAME): $(OBJ_CORE)
 graphicals: directory $(GRAPHICAL_LIBS)
 
 $(NCURSES_LIB):
-	@echo "Building NCurses library..."
-	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/NCurses -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp -o $@ $(NCURSES_FLAGS)
+	@echo "Building Ncurses library..."
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/Ncurses -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp -o $@ $(NCURSES_FLAGS)
 
 $(SDL_LIB):
-	@echo "Building SDL2 library..."
-	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/SDL -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp -o $@ $(SDL2_FLAGS)
+	@echo "Building Sdl2 library..."
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/Sdl2 -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp -o $@ $(SDL2_FLAGS)
 
 $(SFML_LIB):
-	@echo "Building SFML library..."
-	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/SFML -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp -o $@ $(SFML_FLAGS)
+	@echo "Building Sfml library..."
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Graphicals/Sfml -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp -o $@ $(SFML_FLAGS)
 
 games: directory $(GAMES_LIBS)
 
@@ -75,7 +73,7 @@ $(SNAKE_LIB):
 
 $(NIBBLER_LIB):
 	@echo "Building Nibbler game..."
-	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Games/Nibbler -name "*.cpp") src/Games/AGame.cpp src/Core/ArcadeException.cpp -o $@
+	@$(CXX) -shared $(CXXFLAGS) $(shell find src/Games/Nibbler -name "*.cpp") src/Games/AGame.cpp src/Core/ArcadeException.cpp src/Core/Menu.cpp -o $@
 
 %.o: %.cpp
 	@echo "Compiling $<"
@@ -84,7 +82,6 @@ $(NIBBLER_LIB):
 clean:
 	@echo "Cleaning object files..."
 	@$(RM) $(OBJ_CORE)
-	@find . -name "*.o" -type f -delete
 
 fclean: clean
 	@echo "Cleaning executable and libraries..."

@@ -2,17 +2,17 @@
 ** EPITECH PROJECT, 2025
 ** B-OOP-400-LYN-4-1-arcade-youssef.mehili
 ** File description:
-** SDL
+** Ncurses
 */
 
 #pragma once
 #include "Includes.hpp"
 
 namespace arc {
-    class SDL : public AGraphical {
+    class Ncurses : public AGraphical {
         public:
-            SDL();
-            ~SDL();
+            Ncurses();
+            ~Ncurses();
 
             void init() override;
             void close() override;
@@ -23,12 +23,5 @@ namespace arc {
             void draw_image(element_t element);
             void draw_circle(element_t element);
             void draw_rectangle(element_t element);
-
-        private:
-            SDL_Window *_window;
-            SDL_Renderer *_renderer;
-            TTF_Font *_font;
-            int _width;
-            int _height;
     };
 }

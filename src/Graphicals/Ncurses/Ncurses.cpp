@@ -9,7 +9,7 @@
 
 namespace arc
 {
-        Ncurses::Ncurses() : AGraphical("")
+    Ncurses::Ncurses() : AGraphical("")
     {
     }
 
@@ -43,31 +43,7 @@ namespace arc
 
     void Ncurses::close()
     {
-        // Only perform cleanup if NCurses is initialized
-        if (stdscr) {
-            // Reset all colors to defaults to avoid leaks
-            for (int i = 0; i < COLORS && i <= COLOR_WHITE; i++) {
-                for (int j = 0; j < COLORS && j <= COLOR_WHITE; j++) {
-                    init_pair(i * 8 + j, i, j);
-                }
-            }
-
-            // Clear the screen
-            clear();
-            refresh();
-            
-            // End NCurses mode
-            endwin();
-            
-            // Free remaining resources
-            delscreen(set_term(NULL));
-            
-            // Reset terminal completely (might be necessary for full cleanup)
-            if (isatty(STDOUT_FILENO)) {
-                // This system call helps reset the terminal state
-                system("stty sane");
-            }
-        }
+        endwin();
     }
 
     std::tuple<int, int> Ncurses::convertPositionToChar(int percentX, int percentY)

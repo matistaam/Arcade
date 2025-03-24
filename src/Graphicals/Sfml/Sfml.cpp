@@ -88,8 +88,9 @@ namespace arc {
         sf::CircleShape circle(std::get<0>(element._size) / 2);
         sf::Color color = sf::Color::White;
 
-        circle.setPosition(std::get<1>(element._position) - std::get<0>(element._size) / 2,
-            std::get<0>(element._position) - std::get<0>(element._size) / 2);
+        // Adjust position to match grid-based coordinates
+        circle.setPosition(std::get<1>(element._position) * 20,
+            std::get<0>(element._position) * 20);
         if (element._color == "1")
             color = sf::Color::Red;
         else if (element._color == "2")
@@ -111,8 +112,8 @@ namespace arc {
         sf::RectangleShape rectangle(sf::Vector2f(std::get<1>(element._size), std::get<0>(element._size)));
         sf::Color color = sf::Color::White;
 
-        rectangle.setPosition(std::get<1>(element._position) - std::get<1>(element._size) / 2,
-        std::get<0>(element._position) - std::get<0>(element._size) / 2);
+        rectangle.setPosition(std::get<1>(element._position) * 20,
+            std::get<0>(element._position) * 20);
         if (element._color == "1")
             color = sf::Color::Red;
         else if (element._color == "2")

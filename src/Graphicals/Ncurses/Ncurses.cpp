@@ -73,38 +73,23 @@ namespace arc {
 
     void Ncurses::draw_circle(element_t element)
     {
+        element._text = "O";
         int color = std::stoi(element._color);
-        auto [x, y] = convertPositionToChar(std::get<0>(element._position), std::get<1>(element._position));
-        int radius = std::get<0>(element._size) / 40;
-
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
-        for (int dy = -radius; dy <= radius; dy++) {
-            for (int dx = -radius; dx <= radius; dx++) {
-                if (dx*dx + dy*dy <= radius*radius)
-                    mvprintw(y + dy, x + dx, " ");
-            }
-        }
+        mvprintw(std::get<1>(element._position), std::get<0>(element._position), "%s", element._text.c_str());
         attroff(COLOR_PAIR(color));
     }
 
     void Ncurses::draw_rectangle(element_t element)
     {
+        element._text = "#";
         int color = std::stoi(element._color);
-        auto [x, y] = convertPositionToChar(std::get<0>(element._position), std::get<1>(element._position));
-        int width = std::get<1>(element._size) / 10;
-        int height = std::get<0>(element._size) / 20;
-        int startY = y - height/2;
-        int startX = x - width/2;
-
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
-        for (int dy = 0; dy < height; dy++) {
-            for (int dx = 0; dx < width; dx++)
-                mvprintw(startY + dy, startX + dx, " ");
-        }
+        mvprintw(std::get<1>(element._position), std::get<0>(element._position), "%s", element._text.c_str());
         attroff(COLOR_PAIR(color));
     }
 
@@ -160,6 +145,14 @@ namespace arc {
                 return ("PREV_LIB");
             case '2':
                 return ("NEXT_LIB");
+            case KEY_UP:
+                return ("UP");
+            case KEY_DOWN:
+                return ("DOWN");
+            case KEY_LEFT:
+                return ("LEFT");
+            case KEY_RIGHT:
+                return ("RIGHT");
             default:
                 if (ch >= 32 && ch <= 126)
                     return (std::string(1, (char)ch));

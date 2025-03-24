@@ -140,18 +140,17 @@ namespace arc {
         element_t finalScoreText = {};
         int segmentY = 0;
         int segmentX = 0;
-        int foodY = 0;
-        int foodX = 0;
 
         background._type = IMAGE;
         background._image_path = "assets/snake_background.png";
         background._position = std::make_tuple(0, 0);
         background._size = std::make_tuple(600, 800);
         elements.push_back(background);
+        
         for (const auto &segment : this->_snake) {
             snakeSegment._type = RECTANGLE;
-            segmentY = std::get<0>(segment) * CELL_SIZE + CELL_SIZE / 2;
-            segmentX = std::get<1>(segment) * CELL_SIZE + CELL_SIZE / 2;
+            segmentY = std::get<0>(segment);
+            segmentX = std::get<1>(segment);
             snakeSegment._position = std::make_tuple(segmentY, segmentX);
             snakeSegment._size = std::make_tuple(CELL_SIZE - 2, CELL_SIZE - 2);
             if (segment == this->_snake.front())
@@ -160,13 +159,14 @@ namespace arc {
                 snakeSegment._color = "3";
             elements.push_back(snakeSegment);
         }
+
+        // Fix food rendering
         food._type = CIRCLE;
-        foodY = std::get<0>(this->_food) * CELL_SIZE + CELL_SIZE / 2;
-        foodX = std::get<1>(this->_food) * CELL_SIZE + CELL_SIZE / 2;
-        food._position = std::make_tuple(foodY, foodX);
+        food._position = std::make_tuple(std::get<0>(this->_food), std::get<1>(this->_food));
         food._size = std::make_tuple(CELL_SIZE - 2, CELL_SIZE - 2);
         food._color = "1";
         elements.push_back(food);
+
         scoreText._type = TEXT;
         scoreText._text = "Score: " + std::to_string(this->_score);
         scoreText._position = std::make_tuple(10, 20);

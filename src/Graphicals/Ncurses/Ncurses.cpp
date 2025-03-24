@@ -99,26 +99,26 @@ namespace arc
 
     void Ncurses::draw()
     {
-        int terminalRows = 0;
-        int terminalCols = 0;
+        // int terminalRows = 0;
+        // int terminalCols = 0;
         element_t adjusted = {};
 
         try {
-            getmaxyx(stdscr, terminalRows, terminalCols);
+            //getmaxyx(stdscr, terminalRows, terminalCols);
             clear();
             attron(COLOR_PAIR(6));
             mvprintw(0, 0, "+");
-            for (int i = 0; i < terminalCols - 2; i++)
+            for (int i = 0; i < 42 - 2; i++)
                 mvprintw(0, 1 + i, "-");
-            mvprintw(0, terminalCols - 1, "+");
-            for (int i = 0; i < terminalRows - 2; i++) {
+            mvprintw(0, 42 - 1, "+");
+            for (int i = 0; i < 32 - 2; i++) {
                 mvprintw(1 + i, 0, "|");
-                mvprintw(1 + i, terminalCols - 1, "|");
+                mvprintw(1 + i, 42 - 1, "|");
             }
-            mvprintw(terminalRows - 1, 0, "+");
-            for (int i = 0; i < terminalCols - 2; i++)
-                mvprintw(terminalRows - 1, 1 + i, "-");
-            mvprintw(terminalRows - 1, terminalCols - 1, "+");
+            mvprintw(32 - 1, 0, "+");
+            for (int i = 0; i < 42 - 2; i++)
+                mvprintw(32 - 1, 1 + i, "-");
+            mvprintw(32 - 1, 42 - 1, "+");
             attroff(COLOR_PAIR(6));
             for (auto &element : this->_elements) {
                 switch (element._type) {

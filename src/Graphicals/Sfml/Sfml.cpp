@@ -191,6 +191,8 @@ namespace arc {
                     return ("LEFT");
                 if (event.key.code == sf::Keyboard::Right)
                     return ("RIGHT");
+                if (event.key.code == sf::Keyboard::Space)
+                    return ("SWITCH_LIB");
             }
         }
         return ("");

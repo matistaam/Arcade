@@ -125,8 +125,57 @@ namespace arc {
 
     void ACore::switchGraphicalLibrary(const std::string &name)
     {
-        (void)name;
-        // To implement
+        create_graphical_t create = nullptr;
+        destroy_graphical_t destroy = nullptr;
+        void *newHandle = nullptr;
+        IGraphical *newGraphical = nullptr;
+
+        if (name.empty())
+            return;
+
+        std::string lib_path = "lib/arcade_" + name + ".so";
+        newHandle = dlopen(lib_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+        if (!newHandle)
+            throw GraphicalError(std::string("Cannot load graphical library '") + lib_path + "': " + std::string(dlerror()));
+
+        create = (create_graphical_t)dlsym(newHandle, "create");
+        if (!create) {
+            dlclose(newHandle);
+            throw GraphicalError(std::string("Invalid graphical library '") + lib_path + "'");
+        }
+
+        newGraphical = create();
+        if (!newGraphical) {
+            dlclose(newHandle);
+            throw GraphicalError(std::string("Failed to create graphical instance from '") + lib_path + "'");
+        }
+
+        // Close and destroy the current graphical library
+        if (this->_graphical) {
+            this->_graphical->close();
+            destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
+            if (destroy)
+                destroy(this->_graphical);
+        }
+
+        // Close the current handle
+        if (this->_handle)
+            dlclose(this->_handle);
+
+        // Set the new handle and graphical instance
+        this->_handle = newHandle;
+        this->_graphical = newGraphical;
+        
+        // Initialize the new graphical library
+        this->_graphical->init();
+        
+        // If we have a game running, we need to redisplay its elements
+        if (this->_game && this->_inGame && !this->_isPaused) {
+            std::vector<element_t> gameElements = this->_game->handleEvents("");
+            display(gameElements);
+        } else if (!this->_inGame || this->_isPaused) {
+            display(this->_menu.getElements());
+        }
     }
 
     void ACore::setGame(IGame *Game)
@@ -158,15 +207,33 @@ namespace arc {
     {
         std::string event;
         std::vector<element_t> gameElements;
+        static size_t currentLibIndex = 0;
 
         if (!this->_graphical)
             return ("EXIT");
         event = this->_graphical->update();
         if (event == "EXIT")
             return (event);
-        if (event == "PREV_LIB" || event == "NEXT_LIB") {
-            // To implement
+        if (event == "PREV_LIB") {
+            if (!this->_availableGraphicalLibs.empty()) {
+                if (currentLibIndex == 0)
+                    currentLibIndex = this->_availableGraphicalLibs.size() - 1;
+                else
+                    currentLibIndex--;
+                switchGraphicalLibrary(this->_availableGraphicalLibs[currentLibIndex]);
+            }
+        } else if (event == "NEXT_LIB") {
+            if (!this->_availableGraphicalLibs.empty()) {
+                currentLibIndex = (currentLibIndex + 1) % this->_availableGraphicalLibs.size();
+                switchGraphicalLibrary(this->_availableGraphicalLibs[currentLibIndex]);
+            }
+        } else if (event == "SWITCH_LIB") {
+            if (!this->_availableGraphicalLibs.empty()) {
+                currentLibIndex = (currentLibIndex + 1) % this->_availableGraphicalLibs.size();
+                switchGraphicalLibrary(this->_availableGraphicalLibs[currentLibIndex]);
+            }
         }
+        
         if (!this->_inGame) {
             this->_menu.handleInput(event);
             display(this->_menu.getElements());

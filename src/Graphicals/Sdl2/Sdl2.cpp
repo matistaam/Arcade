@@ -251,6 +251,8 @@ namespace arc {
                     return ("DOWN");
                 if (event.key.keysym.sym == SDLK_LEFT)
                     return ("LEFT");
+                if (event.key.keysym.sym == SDLK_SPACE)
+                    return ("SWITCH_LIB");
                 if (event.key.keysym.sym >= SDLK_SPACE && event.key.keysym.sym <= SDLK_z) {
                     c = event.key.keysym.sym;
                     return (std::string(1, c));

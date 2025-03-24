@@ -191,6 +191,8 @@ namespace arc
                 return ("LEFT");
             case KEY_RIGHT:
                 return ("RIGHT");
+            case ' ':  // Space key
+                return ("SWITCH_LIB");
             default:
                 if (ch >= 32 && ch <= 126)
                     return (std::string(1, (char)ch));

@@ -7,7 +7,8 @@
 
 #include "Includes.hpp"
 
-namespace arc {
+namespace arc
+{
     Ncurses::Ncurses() : AGraphical("")
     {
     }
@@ -78,7 +79,7 @@ namespace arc {
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
-        mvprintw(std::get<1>(element._position), std::get<0>(element._position), "%s", element._text.c_str());
+        mvprintw(std::get<0>(element._position), std::get<1>(element._position), "%s", element._text.c_str());
         attroff(COLOR_PAIR(color));
     }
 
@@ -89,36 +90,41 @@ namespace arc {
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
-        mvprintw(std::get<1>(element._position), std::get<0>(element._position), "%s", element._text.c_str());
+        mvprintw(std::get<0>(element._position), std::get<1>(element._position), "%s", element._text.c_str());
         attroff(COLOR_PAIR(color));
     }
 
     void Ncurses::draw()
     {
-        try {
+        try
+        {
             clear();
-            for (auto &element : this->_elements) {
-                switch (element._type) {
-                    case TEXT:
-                        draw_text(element);
-                        break;
-                    case IMAGE:
-                        draw_image(element);
-                        break;
-                    case CIRCLE:
-                        draw_circle(element);
-                        break;
-                    case RECTANGLE:
-                        draw_rectangle(element);
-                        break;
-                    case BUTTON:
-                        draw_rectangle(element);
-                        draw_text(element);
-                        break;
+            for (auto &element : this->_elements)
+            {
+                switch (element._type)
+                {
+                case TEXT:
+                    draw_text(element);
+                    break;
+                case IMAGE:
+                    draw_image(element);
+                    break;
+                case CIRCLE:
+                    draw_circle(element);
+                    break;
+                case RECTANGLE:
+                    draw_rectangle(element);
+                    break;
+                case BUTTON:
+                    draw_rectangle(element);
+                    draw_text(element);
+                    break;
                 }
             }
             refresh();
-        } catch (const std::exception &e) {
+        }
+        catch (const std::exception &e)
+        {
             throw GraphicalError("NCurses drawing error: " + std::string(e.what()));
         }
     }
@@ -131,37 +137,39 @@ namespace arc {
             return ("");
         if (ch == KEY_RESIZE)
             return ("RESIZE");
-        switch (ch) {
-            case 27:
-                return ("EXIT");
-            case '\n':
-                return ("ENTER");
-            case '\t':
-                return ("TAB");
-            case KEY_BACKSPACE:
-            case 127:
-                return ("BACKSPACE");
-            case '1':
-                return ("PREV_LIB");
-            case '2':
-                return ("NEXT_LIB");
-            case KEY_UP:
-                return ("UP");
-            case KEY_DOWN:
-                return ("DOWN");
-            case KEY_LEFT:
-                return ("LEFT");
-            case KEY_RIGHT:
-                return ("RIGHT");
-            default:
-                if (ch >= 32 && ch <= 126)
-                    return (std::string(1, (char)ch));
-                return ("");
+        switch (ch)
+        {
+        case 27:
+            return ("EXIT");
+        case '\n':
+            return ("ENTER");
+        case '\t':
+            return ("TAB");
+        case KEY_BACKSPACE:
+        case 127:
+            return ("BACKSPACE");
+        case '1':
+            return ("PREV_LIB");
+        case '2':
+            return ("NEXT_LIB");
+        case KEY_UP:
+            return ("UP");
+        case KEY_DOWN:
+            return ("DOWN");
+        case KEY_LEFT:
+            return ("LEFT");
+        case KEY_RIGHT:
+            return ("RIGHT");
+        default:
+            if (ch >= 32 && ch <= 126)
+                return (std::string(1, (char)ch));
+            return ("");
         }
     }
 }
 
-extern "C" {
+extern "C"
+{
     arc::IGraphical *create()
     {
         return (new arc::Ncurses());
@@ -172,7 +180,7 @@ extern "C" {
         delete instance;
     }
 
-    const char* get_type()
+    const char *get_type()
     {
         return ("graphical");
     }

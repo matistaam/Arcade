@@ -14,7 +14,7 @@ namespace arc {
     typedef void (*destroy_game_t)(IGame*);
     typedef const char* (*get_type_t)();
 
-    ACore::ACore(std::string path) : _handle(nullptr), _gameHandle(nullptr), _menu(), _inGame(false), _isPaused(false)
+    ACore::ACore(std::string path) : _isPaused(false), _handle(nullptr), _currentLibIndex(0), _gameHandle(nullptr), _menu(), _inGame(false)
     {
         create_graphical_t create = nullptr;
         get_type_t get_type = nullptr;
@@ -46,6 +46,22 @@ namespace arc {
         }
         this->_graphical->init();
         this->_game = nullptr;
+        
+        std::string libName = path;
+        size_t lastSlash = libName.find_last_of('/');
+        if (lastSlash != std::string::npos) {
+            libName = libName.substr(lastSlash + 1);
+        }
+        if (libName.substr(0, 7) == "arcade_" && libName.substr(libName.length() - 3) == ".so") {
+            libName = libName.substr(7, libName.length() - 10);
+            
+            for (size_t i = 0; i < this->_availableGraphicalLibs.size(); i++) {
+                if (this->_availableGraphicalLibs[i] == libName) {
+                    this->_currentLibIndex = i;
+                    break;
+                }
+            }
+        }
     }
 
     ACore::~ACore()
@@ -150,7 +166,6 @@ namespace arc {
             throw GraphicalError(std::string("Failed to create graphical instance from '") + lib_path + "'");
         }
 
-        // Close and destroy the current graphical library
         if (this->_graphical) {
             this->_graphical->close();
             destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
@@ -158,18 +173,14 @@ namespace arc {
                 destroy(this->_graphical);
         }
 
-        // Close the current handle
         if (this->_handle)
             dlclose(this->_handle);
 
-        // Set the new handle and graphical instance
         this->_handle = newHandle;
         this->_graphical = newGraphical;
         
-        // Initialize the new graphical library
         this->_graphical->init();
         
-        // If we have a game running, we need to redisplay its elements
         if (this->_game && this->_inGame && !this->_isPaused) {
             std::vector<element_t> gameElements = this->_game->handleEvents("");
             display(gameElements);
@@ -207,30 +218,17 @@ namespace arc {
     {
         std::string event;
         std::vector<element_t> gameElements;
-        static size_t currentLibIndex = 0;
 
         if (!this->_graphical)
             return ("EXIT");
         event = this->_graphical->update();
         if (event == "EXIT")
             return (event);
-        if (event == "PREV_LIB") {
+        else if (event == "SWITCH_LIB") {
             if (!this->_availableGraphicalLibs.empty()) {
-                if (currentLibIndex == 0)
-                    currentLibIndex = this->_availableGraphicalLibs.size() - 1;
-                else
-                    currentLibIndex--;
-                switchGraphicalLibrary(this->_availableGraphicalLibs[currentLibIndex]);
-            }
-        } else if (event == "NEXT_LIB") {
-            if (!this->_availableGraphicalLibs.empty()) {
-                currentLibIndex = (currentLibIndex + 1) % this->_availableGraphicalLibs.size();
-                switchGraphicalLibrary(this->_availableGraphicalLibs[currentLibIndex]);
-            }
-        } else if (event == "SWITCH_LIB") {
-            if (!this->_availableGraphicalLibs.empty()) {
-                currentLibIndex = (currentLibIndex + 1) % this->_availableGraphicalLibs.size();
-                switchGraphicalLibrary(this->_availableGraphicalLibs[currentLibIndex]);
+                this->_currentLibIndex = (this->_currentLibIndex + 1) % this->_availableGraphicalLibs.size();
+                printf("Switching to graphical library: %s\n", this->_availableGraphicalLibs[this->_currentLibIndex].c_str());
+                switchGraphicalLibrary(this->_availableGraphicalLibs[this->_currentLibIndex]);
             }
         }
         

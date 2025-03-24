@@ -8,28 +8,31 @@
 #pragma once
 #include "Includes.hpp"
 
-namespace arc {
-    class ACore : public ICore {
-        public:
-            ACore(std::string path);
-            ~ACore();
+namespace arc
+{
+    class ACore : public ICore
+    {
+    private:
+        bool _isPaused;
+        void *_handle;
+        size_t _currentLibIndex;
+        void *_gameHandle;
+        Menu _menu;
+        bool _inGame;
 
-            void setGraphical(IGraphical *Graphical) override;
-            void setGame(IGame *Game) override;
-            void display(std::vector<element_t> elements) override;
-            std::string update();
-            void loadGame(const std::string &name);
-            void switchGraphicalLibrary(const std::string &name);
-            std::vector<std::string> getAvailableGames();
-            std::vector<std::string> getAvailableGraphicalLibs();
-            std::vector<std::string> _availableGames;
-            std::vector<std::string> _availableGraphicalLibs;
+    public:
+        ACore(std::string path);
+        ~ACore();
 
-        private:
-            void *_handle;
-            void *_gameHandle;
-            Menu _menu;
-            bool _inGame;
-            bool _isPaused;
+        void setGraphical(IGraphical *Graphical) override;
+        void setGame(IGame *Game) override;
+        void display(std::vector<element_t> elements) override;
+        std::string update();
+        void loadGame(const std::string &name);
+        void switchGraphicalLibrary(const std::string &name);
+        std::vector<std::string> getAvailableGames();
+        std::vector<std::string> getAvailableGraphicalLibs();
+        std::vector<std::string> _availableGames;
+        std::vector<std::string> _availableGraphicalLibs;
     };
 }

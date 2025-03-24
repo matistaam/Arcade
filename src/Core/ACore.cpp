@@ -19,6 +19,7 @@ namespace arc {
         create_graphical_t create = nullptr;
         get_type_t get_type = nullptr;
 
+        this->_availableGraphicalLibs = getAvailableGraphicalLibs();
         getAvailableGames();
         this->_menu.setAvailableGames(this->_availableGames);
         this->_handle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
@@ -122,6 +123,12 @@ namespace arc {
         this->_inGame = true;
     }
 
+    void ACore::switchGraphicalLibrary(const std::string &name)
+    {
+        (void)name;
+        // To implement
+    }
+
     void ACore::setGame(IGame *Game)
     {
         std::vector<element_t> initialElements = {};
@@ -157,13 +164,8 @@ namespace arc {
         event = this->_graphical->update();
         if (event == "EXIT")
             return (event);
-        if (event == "PREV_LIB") {
-            std::cout << "Previous library" << std::endl;
-            // TODO: Implement library switching
-        }
-        if (event == "NEXT_LIB") {
-            std::cout << "Next library" << std::endl;
-            // TODO: Implement library switching
+        if (event == "PREV_LIB" || event == "NEXT_LIB") {
+            // To implement
         }
         if (!this->_inGame) {
             this->_menu.handleInput(event);
@@ -235,5 +237,34 @@ namespace arc {
         }
         closedir(dir);
         return (this->_availableGames);
+    }
+
+    std::vector<std::string> ACore::getAvailableGraphicalLibs()
+    {
+        DIR *dir = nullptr;
+        struct dirent *entry = nullptr;
+        std::string filename = "";
+        void *handle = nullptr;
+        get_type_t get_type = nullptr;
+
+        this->_availableGraphicalLibs.clear();
+        dir = opendir("lib");
+        if (dir == nullptr)
+            return (this->_availableGraphicalLibs);
+        while ((entry = readdir(dir)) != nullptr) {
+            filename = entry->d_name;
+            if ((filename.substr(0, 7) == "arcade_") && (filename.substr(filename.length() - 3) == ".so")) {
+                handle = dlopen(("lib/" + filename).c_str(), RTLD_LAZY | RTLD_GLOBAL);
+                if (handle) {
+                    get_type = (get_type_t)dlsym(handle, "get_type");
+                    if (get_type && std::string(get_type()) == "graphical") {
+                        this->_availableGraphicalLibs.push_back(filename.substr(7, filename.length() - 10));
+                    }
+                    dlclose(handle);
+                }
+            }
+        }
+        closedir(dir);
+        return (this->_availableGraphicalLibs);
     }
 }

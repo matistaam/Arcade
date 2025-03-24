@@ -9,7 +9,7 @@
 
 namespace arc
 {
-    Ncurses::Ncurses() : AGraphical("")
+        Ncurses::Ncurses() : AGraphical("")
     {
     }
 
@@ -50,8 +50,9 @@ namespace arc
     {
         int terminalRows = 0;
         int terminalCols = 0;
+
         getmaxyx(stdscr, terminalRows, terminalCols);
-        return std::make_tuple((terminalCols * percentX) / 100, (terminalRows * percentY) / 100);
+        return (std::make_tuple((terminalCols * percentX) / 100, (terminalRows * percentY) / 100));
     }
 
     void Ncurses::draw_text(element_t element)
@@ -74,8 +75,9 @@ namespace arc
 
     void Ncurses::draw_circle(element_t element)
     {
-        element._text = "O";
         int color = std::stoi(element._color);
+
+        element._text = "O";
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
@@ -85,8 +87,9 @@ namespace arc
 
     void Ncurses::draw_rectangle(element_t element)
     {
-        element._text = "#";
         int color = std::stoi(element._color);
+
+        element._text = "#";
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
@@ -96,35 +99,64 @@ namespace arc
 
     void Ncurses::draw()
     {
-        try
-        {
+        int terminalRows = 0;
+        int terminalCols = 0;
+        element_t adjusted = {};
+
+        try {
+            getmaxyx(stdscr, terminalRows, terminalCols);
             clear();
-            for (auto &element : this->_elements)
-            {
-                switch (element._type)
-                {
-                case TEXT:
-                    draw_text(element);
-                    break;
-                case IMAGE:
-                    draw_image(element);
-                    break;
-                case CIRCLE:
-                    draw_circle(element);
-                    break;
-                case RECTANGLE:
-                    draw_rectangle(element);
-                    break;
-                case BUTTON:
-                    draw_rectangle(element);
-                    draw_text(element);
-                    break;
+            attron(COLOR_PAIR(6));
+            mvprintw(0, 0, "+");
+            for (int i = 0; i < terminalCols - 2; i++)
+                mvprintw(0, 1 + i, "-");
+            mvprintw(0, terminalCols - 1, "+");
+            for (int i = 0; i < terminalRows - 2; i++) {
+                mvprintw(1 + i, 0, "|");
+                mvprintw(1 + i, terminalCols - 1, "|");
+            }
+            mvprintw(terminalRows - 1, 0, "+");
+            for (int i = 0; i < terminalCols - 2; i++)
+                mvprintw(terminalRows - 1, 1 + i, "-");
+            mvprintw(terminalRows - 1, terminalCols - 1, "+");
+            attroff(COLOR_PAIR(6));
+            for (auto &element : this->_elements) {
+                switch (element._type) {
+                    case TEXT:
+                        draw_text(element);
+                        break;
+                    case IMAGE:
+                        draw_image(element);
+                        break;
+                    case CIRCLE:
+                        {
+                            adjusted = element;
+                            adjusted._position = std::make_tuple(
+                                std::get<0>(element._position) + 1,
+                                std::get<1>(element._position) + 1
+                            );
+                            draw_circle(adjusted);
+                        }
+                        break;
+                    case RECTANGLE:
+                        {
+                            adjusted = element;
+                            adjusted._position = std::make_tuple(
+                                std::get<0>(element._position) + 1,
+                                std::get<1>(element._position) + 1
+                            );
+                            draw_rectangle(adjusted);
+                        }
+                        break;
+                    case BUTTON:
+                        draw_rectangle(element);
+                        draw_text(element);
+                        break;
                 }
             }
             refresh();
         }
-        catch (const std::exception &e)
-        {
+        catch (const std::exception &e) {
             throw GraphicalError("NCurses drawing error: " + std::string(e.what()));
         }
     }
@@ -137,33 +169,32 @@ namespace arc
             return ("");
         if (ch == KEY_RESIZE)
             return ("RESIZE");
-        switch (ch)
-        {
-        case 27:
-            return ("EXIT");
-        case '\n':
-            return ("ENTER");
-        case '\t':
-            return ("TAB");
-        case KEY_BACKSPACE:
-        case 127:
-            return ("BACKSPACE");
-        case '1':
-            return ("PREV_LIB");
-        case '2':
-            return ("NEXT_LIB");
-        case KEY_UP:
-            return ("UP");
-        case KEY_DOWN:
-            return ("DOWN");
-        case KEY_LEFT:
-            return ("LEFT");
-        case KEY_RIGHT:
-            return ("RIGHT");
-        default:
-            if (ch >= 32 && ch <= 126)
-                return (std::string(1, (char)ch));
-            return ("");
+        switch (ch) {
+            case 27:
+                return ("EXIT");
+            case '\n':
+                return ("ENTER");
+            case '\t':
+                return ("TAB");
+            case KEY_BACKSPACE:
+            case 127:
+                return ("BACKSPACE");
+            case '1':
+                return ("PREV_LIB");
+            case '2':
+                return ("NEXT_LIB");
+            case KEY_UP:
+                return ("UP");
+            case KEY_DOWN:
+                return ("DOWN");
+            case KEY_LEFT:
+                return ("LEFT");
+            case KEY_RIGHT:
+                return ("RIGHT");
+            default:
+                if (ch >= 32 && ch <= 126)
+                    return (std::string(1, (char)ch));
+                return ("");
         }
     }
 }

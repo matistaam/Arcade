@@ -25,5 +25,9 @@ namespace arc {
             void draw_rectangle(element_t element);
 
             std::tuple<int, int> convertPositionToChar(int percentX, int percentY);
+
+        private:
+            static const int WIDTH = 40;
+            static const int HEIGHT = 30;
     };
 }

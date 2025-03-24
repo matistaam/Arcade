@@ -112,7 +112,7 @@ namespace arc {
             return;
         }
         rect = {std::get<1>(element._position) * 20, std::get<0>(element._position) * 20,
-        std::get<1>(element._size), std::get<0>(element._size)}; // Size is already in pixels
+        std::get<1>(element._size), std::get<0>(element._size)};
         SDL_RenderCopy(this->_renderer, texture, NULL, &rect);
         SDL_FreeSurface(surface);
         SDL_DestroyTexture(texture);
@@ -121,11 +121,13 @@ namespace arc {
     void SDL::draw_circle(element_t element)
     {
         int cell_size = 20;
-        int radius = std::get<0>(element._size) / 2;
-        int centerX = std::get<1>(element._position) * cell_size;
-        int centerY = std::get<0>(element._position) * cell_size;
-        int dx = 0;
-        int dy = 0;
+        int diameter = std::get<0>(element._size);
+        int radius = diameter / 2;
+        int centerX = std::get<1>(element._position) * cell_size + cell_size/2;
+        int centerY = std::get<0>(element._position) * cell_size + cell_size/2;
+        int x = radius;
+        int y = 0;
+        int err = 0;
         Uint8 r = 255;
         Uint8 g = 255;
         Uint8 b = 255;
@@ -143,12 +145,21 @@ namespace arc {
         else if (element._color == "6")
             { r = 0; g = 255; b = 255; }
         SDL_SetRenderDrawColor(this->_renderer, r, g, b, 255);
-        for (int w = 0; w < radius * 2; w++) {
-            for (int h = 0; h < radius * 2; h++) {
-                dx = radius - w;
-                dy = radius - h;
-                if ((dx*dx + dy*dy) <= (radius * radius))
-                    SDL_RenderDrawPoint(this->_renderer, centerX + dx - radius, centerY + dy - radius);
+
+        while (x >= y) {
+            for(int i = centerX - x; i <= centerX + x; i++) {
+                SDL_RenderDrawPoint(this->_renderer, i, centerY + y);
+                SDL_RenderDrawPoint(this->_renderer, i, centerY - y);
+            }
+            for(int i = centerX - y; i <= centerX + y; i++) {
+                SDL_RenderDrawPoint(this->_renderer, i, centerY + x);
+                SDL_RenderDrawPoint(this->_renderer, i, centerY - x);
+            }
+            y += 1;
+            err += 1 + 2*y;
+            if (2*(err-x) + 1 > 0) {
+                x -= 1;
+                err += 1 - 2*x;
             }
         }
     }

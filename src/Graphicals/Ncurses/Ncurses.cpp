@@ -50,7 +50,7 @@ namespace arc {
         int terminalRows = 0;
         int terminalCols = 0;
         getmaxyx(stdscr, terminalRows, terminalCols);
-        return std::make_tuple((terminalRows * percentX) / 100, (terminalCols * percentY) / 100);
+        return std::make_tuple((terminalCols * percentX) / 100, (terminalRows * percentY) / 100);
     }
 
     void Ncurses::draw_text(element_t element)
@@ -62,7 +62,7 @@ namespace arc {
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
-        mvprintw(y - element._text.length() / 2, x - textLength / 2, "%s", element._text.c_str());
+        mvprintw(y, x - textLength / 2, "%s", element._text.c_str());
         attroff(COLOR_PAIR(color));
     }
 
@@ -74,12 +74,16 @@ namespace arc {
     void Ncurses::draw_circle(element_t element)
     {
         int color = std::stoi(element._color);
-        auto [centerY, centerX] = convertPositionToChar(std::get<0>(element._position), std::get<1>(element._position));
-        int radius = std::get<0>(element._size) / 40; // Ajuster la taille pour l'affichage en caractères
-        for (int y = -radius; y <= radius; y++) {
-            for (int x = -radius; x <= radius; x++) {
-                if (x*x + y*y <= radius*radius)
-                    mvprintw(centerY + y, centerX + x, " ");
+        auto [x, y] = convertPositionToChar(std::get<0>(element._position), std::get<1>(element._position));
+        int radius = std::get<0>(element._size) / 40;
+
+        if (color < 1 || color > 6)
+            color = 0;
+        attron(COLOR_PAIR(color));
+        for (int dy = -radius; dy <= radius; dy++) {
+            for (int dx = -radius; dx <= radius; dx++) {
+                if (dx*dx + dy*dy <= radius*radius)
+                    mvprintw(y + dy, x + dx, " ");
             }
         }
         attroff(COLOR_PAIR(color));
@@ -88,19 +92,18 @@ namespace arc {
     void Ncurses::draw_rectangle(element_t element)
     {
         int color = std::stoi(element._color);
-        int width = std::get<1>(element._size);
-        int height = std::get<0>(element._size);
-        int centerY = std::get<0>(element._position);
-        int centerX = std::get<1>(element._position);
-        int startY = centerY - height/2;
-        int startX = centerX - width/2;
+        auto [x, y] = convertPositionToChar(std::get<0>(element._position), std::get<1>(element._position));
+        int width = std::get<1>(element._size) / 10;
+        int height = std::get<0>(element._size) / 20;
+        int startY = y - height/2;
+        int startX = x - width/2;
 
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++)
-                mvprintw(startY + y, startX + x, " ");
+        for (int dy = 0; dy < height; dy++) {
+            for (int dx = 0; dx < width; dx++)
+                mvprintw(startY + dy, startX + dx, " ");
         }
         attroff(COLOR_PAIR(color));
     }

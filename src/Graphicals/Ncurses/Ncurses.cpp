@@ -45,19 +45,24 @@ namespace arc {
         endwin();
     }
 
+    std::tuple<int, int> Ncurses::convertPositionToChar(int percentX, int percentY)
+    {
+        int terminalRows = 0;
+        int terminalCols = 0;
+        getmaxyx(stdscr, terminalRows, terminalCols);
+        return std::make_tuple((terminalRows * percentX) / 100, (terminalCols * percentY) / 100);
+    }
+
     void Ncurses::draw_text(element_t element)
     {
         int color = std::stoi(element._color);
-        auto [x, y] = convertPositionToPixels(std::get<0>(element._position), std::get<1>(element._position));
-        float scale = static_cast<float>(element._font_size) / 24.0f;
+        auto [x, y] = convertPositionToChar(std::get<0>(element._position), std::get<1>(element._position));
         int textLength = element._text.length();
-        int startX = static_cast<int>(y / (24 / scale)) - textLength / 2;
-        int startY = static_cast<int>(x / (12 / scale));
 
         if (color < 1 || color > 6)
             color = 0;
         attron(COLOR_PAIR(color));
-        mvprintw(startY, startX, "%s", element._text.c_str());
+        mvprintw(y - element._text.length() / 2, x - textLength / 2, "%s", element._text.c_str());
         attroff(COLOR_PAIR(color));
     }
 
@@ -69,13 +74,8 @@ namespace arc {
     void Ncurses::draw_circle(element_t element)
     {
         int color = std::stoi(element._color);
-        int radius = std::get<0>(element._size) / 2;
-        int centerY = std::get<0>(element._position);
-        int centerX = std::get<1>(element._position);
-
-        if (color < 1 || color > 6)
-            color = 0;
-        attron(COLOR_PAIR(color));
+        auto [centerY, centerX] = convertPositionToChar(std::get<0>(element._position), std::get<1>(element._position));
+        int radius = std::get<0>(element._size) / 40; // Ajuster la taille pour l'affichage en caractères
         for (int y = -radius; y <= radius; y++) {
             for (int x = -radius; x <= radius; x++) {
                 if (x*x + y*y <= radius*radius)

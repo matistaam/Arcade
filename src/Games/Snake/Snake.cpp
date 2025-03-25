@@ -163,16 +163,15 @@ namespace arc {
         food._size = std::make_tuple(18, 18);
         food._color = "1";
         elements.push_back(food);
-        scoreText._type = TEXT;
-        scoreText._text = "Score: " + std::to_string(this->_score);
-        scoreText._position = std::make_tuple(10, 5);
-        scoreText._color = "5";
-        elements.push_back(scoreText);
         highScoreText._type = TEXT;
         highScoreText._text = "Highest Score: " + std::to_string(this->_highScore);
-        highScoreText._position = std::make_tuple(10, 2);
+        highScoreText._position = std::make_tuple(50, 2);
         highScoreText._color = "5";
-        elements.push_back(highScoreText);
+        elements.push_back(highScoreText);scoreText._type = TEXT;
+        scoreText._text = "Score: " + std::to_string(this->_score);
+        scoreText._position = std::make_tuple(50, 5);
+        scoreText._color = "5";
+        elements.push_back(scoreText);
         if (this->_gameOver) {
             gameOverText._type = TEXT;
             gameOverText._text = "GAME OVER - Press R to restart";

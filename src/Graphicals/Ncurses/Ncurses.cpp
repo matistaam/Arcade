@@ -99,26 +99,29 @@ namespace arc
 
     void Ncurses::draw()
     {
-        // int terminalRows = 0;
-        // int terminalCols = 0;
         element_t adjusted = {};
+        int terminalRows = 0;
+        int terminalCols = 0;
+        int offset = 0;
 
         try {
-            //getmaxyx(stdscr, terminalRows, terminalCols);
+            getmaxyx(stdscr, terminalRows, terminalCols);
+            offset = (terminalCols - 42) / 2;
+            (void)terminalRows;
             clear();
             attron(COLOR_PAIR(6));
-            mvprintw(0, 0, "+");
+            mvprintw(0, offset, "+");
             for (int i = 0; i < 42 - 2; i++)
-                mvprintw(0, 1 + i, "-");
-            mvprintw(0, 42 - 1, "+");
+                mvprintw(0, offset + 1 + i, "-");
+            mvprintw(0, offset + 42 - 1, "+");
             for (int i = 0; i < 32 - 2; i++) {
-                mvprintw(1 + i, 0, "|");
-                mvprintw(1 + i, 42 - 1, "|");
+                mvprintw(1 + i, offset, "|");
+                mvprintw(1 + i, offset + 42 - 1, "|");
             }
-            mvprintw(32 - 1, 0, "+");
+            mvprintw(32 - 1, offset, "+");
             for (int i = 0; i < 42 - 2; i++)
-                mvprintw(32 - 1, 1 + i, "-");
-            mvprintw(32 - 1, 42 - 1, "+");
+                mvprintw(32 - 1, offset + 1 + i, "-");
+            mvprintw(32 - 1, offset + 42 - 1, "+");
             attroff(COLOR_PAIR(6));
             for (auto &element : this->_elements) {
                 switch (element._type) {
@@ -133,7 +136,7 @@ namespace arc
                             adjusted = element;
                             adjusted._position = std::make_tuple(
                                 std::get<0>(element._position) + 1,
-                                std::get<1>(element._position) + 1
+                                std::get<1>(element._position) + 1 + offset
                             );
                             draw_circle(adjusted);
                         }
@@ -143,7 +146,7 @@ namespace arc
                             adjusted = element;
                             adjusted._position = std::make_tuple(
                                 std::get<0>(element._position) + 1,
-                                std::get<1>(element._position) + 1
+                                std::get<1>(element._position) + 1 + offset
                             );
                             draw_rectangle(adjusted);
                         }

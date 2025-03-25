@@ -301,7 +301,7 @@ namespace arc {
         element_t welcomeText = {};
         element_t title = {};
         element_t gameText = {};
-        float yPosition = 30;
+        float yPosition = 35;
 
         this->_elements.clear();
 
@@ -332,7 +332,7 @@ namespace arc {
             gameText._color = this->_selectedButton == i ? "2" : "0";
             gameText._font_size = 40;
             this->_elements.push_back(gameText);
-            yPosition += 10.0f;
+            yPosition += 10;
         }
     }
 
@@ -357,28 +357,28 @@ namespace arc {
 
         title._type = TEXT;
         title._text = "PAUSE";
-        title._position = std::make_tuple(45, 20);
+        title._position = std::make_tuple(50, 20);
         title._color = "0";
         title._font_size = 72;
         this->_elements.push_back(title);
 
         resumeText._type = TEXT;
         resumeText._text = "Resume";
-        resumeText._position = std::make_tuple(45, 45);
+        resumeText._position = std::make_tuple(50, 40);
         resumeText._color = this->_selectedButton == 0 ? "2" : "0";
         resumeText._font_size = 40;
         this->_elements.push_back(resumeText);
 
         menuText._type = TEXT;
         menuText._text = "Return to Menu";
-        menuText._position = std::make_tuple(45, 55);
+        menuText._position = std::make_tuple(50, 50);
         menuText._color = this->_selectedButton == 1 ? "2" : "0";
         menuText._font_size = 40;
         this->_elements.push_back(menuText);
 
         quitText._type = TEXT;
         quitText._text = "Quit";
-        quitText._position = std::make_tuple(45, 65);
+        quitText._position = std::make_tuple(50, 60);
         quitText._color = this->_selectedButton == 2 ? "2" : "0";
         quitText._font_size = 40;
         this->_elements.push_back(quitText);

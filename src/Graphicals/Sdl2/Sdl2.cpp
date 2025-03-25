@@ -55,6 +55,77 @@ namespace arc {
         SDL_Quit();
     }
 
+    std::string SDL::update()
+    {
+        SDL_Event event = {0};
+        char c = 0;
+
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT)
+                return ("EXIT");
+            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED)
+                return ("RESIZE");
+            if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == SDLK_RETURN)
+                    return ("ENTER");
+                if (event.key.keysym.sym == SDLK_TAB)
+                    return ("TAB");
+                if (event.key.keysym.sym == SDLK_BACKSPACE)
+                    return ("BACKSPACE");
+                if (event.key.keysym.sym == SDLK_ESCAPE)
+                    return ("EXIT");
+                if (event.key.keysym.sym == SDLK_UP)
+                    return ("UP");
+                if (event.key.keysym.sym == SDLK_RIGHT)
+                    return ("RIGHT");
+                if (event.key.keysym.sym == SDLK_DOWN)
+                    return ("DOWN");
+                if (event.key.keysym.sym == SDLK_LEFT)
+                    return ("LEFT");
+                if (event.key.keysym.sym == SDLK_SPACE)
+                    return ("SWITCH_LIB");
+                if (event.key.keysym.sym >= SDLK_SPACE && event.key.keysym.sym <= SDLK_z) {
+                    c = event.key.keysym.sym;
+                    return (std::string(1, c));
+                }
+            }
+        }
+        return ("");
+    }
+
+    void SDL::draw()
+    {
+        try {
+            SDL_SetRenderDrawColor(this->_renderer, 0, 0, 0, 255);
+            SDL_RenderClear(this->_renderer);
+            for (auto &element : this->_elements) {
+                switch (element._type) {
+                    case TEXT:
+                        draw_text(element);
+                        break;
+                    case IMAGE:
+                        draw_image(element);
+                        break;
+                    case CIRCLE:
+                        draw_circle(element);
+                        break;
+                    case RECTANGLE:
+                        draw_rectangle(element);
+                        break;
+                    case BUTTON:
+                        draw_rectangle(element);
+                        draw_text(element);
+                        break;
+                    case BORDER:
+                        break;
+                }
+            }
+            SDL_RenderPresent(this->_renderer);
+        } catch (const std::exception &e) {
+            throw GraphicalError("SDL drawing error: " + std::string(e.what()));
+        }
+    }
+
     void SDL::draw_text(element_t element)
     {
         SDL_Color color = {255, 255, 255, 255};
@@ -188,81 +259,6 @@ namespace arc {
         SDL_SetRenderDrawColor(this->_renderer, r, g, b, 255);
         SDL_RenderFillRect(this->_renderer, &rect);
     }
-
-    void SDL::draw()
-    {
-        try {
-            SDL_SetRenderDrawColor(this->_renderer, 0, 0, 0, 255);
-            SDL_RenderClear(this->_renderer);
-            for (auto &element : this->_elements) {
-                switch (element._type) {
-                    case TEXT:
-                        draw_text(element);
-                        break;
-                    case IMAGE:
-                        draw_image(element);
-                        break;
-                    case CIRCLE:
-                        draw_circle(element);
-                        break;
-                    case RECTANGLE:
-                        draw_rectangle(element);
-                        break;
-                    case BUTTON:
-                        draw_rectangle(element);
-                        draw_text(element);
-                        break;
-                    case BORDER:
-                        break;
-                }
-            }
-            SDL_RenderPresent(this->_renderer);
-        } catch (const std::exception &e) {
-            throw GraphicalError("SDL drawing error: " + std::string(e.what()));
-        }
-    }
-
-    std::string SDL::update()
-    {
-        SDL_Event event;
-        char c = 0;
-
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT)
-                return ("EXIT");
-            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED)
-                return ("RESIZE");
-            if (event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_RETURN)
-                    return ("ENTER");
-                if (event.key.keysym.sym == SDLK_TAB)
-                    return ("TAB");
-                if (event.key.keysym.sym == SDLK_BACKSPACE)
-                    return ("BACKSPACE");
-                if (event.key.keysym.sym == SDLK_ESCAPE)
-                    return ("EXIT");
-                if (event.key.keysym.sym == SDLK_1)
-                    return ("PREV_LIB");
-                if (event.key.keysym.sym == SDLK_2)
-                    return ("NEXT_LIB");
-                if (event.key.keysym.sym == SDLK_UP)
-                    return ("UP");
-                if (event.key.keysym.sym == SDLK_RIGHT)
-                    return ("RIGHT");
-                if (event.key.keysym.sym == SDLK_DOWN)
-                    return ("DOWN");
-                if (event.key.keysym.sym == SDLK_LEFT)
-                    return ("LEFT");
-                if (event.key.keysym.sym == SDLK_SPACE)
-                    return ("SWITCH_LIB");
-                if (event.key.keysym.sym >= SDLK_SPACE && event.key.keysym.sym <= SDLK_z) {
-                    c = event.key.keysym.sym;
-                    return (std::string(1, c));
-                }
-            }
-        }
-        return ("");
-    }
 }
 
 extern "C" {
@@ -276,7 +272,7 @@ extern "C" {
         delete instance;
     }
 
-    const char* get_type()
+    const char *get_type()
     {
         return ("graphical");
     }

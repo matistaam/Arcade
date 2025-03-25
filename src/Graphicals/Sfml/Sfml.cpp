@@ -38,6 +38,75 @@ namespace arc {
         }
     }
 
+    std::string SFML::update()
+    {
+        sf::Event event = sf::Event();
+
+        while (this->_window->pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                return ("EXIT");
+            if (event.type == sf::Event::Resized)
+                return ("RESIZE");
+            if (event.type == sf::Event::TextEntered) {
+                if (event.text.unicode < 128 && event.text.unicode >= 32)
+                    return (std::string(1, static_cast<char>(event.text.unicode)));
+            }
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Return)
+                    return ("ENTER");
+                if (event.key.code == sf::Keyboard::Tab)
+                    return ("TAB");
+                if (event.key.code == sf::Keyboard::BackSpace)
+                    return ("BACKSPACE");
+                if (event.key.code == sf::Keyboard::Escape)
+                    return ("EXIT");
+                if (event.key.code == sf::Keyboard::Up)
+                    return ("UP");
+                if (event.key.code == sf::Keyboard::Down)
+                    return ("DOWN");
+                if (event.key.code == sf::Keyboard::Left)
+                    return ("LEFT");
+                if (event.key.code == sf::Keyboard::Right)
+                    return ("RIGHT");
+                if (event.key.code == sf::Keyboard::Space)
+                    return ("SWITCH_LIB");
+            }
+        }
+        return ("");
+    }
+
+    void SFML::draw()
+    {
+        try {
+            this->_window->clear(sf::Color::Black);
+            for (auto &element : this->_elements) {
+                switch (element._type) {
+                    case TEXT:
+                        draw_text(element);
+                        break;
+                    case IMAGE:
+                        draw_image(element);
+                        break;
+                    case CIRCLE:
+                        draw_circle(element);
+                        break;
+                    case RECTANGLE:
+                        draw_rectangle(element);
+                        break;
+                    case BUTTON:
+                        draw_rectangle(element);
+                        draw_text(element);
+                        break;
+                    case BORDER:
+                        break;
+                }
+            }
+            this->_window->display();
+        } catch (const std::exception &e) {
+            throw GraphicalError("SFML drawing error: " + std::string(e.what()));
+        }
+    }
+
     void SFML::draw_text(element_t element)
     {
         sf::Text text = sf::Text();
@@ -70,8 +139,8 @@ namespace arc {
     void SFML::draw_image(element_t element)
     {
         sf::Sprite sprite = sf::Sprite();
-        float scaleX = 1.0f;
-        float scaleY = 1.0f;
+        float scaleX = 1;
+        float scaleY = 1;
 
         if (element._image_path.empty() || !this->_texture.loadFromFile(element._image_path))
             return;
@@ -126,79 +195,6 @@ namespace arc {
         rectangle.setFillColor(color);
         this->_window->draw(rectangle);
     }
-
-    void SFML::draw()
-    {
-        try {
-            this->_window->clear(sf::Color::Black);
-            for (auto &element : this->_elements) {
-                switch (element._type) {
-                    case TEXT:
-                        draw_text(element);
-                        break;
-                    case IMAGE:
-                        draw_image(element);
-                        break;
-                    case CIRCLE:
-                        draw_circle(element);
-                        break;
-                    case RECTANGLE:
-                        draw_rectangle(element);
-                        break;
-                    case BUTTON:
-                        draw_rectangle(element);
-                        draw_text(element);
-                        break;
-                    case BORDER:
-                        break;
-                }
-            }
-            this->_window->display();
-        } catch (const std::exception &e) {
-            throw GraphicalError("SFML drawing error: " + std::string(e.what()));
-        }
-    }
-
-    std::string SFML::update()
-    {
-        sf::Event event = sf::Event();
-
-        while (this->_window->pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                return ("EXIT");
-            if (event.type == sf::Event::Resized)
-                return ("RESIZE");
-            if (event.type == sf::Event::TextEntered) {
-                if (event.text.unicode < 128 && event.text.unicode >= 32)
-                    return (std::string(1, static_cast<char>(event.text.unicode)));
-            }
-            if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Return)
-                    return ("ENTER");
-                if (event.key.code == sf::Keyboard::Tab)
-                    return ("TAB");
-                if (event.key.code == sf::Keyboard::BackSpace)
-                    return ("BACKSPACE");
-                if (event.key.code == sf::Keyboard::Escape)
-                    return ("EXIT");
-                if (event.key.code == sf::Keyboard::Num1)
-                    return ("PREV_LIB");
-                if (event.key.code == sf::Keyboard::Num2)
-                    return ("NEXT_LIB");
-                if (event.key.code == sf::Keyboard::Up)
-                    return ("UP");
-                if (event.key.code == sf::Keyboard::Down)
-                    return ("DOWN");
-                if (event.key.code == sf::Keyboard::Left)
-                    return ("LEFT");
-                if (event.key.code == sf::Keyboard::Right)
-                    return ("RIGHT");
-                if (event.key.code == sf::Keyboard::Space)
-                    return ("SWITCH_LIB");
-            }
-        }
-        return ("");
-    }
 }
 
 extern "C" {
@@ -212,7 +208,7 @@ extern "C" {
         delete instance;
     }
 
-    const char* get_type()
+    const char *get_type()
     {
         return ("graphical");
     }

@@ -14,10 +14,12 @@ namespace arc {
     typedef void (*destroy_game_t)(IGame*);
     typedef const char* (*get_type_t)();
 
-    ACore::ACore(std::string path) : _isPaused(false), _handle(nullptr), _currentLibIndex(0), _gameHandle(nullptr), _menu(), _inGame(false)
+    ACore::ACore(std::string path) : _menu(), _currentLibIndex(0), _handle(nullptr), _gameHandle(nullptr), _inGame(false), _isPaused(false)
     {
         create_graphical_t create = nullptr;
         get_type_t get_type = nullptr;
+        std::string libName = path;
+        size_t lastSlash = libName.find_last_of('/');
 
         this->_availableGraphicalLibs = getAvailableGraphicalLibs();
         getAvailableGames();
@@ -46,15 +48,10 @@ namespace arc {
         }
         this->_graphical->init();
         this->_game = nullptr;
-        
-        std::string libName = path;
-        size_t lastSlash = libName.find_last_of('/');
-        if (lastSlash != std::string::npos) {
+        if (lastSlash != std::string::npos)
             libName = libName.substr(lastSlash + 1);
-        }
         if (libName.substr(0, 7) == "arcade_" && libName.substr(libName.length() - 3) == ".so") {
             libName = libName.substr(7, libName.length() - 10);
-            
             for (size_t i = 0; i < this->_availableGraphicalLibs.size(); i++) {
                 if (this->_availableGraphicalLibs[i] == libName) {
                     this->_currentLibIndex = i;
@@ -99,6 +96,92 @@ namespace arc {
         this->_graphical = Graphical;
         if (this->_graphical)
             this->_graphical->init();
+    }
+
+    void ACore::setGame(IGame *Game)
+    {
+        std::vector<element_t> initialElements = {};
+
+        this->_game = Game;
+        this->_inGame = (Game != nullptr);
+        if (this->_game && this->_inGame) {
+            initialElements = this->_game->handleEvents("");
+            this->display(initialElements);
+        }
+    }
+
+    void ACore::display(std::vector<element_t> elements)
+    {
+        if (!this->_graphical)
+            return;
+        this->_graphical->clearElements();
+        if (!this->_inGame || this->_isPaused) {
+            this->_graphical->addElements(this->_menu.getElements());
+        } else {
+            this->_graphical->addElements(elements);
+        }
+        this->_graphical->draw();
+    }
+
+    std::string ACore::update()
+    {
+        std::string event = "";
+        std::vector<element_t> gameElements = {};
+
+        if (!this->_graphical)
+            return ("EXIT");
+        event = this->_graphical->update();
+        if (event == "EXIT")
+            return (event);
+        else if (event == "SWITCH_LIB") {
+            if (!this->_availableGraphicalLibs.empty()) {
+                this->_currentLibIndex = (this->_currentLibIndex + 1) % this->_availableGraphicalLibs.size();
+                printf("Switching to graphical library: %s\n", this->_availableGraphicalLibs[this->_currentLibIndex].c_str());
+                switchGraphicalLibrary(this->_availableGraphicalLibs[this->_currentLibIndex]);
+            }
+        }
+        if (!this->_inGame) {
+            this->_menu.handleInput(event);
+            display(this->_menu.getElements());
+            if (this->_menu.isAuthenticated() && !this->_menu.getSelectedGame().empty()) {
+                try {
+                    loadGame(this->_menu.getSelectedGame());
+                    if (this->_game) {
+                        gameElements = this->_game->handleEvents("");
+                        display(gameElements);
+                    }
+                } catch (const std::exception &e) {
+                    std::cerr << "Error: " << e.what() << std::endl;
+                    this->_menu.handleInput("ESCAPE");
+                }
+            }
+        } else {
+            if (event == "m") {
+                this->_isPaused = true;
+                this->_menu.handleInput(event);
+                display(this->_menu.getElements());
+            }
+            if (this->_isPaused) {
+                this->_menu.handleInput(event);
+                display(this->_menu.getElements());
+                if (this->_menu.shouldResume()) {
+                    this->_isPaused = false;
+                    if (this->_game) {
+                        gameElements = this->_game->handleEvents("");
+                        display(gameElements);
+                    }
+                } else if (this->_menu.shouldQuit()) {
+                    return ("EXIT");
+                } else if (this->_menu.shouldReturnToMenu()) {
+                    this->_isPaused = false;
+                    this->_inGame = false;
+                }
+            } else if (this->_game) {
+                gameElements = this->_game->handleEvents(event);
+                display(gameElements);
+            }
+        }
+        return ("");
     }
 
     void ACore::loadGame(const std::string &name)
@@ -146,52 +229,44 @@ namespace arc {
         get_type_t get_type = nullptr;
         void *newHandle = nullptr;
         IGraphical *newGraphical = nullptr;
+        std::string lib_path = "lib/arcade_" + name + ".so";
+        std::vector<element_t> gameElements = {};
 
         std::cout << "[DEBUG] Switching graphical library to: " << name << std::endl;
-
         if (name.empty()) {
             std::cout << "[DEBUG] Provided library name is empty. Exiting function." << std::endl;
             return;
         }
-
-        std::string lib_path = "lib/arcade_" + name + ".so";
         std::cout << "[DEBUG] Library path: " << lib_path << std::endl;
-
         newHandle = dlopen(lib_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
         if (!newHandle) {
             std::cerr << "[ERROR] Cannot load graphical library '" << lib_path << "': " << dlerror() << std::endl;
             throw GraphicalError(std::string("Cannot load graphical library '") + lib_path + "': " + std::string(dlerror()));
         }
-
         get_type = (get_type_t)dlsym(newHandle, "get_type");
         if (!get_type) {
             std::cerr << "[ERROR] Invalid graphical library '" << lib_path << "': missing 'get_type' symbol." << std::endl;
             dlclose(newHandle);
             throw GraphicalError(std::string("Invalid graphical library '") + lib_path + "'");
         }
-
         if (std::string(get_type()) != "graphical") {
             std::cerr << "[ERROR] Library '" << lib_path << "' is not a graphical library." << std::endl;
             dlclose(newHandle);
             throw GraphicalError(lib_path + ": not a graphical library");
         }
-
         create = (create_graphical_t)dlsym(newHandle, "create");
         if (!create) {
             std::cerr << "[ERROR] Invalid graphical library '" << lib_path << "': missing 'create' symbol." << std::endl;
             dlclose(newHandle);
             throw GraphicalError(std::string("Invalid graphical library '") + lib_path + "'");
         }
-
         newGraphical = create();
         if (!newGraphical) {
             std::cerr << "[ERROR] Failed to create graphical instance from '" << lib_path << "'." << std::endl;
             dlclose(newHandle);
             throw GraphicalError(std::string("Failed to create graphical instance from '") + lib_path + "'");
         }
-
         std::cout << "[DEBUG] Successfully loaded and created graphical library: " << lib_path << std::endl;
-
         if (this->_graphical) {
             std::cout << "[DEBUG] Closing current graphical library." << std::endl;
             this->_graphical->close();
@@ -201,18 +276,14 @@ namespace arc {
                 destroy(this->_graphical);
             }
         }
-
         if (this->_handle) {
             std::cout << "[DEBUG] Closing current library handle." << std::endl;
             dlclose(this->_handle);
         }
-
         this->_handle = newHandle;
         this->_graphical = newGraphical;
-
         std::cout << "[DEBUG] Initializing new graphical library." << std::endl;
         this->_graphical->init();
-
         for (size_t i = 0; i < this->_availableGraphicalLibs.size(); i++) {
             if (this->_availableGraphicalLibs[i] == name) {
                 this->_currentLibIndex = i;
@@ -220,104 +291,15 @@ namespace arc {
                 break;
             }
         }
-
         if (this->_game && this->_inGame && !this->_isPaused) {
             std::cout << "[DEBUG] In game and not paused. Updating graphical elements for the game." << std::endl;
-            std::vector<element_t> gameElements = this->_game->handleEvents("");
+            gameElements = this->_game->handleEvents("");
             display(gameElements);
         } else if (!this->_inGame || this->_isPaused) {
             std::cout << "[DEBUG] Not in game or paused. Updating graphical elements for the menu." << std::endl;
             display(this->_menu.getElements());
         }
-
         std::cout << "[DEBUG] Finished switching graphical library." << std::endl;
-    }
-
-    void ACore::setGame(IGame *Game)
-    {
-        std::vector<element_t> initialElements = {};
-
-        this->_game = Game;
-        this->_inGame = (Game != nullptr);
-        if (this->_game && this->_inGame) {
-            initialElements = this->_game->handleEvents("");
-            this->display(initialElements);
-        }
-    }
-
-    void ACore::display(std::vector<element_t> elements)
-    {
-        if (!this->_graphical)
-            return;
-        this->_graphical->clearElements();
-        if (!this->_inGame || this->_isPaused) {
-            this->_graphical->addElements(this->_menu.getElements());
-        } else {
-            this->_graphical->addElements(elements);
-        }
-        this->_graphical->draw();
-    }
-
-    std::string ACore::update()
-    {
-        std::string event;
-        std::vector<element_t> gameElements;
-
-        if (!this->_graphical)
-            return ("EXIT");
-        event = this->_graphical->update();
-        if (event == "EXIT")
-            return (event);
-        else if (event == "SWITCH_LIB") {
-            if (!this->_availableGraphicalLibs.empty()) {
-                this->_currentLibIndex = (this->_currentLibIndex + 1) % this->_availableGraphicalLibs.size();
-                printf("Switching to graphical library: %s\n", this->_availableGraphicalLibs[this->_currentLibIndex].c_str());
-                switchGraphicalLibrary(this->_availableGraphicalLibs[this->_currentLibIndex]);
-            }
-        }
-        
-        if (!this->_inGame) {
-            this->_menu.handleInput(event);
-            display(this->_menu.getElements());
-            if (this->_menu.isAuthenticated() && !this->_menu.getSelectedGame().empty()) {
-                try {
-                    loadGame(this->_menu.getSelectedGame());
-                    if (this->_game) {
-                        gameElements = this->_game->handleEvents("");
-                        display(gameElements);
-                    }
-                } catch (const std::exception &e) {
-                    std::cerr << "Error: " << e.what() << std::endl;
-                    this->_menu.handleInput("ESCAPE");
-                }
-            }
-        } else {
-            if (event == "m") {
-                this->_isPaused = true;
-                this->_menu.handleInput(event);
-                display(this->_menu.getElements());
-            }
-            if (this->_isPaused) {
-                this->_menu.handleInput(event);
-                display(this->_menu.getElements());
-                if (this->_menu.shouldResume()) {
-                    this->_isPaused = false;
-                    if (this->_game) {
-                        gameElements = this->_game->handleEvents("");
-                        display(gameElements);
-                    }
-                } else if (this->_menu.shouldQuit()) {
-                    return ("EXIT");
-                } else if (this->_menu.shouldReturnToMenu()) {
-                    this->_isPaused = false;
-                    this->_inGame = false;
-                }
-            } else if (this->_game) {
-                gameElements = this->_game->handleEvents(event);
-                display(gameElements);
-            }
-        }
-        return ("");
     }
 
     std::vector<std::string> ACore::getAvailableGames()

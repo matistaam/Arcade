@@ -17,6 +17,35 @@ namespace arc {
     {
     }
 
+    std::vector<element_t> Snake::handleEvents(std::string command)
+    {
+        if ((this->_gameOver && command == "r") || command == "r") {
+            initGame();
+            return (createElements());
+        }
+        if (this->_gameOver)
+            return (createElements());
+        if (!this->_gameOver) {
+            if (command == "UP" && this->_lastDirection != DOWN)
+                this->_direction = UP;
+            else if (command == "RIGHT" && this->_lastDirection != LEFT)
+                this->_direction = RIGHT;
+            else if (command == "DOWN" && this->_lastDirection != UP)
+                this->_direction = DOWN;
+            else if (command == "LEFT" && this->_lastDirection != RIGHT)
+                this->_direction = LEFT;
+        }
+        auto currentTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        currentTime - this->_lastUpdateTime).count();
+        if (elapsedTime >= this->_updateInterval && !this->_gameOver) {
+            moveSnake();
+            handleCollisions();
+            this->_lastUpdateTime = currentTime;
+        }
+        return (createElements());
+    }
+
     void Snake::setScoreManager(IScoreManager *scoreManager)
     {
         this->_scoreManager = scoreManager;
@@ -29,39 +58,16 @@ namespace arc {
         int centerY = HEIGHT / 2;
         int centerX = WIDTH / 2;
 
-        this->_gameOver = false;
         this->_score = 0;
+        this->_updateInterval = 150;
+        this->_gameOver = false;
         this->_direction = LEFT;
         this->_lastDirection = LEFT;
-        this->_updateInterval = 150;
         this->_lastUpdateTime = std::chrono::steady_clock::now();
         this->_snake.clear();
         for (int i = 0; i < INITIAL_SNAKE_SIZE; i++)
             this->_snake.push_front(std::make_tuple(centerY, centerX - i));
         spawnFood();
-    }
-
-    void Snake::spawnFood()
-    {
-        std::uniform_int_distribution<int> distY(0, HEIGHT - 1);
-        std::uniform_int_distribution<int> distX(0, WIDTH - 1);
-        int foodY = 0;
-        int foodX = 0;
-
-        do {
-            foodY = distY(this->_rng);
-            foodX = distX(this->_rng);
-        } while (isPositionInSnake(foodY, foodX));
-        this->_food = std::make_tuple(foodY, foodX);
-    }
-
-    bool Snake::isPositionInSnake(int y, int x) const
-    {
-        for (const auto &segment : this->_snake) {
-            if (std::get<0>(segment) == y && std::get<1>(segment) == x)
-                return (true);
-        }
-        return (false);
     }
 
     void Snake::moveSnake()
@@ -103,14 +109,6 @@ namespace arc {
         this->_lastDirection = this->_direction;
     }
 
-    void Snake::updateHighScore()
-    {
-        if (this->_score > this->_highScore)
-            this->_highScore = this->_score;
-        if (this->_scoreManager)
-            this->_scoreManager->updateHighScore("snake", this->_score);
-    }
-
     void Snake::handleCollisions()
     {
         int headY = std::get<0>(this->_snake.front());
@@ -126,6 +124,37 @@ namespace arc {
             }
             it++;
         }
+    }
+
+    void Snake::spawnFood()
+    {
+        std::uniform_int_distribution<int> distY(0, HEIGHT - 1);
+        std::uniform_int_distribution<int> distX(0, WIDTH - 1);
+        int foodY = 0;
+        int foodX = 0;
+
+        do {
+            foodY = distY(this->_rng);
+            foodX = distX(this->_rng);
+        } while (isPositionInSnake(foodY, foodX));
+        this->_food = std::make_tuple(foodY, foodX);
+    }
+
+    void Snake::updateHighScore()
+    {
+        if (this->_score > this->_highScore)
+            this->_highScore = this->_score;
+        if (this->_scoreManager)
+            this->_scoreManager->updateHighScore("snake", this->_score);
+    }
+
+    bool Snake::isPositionInSnake(int y, int x) const
+    {
+        for (const auto &segment : this->_snake) {
+            if (std::get<0>(segment) == y && std::get<1>(segment) == x)
+                return (true);
+        }
+        return (false);
     }
 
     std::vector<element_t> Snake::createElements()
@@ -194,35 +223,6 @@ namespace arc {
         }
         return (elements);
     }
-
-    std::vector<element_t> Snake::handleEvents(std::string command)
-    {
-        if ((this->_gameOver && command == "r") || command == "r") {
-            initGame();
-            return (createElements());
-        }
-        if (this->_gameOver)
-            return (createElements());
-        if (!this->_gameOver) {
-            if (command == "UP" && this->_lastDirection != DOWN)
-                this->_direction = UP;
-            else if (command == "RIGHT" && this->_lastDirection != LEFT)
-                this->_direction = RIGHT;
-            else if (command == "DOWN" && this->_lastDirection != UP)
-                this->_direction = DOWN;
-            else if (command == "LEFT" && this->_lastDirection != RIGHT)
-                this->_direction = LEFT;
-        }
-        auto currentTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        currentTime - this->_lastUpdateTime).count();
-        if (elapsedTime >= this->_updateInterval && !this->_gameOver) {
-            moveSnake();
-            handleCollisions();
-            this->_lastUpdateTime = currentTime;
-        }
-        return (createElements());
-    }
 }
 
 extern "C" {
@@ -236,7 +236,7 @@ extern "C" {
         delete instance;
     }
 
-    const char* get_type()
+    const char *get_type()
     {
         return ("game");
     }

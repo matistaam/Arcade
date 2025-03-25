@@ -8,7 +8,7 @@
 #include "Includes.hpp"
 
 namespace arc {
-    Menu::Menu() : _state(LOGIN_SIGNUP), _authenticated(false), _selectedButton(0), _resume(false), _quit(false), _returnToMenu(false)
+    Menu::Menu() : _state(LOGIN_SIGNUP), _selectedButton(0), _authenticated(false), _resume(false), _returnToMenu(false), _quit(false)
     {
         createLoginSignUpElements();
     }
@@ -17,14 +17,56 @@ namespace arc {
     {
     }
 
-    void Menu::setAvailableGames(const std::vector<std::string> &games)
+    int Menu::getHighScore(const std::string &game) const
     {
-        this->_availableGames = games;
+        auto it = this->_highScores.find(game);
+
+        if (it != this->_highScores.end())
+            return (it->second);
+        return (0);
+    }
+
+    void Menu::updateHighScore(const std::string &game, int score)
+    {
+        if (this->_highScores[game] < score) {
+            this->_highScores[game] = score;
+            saveAccount(this->_username, this->_password);
+        }
     }
 
     std::vector<element_t> Menu::getElements() const
     {
         return (this->_elements);
+    }
+
+    std::string Menu::getSelectedGame() const
+    {
+        return (this->_selectedGame);
+    }
+
+    bool Menu::isAuthenticated() const
+    {
+        return (this->_authenticated);
+    }
+
+    bool Menu::shouldResume() const
+    {
+        return (this->_resume);
+    }
+
+    bool Menu::shouldReturnToMenu() const
+    {
+        return (this->_returnToMenu);
+    }
+
+    bool Menu::shouldQuit() const
+    {
+        return (this->_quit);
+    }
+
+    void Menu::setAvailableGames(const std::vector<std::string> &games)
+    {
+        this->_availableGames = games;
     }
 
     void Menu::handleInput(const std::string &input)
@@ -45,31 +87,6 @@ namespace arc {
             handlePauseInput(input);
         else
             handleGameSelectInput(input);
-    }
-
-    bool Menu::isAuthenticated() const
-    {
-        return (this->_authenticated);
-    }
-
-    std::string Menu::getSelectedGame() const
-    {
-        return (this->_selectedGame);
-    }
-
-    bool Menu::shouldResume() const
-    {
-        return (this->_resume);
-    }
-
-    bool Menu::shouldQuit() const
-    {
-        return (this->_quit);
-    }
-
-    bool Menu::shouldReturnToMenu() const
-    {
-        return (this->_returnToMenu);
     }
 
     bool Menu::saveAccount(const std::string &username, const std::string &password)
@@ -509,22 +526,5 @@ namespace arc {
             this->_selectedButton = (this->_selectedButton + 1) % 3;
             createPauseElements();
         }
-    }
-
-    void Menu::updateHighScore(const std::string &game, int score)
-    {
-        if (this->_highScores[game] < score) {
-            this->_highScores[game] = score;
-            saveAccount(this->_username, this->_password);
-        }
-    }
-
-    int Menu::getHighScore(const std::string &game) const
-    {
-        auto it = this->_highScores.find(game);
-
-        if (it != this->_highScores.end())
-            return (it->second);
-        return (0);
     }
 }

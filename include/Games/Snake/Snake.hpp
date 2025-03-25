@@ -9,13 +9,6 @@
 #include "Includes.hpp"
 
 namespace arc {
-    enum Direction {
-        UP,
-        RIGHT,
-        DOWN,
-        LEFT
-    };
-
     class Snake : public AGame, public IScorableGame {
         public:
             Snake();
@@ -24,33 +17,38 @@ namespace arc {
             std::vector<element_t> handleEvents(std::string command) override;
             void setScoreManager(IScoreManager *scoreManager) override;
 
+            enum Direction {
+                UP,
+                RIGHT,
+                DOWN,
+                LEFT
+            };
         private:
             void initGame();
             void moveSnake();
             void handleCollisions();
             void spawnFood();
-            std::vector<element_t> createElements();
-            bool isPositionInSnake(int y, int x) const;
             void updateHighScore();
 
-            IScoreManager *_scoreManager;
+            bool isPositionInSnake(int y, int x) const;
+
+            std::vector<element_t> createElements();
 
             static const int WIDTH = 40;
             static const int HEIGHT = 30;
             static const int CELL_SIZE = 20;
             static const int INITIAL_SNAKE_SIZE = 4;
 
-            bool _gameOver;
+            IScoreManager *_scoreManager;
             int _score;
             int _highScore;
+            int _updateInterval;
+            bool _gameOver;
             Direction _direction;
             Direction _lastDirection;
             std::list<std::tuple<int, int>> _snake;
             std::tuple<int, int> _food;
-
             std::chrono::time_point<std::chrono::steady_clock> _lastUpdateTime;
-            int _updateInterval;
-
             std::mt19937 _rng;
     };
 }

@@ -14,6 +14,7 @@ CXXFLAGS				=	-std=c++20 -Wall -Wextra -Werror -g3 $(INCLUDE_FLAGS) -fPIC
 # Main executable
 NAME					=	arcade
 SRC_CORE				=	$(shell find src/Core -name "*.cpp") \
+					 		src/ArcadeException.cpp \
 							src/main.cpp
 OBJ_CORE				=	$(SRC_CORE:.cpp=.o)
 
@@ -32,11 +33,11 @@ NIBBLER_LIB				=	$(LIB_DIR)/arcade_nibbler.so
 GAMES_LIBS				=	$(SNAKE_LIB) $(NIBBLER_LIB)
 
 # Source files for libraries
-NCURSES_SRC				=	$(shell find src/Graphicals/Ncurses -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp
-SDL_SRC					=	$(shell find src/Graphicals/Sdl2 -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp
-SFML_SRC				=	$(shell find src/Graphicals/Sfml -name "*.cpp") src/Graphicals/AGraphical.cpp src/Core/ArcadeException.cpp
-SNAKE_SRC				=	$(shell find src/Games/Snake -name "*.cpp") src/Games/AGame.cpp src/Core/ArcadeException.cpp src/Core/Menu.cpp
-NIBBLER_SRC				=	$(shell find src/Games/Nibbler -name "*.cpp") src/Games/AGame.cpp src/Core/ArcadeException.cpp src/Core/Menu.cpp
+NCURSES_SRC				=	$(shell find src/Graphicals/Ncurses -name "*.cpp") src/Graphicals/AGraphical.cpp src/ArcadeException.cpp
+SDL_SRC					=	$(shell find src/Graphicals/Sdl2 -name "*.cpp") src/Graphicals/AGraphical.cpp src/ArcadeException.cpp
+SFML_SRC				=	$(shell find src/Graphicals/Sfml -name "*.cpp") src/Graphicals/AGraphical.cpp src/ArcadeException.cpp
+SNAKE_SRC				=	$(shell find src/Games/Snake -name "*.cpp") src/Games/AGame.cpp src/ArcadeException.cpp src/Core/Menu.cpp
+NIBBLER_SRC				=	$(shell find src/Games/Nibbler -name "*.cpp") src/Games/AGame.cpp src/ArcadeException.cpp src/Core/Menu.cpp
 
 # Object files for libraries
 NCURSES_OBJ				=	$(NCURSES_SRC:.cpp=.o)
@@ -50,7 +51,12 @@ NCURSES_FLAGS			=	-lncurses
 SDL2_FLAGS				=	-lSDL2 -lSDL2_ttf -lSDL2_image
 SFML_FLAGS				=	-lsfml-graphics -lsfml-window -lsfml-system
 
-all: directory $(NAME) graphicals games
+all: directory core graphicals games
+
+core: directory $(OBJ_CORE)
+	@echo "Linking core components..."
+	@$(CXX) $(CXXFLAGS) $(OBJ_CORE) -o $(NAME) -ldl
+	@echo "Core components built successfully!"
 
 directory:
 	@mkdir -p $(LIB_DIR)

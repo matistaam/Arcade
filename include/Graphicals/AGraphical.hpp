@@ -18,6 +18,7 @@ namespace arc {
             void close() override;
             std::string update() override;
             void draw() override;
+
             void clearElements() override;
             void addElements(const std::vector<element_t> &elements) override;
 

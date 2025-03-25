@@ -146,59 +146,91 @@ namespace arc {
         get_type_t get_type = nullptr;
         void *newHandle = nullptr;
         IGraphical *newGraphical = nullptr;
-        if (name.empty())
+
+        std::cout << "[DEBUG] Switching graphical library to: " << name << std::endl;
+
+        if (name.empty()) {
+            std::cout << "[DEBUG] Provided library name is empty. Exiting function." << std::endl;
             return;
+        }
+
         std::string lib_path = "lib/arcade_" + name + ".so";
+        std::cout << "[DEBUG] Library path: " << lib_path << std::endl;
+
         newHandle = dlopen(lib_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
-        if (!newHandle)
+        if (!newHandle) {
+            std::cerr << "[ERROR] Cannot load graphical library '" << lib_path << "': " << dlerror() << std::endl;
             throw GraphicalError(std::string("Cannot load graphical library '") + lib_path + "': " + std::string(dlerror()));
-        
+        }
+
         get_type = (get_type_t)dlsym(newHandle, "get_type");
         if (!get_type) {
+            std::cerr << "[ERROR] Invalid graphical library '" << lib_path << "': missing 'get_type' symbol." << std::endl;
             dlclose(newHandle);
             throw GraphicalError(std::string("Invalid graphical library '") + lib_path + "'");
         }
+
         if (std::string(get_type()) != "graphical") {
+            std::cerr << "[ERROR] Library '" << lib_path << "' is not a graphical library." << std::endl;
             dlclose(newHandle);
             throw GraphicalError(lib_path + ": not a graphical library");
         }
-        
+
         create = (create_graphical_t)dlsym(newHandle, "create");
         if (!create) {
+            std::cerr << "[ERROR] Invalid graphical library '" << lib_path << "': missing 'create' symbol." << std::endl;
             dlclose(newHandle);
             throw GraphicalError(std::string("Invalid graphical library '") + lib_path + "'");
         }
+
         newGraphical = create();
         if (!newGraphical) {
+            std::cerr << "[ERROR] Failed to create graphical instance from '" << lib_path << "'." << std::endl;
             dlclose(newHandle);
             throw GraphicalError(std::string("Failed to create graphical instance from '") + lib_path + "'");
         }
+
+        std::cout << "[DEBUG] Successfully loaded and created graphical library: " << lib_path << std::endl;
+
         if (this->_graphical) {
+            std::cout << "[DEBUG] Closing current graphical library." << std::endl;
             this->_graphical->close();
             destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
-            if (destroy)
+            if (destroy) {
+                std::cout << "[DEBUG] Destroying current graphical instance." << std::endl;
                 destroy(this->_graphical);
+            }
         }
-        if (this->_handle)
+
+        if (this->_handle) {
+            std::cout << "[DEBUG] Closing current library handle." << std::endl;
             dlclose(this->_handle);
+        }
+
         this->_handle = newHandle;
         this->_graphical = newGraphical;
-        
+
+        std::cout << "[DEBUG] Initializing new graphical library." << std::endl;
         this->_graphical->init();
-        
+
         for (size_t i = 0; i < this->_availableGraphicalLibs.size(); i++) {
             if (this->_availableGraphicalLibs[i] == name) {
                 this->_currentLibIndex = i;
+                std::cout << "[DEBUG] Updated current library index to: " << this->_currentLibIndex << std::endl;
                 break;
             }
         }
-        
+
         if (this->_game && this->_inGame && !this->_isPaused) {
+            std::cout << "[DEBUG] In game and not paused. Updating graphical elements for the game." << std::endl;
             std::vector<element_t> gameElements = this->_game->handleEvents("");
             display(gameElements);
         } else if (!this->_inGame || this->_isPaused) {
+            std::cout << "[DEBUG] Not in game or paused. Updating graphical elements for the menu." << std::endl;
             display(this->_menu.getElements());
         }
+
+        std::cout << "[DEBUG] Finished switching graphical library." << std::endl;
     }
 
     void ACore::setGame(IGame *Game)

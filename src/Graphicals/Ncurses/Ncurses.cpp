@@ -97,32 +97,53 @@ namespace arc
         attroff(COLOR_PAIR(color));
     }
 
+    void Ncurses::draw_border(element_t element)
+    {
+        int color = std::stoi(element._color);
+        int height = std::get<0>(element._size);
+        int width = std::get<1>(element._size);
+        int terminalCols = 0;
+        int terminalRows = 0;
+        int offset = 0;
+
+        getmaxyx(stdscr, terminalRows, terminalCols);
+        (void)terminalRows;
+        offset = (terminalCols - width) / 2;
+        if (color < 1 || color > 6)
+            color = 0;
+        attron(COLOR_PAIR(color));
+        mvprintw(0, offset, "+");
+        for (int i = 0; i < width - 2; i++)
+            mvprintw(0, offset + 1 + i, "-");
+        mvprintw(0, offset + width - 1, "+");
+        for (int i = 0; i < height - 2; i++) {
+            mvprintw(1 + i, offset, "|");
+            mvprintw(1 + i, offset + width - 1, "|");
+        }
+        mvprintw(height - 1, offset, "+");
+        for (int i = 0; i < width - 2; i++)
+            mvprintw(height - 1, offset + 1 + i, "-");
+        mvprintw(height - 1, offset + width - 1, "+");
+        attroff(COLOR_PAIR(color));
+    }
+
     void Ncurses::draw()
     {
         element_t adjusted = {};
-        int terminalRows = 0;
         int terminalCols = 0;
+        int terminalRows = 0;
         int offset = 0;
 
         try {
             getmaxyx(stdscr, terminalRows, terminalCols);
-            offset = (terminalCols - 42) / 2;
             (void)terminalRows;
             clear();
-            attron(COLOR_PAIR(6));
-            mvprintw(0, offset, "+");
-            for (int i = 0; i < 42 - 2; i++)
-                mvprintw(0, offset + 1 + i, "-");
-            mvprintw(0, offset + 42 - 1, "+");
-            for (int i = 0; i < 32 - 2; i++) {
-                mvprintw(1 + i, offset, "|");
-                mvprintw(1 + i, offset + 42 - 1, "|");
+            for (const auto &element : this->_elements) {
+                if (element._type == BORDER) {
+                    offset = (terminalCols - std::get<1>(element._size)) / 2;
+                    break;
+                }
             }
-            mvprintw(32 - 1, offset, "+");
-            for (int i = 0; i < 42 - 2; i++)
-                mvprintw(32 - 1, offset + 1 + i, "-");
-            mvprintw(32 - 1, offset + 42 - 1, "+");
-            attroff(COLOR_PAIR(6));
             for (auto &element : this->_elements) {
                 switch (element._type) {
                     case TEXT:
@@ -154,6 +175,9 @@ namespace arc
                     case BUTTON:
                         draw_rectangle(element);
                         draw_text(element);
+                        break;
+                    case BORDER:
+                        draw_border(element);
                         break;
                 }
             }
@@ -194,7 +218,7 @@ namespace arc
                 return ("LEFT");
             case KEY_RIGHT:
                 return ("RIGHT");
-            case ' ':  // Space key
+            case ' ':
                 return ("SWITCH_LIB");
             default:
                 if (ch >= 32 && ch <= 126)

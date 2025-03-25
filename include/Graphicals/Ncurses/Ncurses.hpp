@@ -23,11 +23,8 @@ namespace arc {
             void draw_image(element_t element);
             void draw_circle(element_t element);
             void draw_rectangle(element_t element);
+            void draw_border(element_t element);
 
             std::tuple<int, int> convertPositionToChar(int percentX, int percentY);
-
-        private:
-            static const int WIDTH = 40;
-            static const int HEIGHT = 30;
     };
 }

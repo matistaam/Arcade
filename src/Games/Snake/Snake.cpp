@@ -131,6 +131,7 @@ namespace arc {
     std::vector<element_t> Snake::createElements()
     {
         std::vector<element_t> elements = {};
+        element_t border = {};
         element_t background = {};
         element_t snakeSegment = {};
         element_t food = {};
@@ -141,6 +142,11 @@ namespace arc {
         int segmentY = 0;
         int segmentX = 0;
 
+        border._type = BORDER;
+        border._position = std::make_tuple(0, 0);
+        border._size = std::make_tuple(HEIGHT + 2, WIDTH + 2);
+        border._color = "6";
+        elements.push_back(border);
         background._type = IMAGE;
         background._image_path = "assets/snake_background.png";
         background._position = std::make_tuple(0, 0);
@@ -191,7 +197,7 @@ namespace arc {
 
     std::vector<element_t> Snake::handleEvents(std::string command)
     {
-        if (this->_gameOver && command == "r") {
+        if ((this->_gameOver && command == "r") || command == "r") {
             initGame();
             return (createElements());
         }

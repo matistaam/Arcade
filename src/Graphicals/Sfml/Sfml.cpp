@@ -149,6 +149,8 @@ namespace arc {
                         draw_rectangle(element);
                         draw_text(element);
                         break;
+                    case BORDER:
+                        break;
                 }
             }
             this->_window->display();

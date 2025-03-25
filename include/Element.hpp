@@ -14,7 +14,8 @@ namespace arc {
         IMAGE,
         CIRCLE,
         RECTANGLE,
-        BUTTON
+        BUTTON,
+        BORDER
     };
 
     enum ELEMENT_COLOR {

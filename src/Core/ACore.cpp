@@ -143,43 +143,55 @@ namespace arc {
     {
         create_graphical_t create = nullptr;
         destroy_graphical_t destroy = nullptr;
+        get_type_t get_type = nullptr;
         void *newHandle = nullptr;
         IGraphical *newGraphical = nullptr;
-
         if (name.empty())
             return;
-
         std::string lib_path = "lib/arcade_" + name + ".so";
         newHandle = dlopen(lib_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
         if (!newHandle)
             throw GraphicalError(std::string("Cannot load graphical library '") + lib_path + "': " + std::string(dlerror()));
-
+        
+        get_type = (get_type_t)dlsym(newHandle, "get_type");
+        if (!get_type) {
+            dlclose(newHandle);
+            throw GraphicalError(std::string("Invalid graphical library '") + lib_path + "'");
+        }
+        if (std::string(get_type()) != "graphical") {
+            dlclose(newHandle);
+            throw GraphicalError(lib_path + ": not a graphical library");
+        }
+        
         create = (create_graphical_t)dlsym(newHandle, "create");
         if (!create) {
             dlclose(newHandle);
             throw GraphicalError(std::string("Invalid graphical library '") + lib_path + "'");
         }
-
         newGraphical = create();
         if (!newGraphical) {
             dlclose(newHandle);
             throw GraphicalError(std::string("Failed to create graphical instance from '") + lib_path + "'");
         }
-
         if (this->_graphical) {
             this->_graphical->close();
             destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
             if (destroy)
                 destroy(this->_graphical);
         }
-
         if (this->_handle)
             dlclose(this->_handle);
-
         this->_handle = newHandle;
         this->_graphical = newGraphical;
         
         this->_graphical->init();
+        
+        for (size_t i = 0; i < this->_availableGraphicalLibs.size(); i++) {
+            if (this->_availableGraphicalLibs[i] == name) {
+                this->_currentLibIndex = i;
+                break;
+            }
+        }
         
         if (this->_game && this->_inGame && !this->_isPaused) {
             std::vector<element_t> gameElements = this->_game->handleEvents("");

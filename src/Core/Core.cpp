@@ -10,7 +10,7 @@
 namespace arc {
     typedef IGraphical* (*create_graphical_t)();
     typedef void (*destroy_graphical_t)(IGraphical*);
-    typedef IGame* (*create_game_t)();
+    typedef IGame* (*create_game_t)(const std::string &, int);
     typedef void (*destroy_game_t)(IGame*);
     typedef const char* (*get_type_t)();
 
@@ -111,9 +111,9 @@ namespace arc {
             return;
         this->_graphical->clearElements();
         if (!this->_inGame || this->_isPaused) {
-            this->_graphical->addElements(this->_menu.getElements());
+            this->_graphical->setElements(this->_menu.getElements());
         } else {
-            this->_graphical->addElements(elements);
+            this->_graphical->setElements(elements);
         }
         this->_graphical->draw();
     }
@@ -125,7 +125,7 @@ namespace arc {
 
         if (!this->_graphical)
             return ("EXIT");
-        event = this->_graphical->update();
+        event = this->_graphical->getEvents();
         if (event == "EXIT")
             return (event);
         else if (event == "SWITCH_LIB") {
@@ -183,7 +183,8 @@ namespace arc {
         create_game_t create = nullptr;
         destroy_game_t destroy_game = nullptr;
         std::string lib_path = "lib/arcade_" + name + ".so";
-        IScorableGame *scorableGame = nullptr;
+        std::string username = this->_menu.getUsername();
+        int highScore = 0;
 
         if (this->_game) {
             destroy_game = (destroy_game_t)dlsym(this->_gameHandle, "destroy");
@@ -195,6 +196,30 @@ namespace arc {
             dlclose(this->_gameHandle);
             this->_gameHandle = nullptr;
         }
+        
+        // Open accounts.txt file to read the high score
+        std::ifstream file("accounts.txt");
+        if (file.is_open()) {
+            std::string line;
+            while (std::getline(file, line)) {
+                std::string currentUser = line.substr(0, line.find(':'));
+                if (currentUser == username) {
+                    // Parse the line to find the high score for the selected game
+                    size_t pos = line.find(name + "=");
+                    if (pos != std::string::npos) {
+                        pos += name.length() + 1; // Skip past the game name and =
+                        size_t endPos = line.find(':', pos);
+                        if (endPos == std::string::npos)
+                            endPos = line.length();
+                        highScore = std::stoi(line.substr(pos, endPos - pos));
+                        std::cout << "High score for " << name << ": " << highScore << std::endl;
+                    }
+                    break;
+                }
+            }
+            file.close();
+        }
+
         this->_gameHandle = dlopen(lib_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
         if (!this->_gameHandle)
             throw GameError(std::string("Cannot load game library '") + lib_path + "': " + std::string(dlerror()));
@@ -204,15 +229,13 @@ namespace arc {
             this->_gameHandle = nullptr;
             throw GameError(std::string("Invalid game library '") + lib_path + "'");
         }
-        this->_game = create();
+        this->_game = create(username, highScore);
         if (!this->_game) {
             dlclose(this->_gameHandle);
             this->_gameHandle = nullptr;
             throw GameError(std::string("Failed to create game instance from '") + lib_path + "'");
         }
-        scorableGame = dynamic_cast<IScorableGame*>(this->_game);
-        if (scorableGame)
-            scorableGame->setScoreManager(&this->_menu);
+        
         this->_inGame = true;
     }
 

@@ -14,7 +14,7 @@ namespace arc {
             SFML();
             ~SFML();
 
-            std::string update() override;
+            std::string getEvents() override;
             void draw() override;
 
             void draw_text(element_t element);
@@ -23,6 +23,7 @@ namespace arc {
             void draw_rectangle(element_t element);
 
         private:
+            std::tuple<int, int> convertPositionToPixels(int percentX, int percentY);
             sf::RenderWindow *_window;
             sf::Font _font;
             sf::Texture _texture;

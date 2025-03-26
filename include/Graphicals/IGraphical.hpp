@@ -13,10 +13,10 @@ namespace arc {
         public:
             virtual ~IGraphical() = default;
 
-            virtual std::string update() = 0;
+            virtual std::string getEvents() = 0;
             virtual void draw() = 0;
 
             virtual void clearElements() = 0;
-            virtual void addElements(const std::vector<element_t> &elements) = 0;
+            virtual void setElements(const std::vector<element_t> &elements) = 0;
     };
 }

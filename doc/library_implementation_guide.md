@@ -36,9 +36,7 @@ namespace arc {
             ~YourGraphicsLib();
 
             // Required overrides from IGraphical
-            void init() override;
-            void close() override;
-            std::string update() override;
+            std::string getEvents() override;
             void draw() override;
 
             // Helper methods for drawing elements
@@ -79,7 +77,7 @@ namespace arc {
 - Free allocated memory
 - Handle library-specific cleanup (TTF_Quit, SDL_Quit, etc.)
 
-#### update()
+#### getEvents()
 - Handle input events with consistent mapping:
   - Arrow keys: "UP", "DOWN", "LEFT", "RIGHT"
   - Enter: "ENTER"

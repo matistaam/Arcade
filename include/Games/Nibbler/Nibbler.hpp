@@ -17,8 +17,8 @@
 namespace arc {
     class Nibbler : public AGame {
         public:
-            Nibbler();
-            ~Nibbler() override;
+            Nibbler(std::string username, int highScore);
+            ~Nibbler();
 
             std::vector<element_t> handleEvents(std::string command) override;
 

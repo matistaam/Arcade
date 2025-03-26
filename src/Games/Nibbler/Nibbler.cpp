@@ -13,7 +13,7 @@
 #include <queue>
 
 namespace arc {
-    Nibbler::Nibbler() : AGame()
+    Nibbler::Nibbler(std::string username, int highScore) : AGame(username, highScore)
     {
         // Initialize game state
         this->_gameState = GameState::RUNNING;
@@ -487,7 +487,7 @@ namespace arc {
             && command == "ENTER") {
             
             // Reset the game by recreating the Nibbler object
-            *this = Nibbler();
+            *this = Nibbler(this->_username, this->_highScore);
             return;
         }
         
@@ -750,9 +750,9 @@ namespace arc {
 }
 
 extern "C" {
-    arc::IGame *create()
+    arc::IGame *create(const std::string &username, int highScore)
     {
-        return (new arc::Nibbler());
+        return (new arc::Nibbler(username, highScore));
     }
 
     void destroy(arc::IGame *instance)

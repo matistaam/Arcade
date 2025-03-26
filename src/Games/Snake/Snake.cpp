@@ -13,6 +13,8 @@ namespace arc {
         int centerY = HEIGHT / 2;
         int centerX = WIDTH / 2;
 
+        std::cout << highScore << std::endl;
+        std::cout << _highScore << std::endl;
         this->_score = 0;
         this->_updateInterval = 150;
         this->_gameOver = false;
@@ -150,7 +152,6 @@ namespace arc {
     {
         if (this->_score > this->_highScore)
             this->_highScore = this->_score;
-        // reimplementer la sauvegarde du highscore
     }
 
     bool Snake::isPositionInSnake(int y, int x) const
@@ -204,6 +205,7 @@ namespace arc {
         food._color = "1";
         elements.push_back(food);
         highScoreText._type = TEXT;
+        std::cout << _highScore << std::endl;
         highScoreText._text = "Highest Score: " + std::to_string(this->_highScore);
         highScoreText._position = std::make_tuple(50, 2);
         highScoreText._color = "5";

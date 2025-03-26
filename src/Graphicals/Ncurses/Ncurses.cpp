@@ -45,7 +45,7 @@ namespace arc {
         }
     }
 
-    std::string Ncurses::update()
+    std::string Ncurses::getEvents()
     {
         int ch = 0;
 

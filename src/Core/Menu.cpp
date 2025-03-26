@@ -17,23 +17,6 @@ namespace arc {
     {
     }
 
-    int Menu::getHighScore(const std::string &game) const
-    {
-        auto it = this->_highScores.find(game);
-
-        if (it != this->_highScores.end())
-            return (it->second);
-        return (0);
-    }
-
-    void Menu::updateHighScore(const std::string &game, int score)
-    {
-        if (this->_highScores[game] < score) {
-            this->_highScores[game] = score;
-            saveAccount(this->_username, this->_password);
-        }
-    }
-
     std::vector<element_t> Menu::getElements() const
     {
         return (this->_elements);
@@ -42,6 +25,11 @@ namespace arc {
     std::string Menu::getSelectedGame() const
     {
         return (this->_selectedGame);
+    }
+
+    std::string Menu::getUsername() const
+    {
+        return (this->_username);
     }
 
     bool Menu::isAuthenticated() const
@@ -115,9 +103,6 @@ namespace arc {
         if (isNewAccount) {
             for (const auto &game : this->_availableGames)
                 accountFile << ":" << game << "=0";
-        } else {
-            for (const auto &[game, score] : this->_highScores)
-                accountFile << ":" << game << "=" << score;
         }
         accountFile << std::endl;
         accountFile.close();
@@ -128,10 +113,6 @@ namespace arc {
     {
         std::ifstream accountFile("accounts.txt");
         std::string line = "";
-        std::string gameScore = "";
-        size_t equalPos = 0;
-        std::string game = "";
-        int score = 0;
 
         if (!accountFile.is_open())
             return (false);
@@ -141,19 +122,6 @@ namespace arc {
             std::getline(iss, storedUsername, ':');
             std::getline(iss, storedPassword, ':');
             if (storedUsername == username && storedPassword == password) {
-                this->_highScores.clear();
-                while (std::getline(iss, gameScore, ':')) {
-                    equalPos = gameScore.find('=');
-                    if (equalPos != std::string::npos) {
-                        game = gameScore.substr(0, equalPos);
-                        try {
-                            score = std::stoi(gameScore.substr(equalPos + 1));
-                            this->_highScores[game] = score;
-                        } catch (const std::exception &e) {
-                            throw std::runtime_error("Invalid score format for game: " + game);
-                        }
-                    }
-                }
                 accountFile.close();
                 return (true);
             }

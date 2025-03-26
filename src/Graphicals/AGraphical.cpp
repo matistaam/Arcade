@@ -22,13 +22,8 @@ namespace arc {
         this->_elements.clear();
     }
 
-    void AGraphical::addElements(const std::vector<element_t> &elements)
+    void AGraphical::setElements(const std::vector<element_t> &elements)
     {
         this->_elements = elements;
-    }
-
-    std::tuple<int, int> AGraphical::convertPositionToPixels(int percentX, int percentY)
-    {
-        return (std::make_tuple((this->_width * percentX) / 100, (this->_height * percentY) / 100));
     }
 }

@@ -13,7 +13,7 @@ namespace arc {
             Ncurses();
             ~Ncurses();
 
-            std::string update() override;
+            std::string getEvents() override;
             void draw() override;
 
         private:
@@ -24,7 +24,6 @@ namespace arc {
             void draw_border(element_t element);
 
             std::tuple<int, int> convertPositionToChar(int percentX, int percentY);
-
             WINDOW *_window;
             int _maxY;
             int _maxX;

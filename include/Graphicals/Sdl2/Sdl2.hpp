@@ -14,7 +14,7 @@ namespace arc {
             SDL();
             ~SDL();
 
-            std::string update() override;
+            std::string getEvents() override;
             void draw() override;
 
             void draw_text(element_t element);
@@ -23,6 +23,7 @@ namespace arc {
             void draw_rectangle(element_t element);
 
         private:
+            std::tuple<int, int> convertPositionToPixels(int percentX, int percentY);
             SDL_Window *_window;
             SDL_Renderer *_renderer;
             TTF_Font *_font;

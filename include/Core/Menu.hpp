@@ -16,6 +16,7 @@ namespace arc {
 
             std::vector<element_t> getElements() const;
             std::string getSelectedGame() const;
+            std::string getUsername() const;
 
             bool isAuthenticated() const;
             bool shouldResume() const;
@@ -51,7 +52,6 @@ namespace arc {
             void handleGameSelectInput(const std::string &input);
             void handlePauseInput(const std::string &input);
 
-            std::map<std::string, int> _highScores;
             std::vector<element_t> _elements;
             std::vector<std::string> _availableGames;
             std::string _username;

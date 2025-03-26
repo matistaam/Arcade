@@ -46,7 +46,7 @@ namespace arc {
         SDL_Quit();
     }
 
-    std::string SDL::update()
+    std::string SDL::getEvents()
     {
         SDL_Event event = {0};
         char c = 0;
@@ -249,6 +249,11 @@ namespace arc {
             { r = 0; g = 255; b = 255; }
         SDL_SetRenderDrawColor(this->_renderer, r, g, b, 255);
         SDL_RenderFillRect(this->_renderer, &rect);
+    }
+
+    std::tuple<int, int> SDL::convertPositionToPixels(int percentX, int percentY)
+    {
+        return (std::make_tuple((this->_width * percentX) / 100, (this->_height * percentY) / 100));
     }
 }
 

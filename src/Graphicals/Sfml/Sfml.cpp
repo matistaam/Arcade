@@ -29,7 +29,7 @@ namespace arc {
         }
     }
 
-    std::string SFML::update()
+    std::string SFML::getEvents()
     {
         sf::Event event = sf::Event();
 
@@ -186,6 +186,11 @@ namespace arc {
             color = sf::Color::Cyan;
         rectangle.setFillColor(color);
         this->_window->draw(rectangle);
+    }
+
+    std::tuple<int, int> SFML::convertPositionToPixels(int percentX, int percentY)
+    {
+        return (std::make_tuple((this->_width * percentX) / 100, (this->_height * percentY) / 100));
     }
 }
 

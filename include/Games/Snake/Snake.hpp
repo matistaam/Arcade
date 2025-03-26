@@ -22,6 +22,7 @@ namespace arc {
                 DOWN,
                 LEFT
             };
+
         private:
             void restartGame();
             void moveSnake();

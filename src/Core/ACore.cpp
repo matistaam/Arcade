@@ -229,7 +229,15 @@ namespace arc {
         IGraphical *newGraphical = nullptr;
         std::string lib_path = "lib/arcade_" + name + ".so";
         std::vector<element_t> gameElements = {};
-
+        
+        if (this->_graphical) {
+            // close() is now called in the graphical destructor
+            destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
+            if (destroy)
+                destroy(this->_graphical);
+        }
+        if (this->_handle)
+            dlclose(this->_handle);
         if (name.empty())
             return;
         newHandle = dlopen(lib_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
@@ -254,14 +262,6 @@ namespace arc {
             dlclose(newHandle);
             throw GraphicalError(std::string("Failed to create graphical instance from '") + lib_path + "'");
         }
-        if (this->_graphical) {
-            // close() is now called in the graphical destructor
-            destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
-            if (destroy)
-                destroy(this->_graphical);
-        }
-        if (this->_handle)
-            dlclose(this->_handle);
         this->_handle = newHandle;
         this->_graphical = newGraphical;
         // Initialization now happens in the graphical constructor

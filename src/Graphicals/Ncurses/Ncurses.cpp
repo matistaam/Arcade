@@ -34,14 +34,6 @@ namespace arc {
         init_pair(4, COLOR_BLUE, COLOR_BLACK);
         init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
         init_pair(6, COLOR_CYAN, COLOR_BLACK);
-        this->_colorPairs["BLACK"] = 1;
-        this->_colorPairs["RED"] = 2;
-        this->_colorPairs["GREEN"] = 3;
-        this->_colorPairs["YELLOW"] = 4;
-        this->_colorPairs["BLUE"] = 5;
-        this->_colorPairs["MAGENTA"] = 6;
-        this->_colorPairs["CYAN"] = 7;
-        this->_colorPairs["WHITE"] = 8;
         this->_isInitialized = true;
     }
 

@@ -142,15 +142,16 @@ namespace arc {
     void SFML::draw_image(element_t element)
     {
         sf::Sprite sprite = sf::Sprite();
+        sf::Texture texture = sf::Texture();
         float scaleX = 1;
         float scaleY = 1;
 
-        if (element._image_path.empty() || !this->_texture.loadFromFile(element._image_path))
+        if (element._image_path.empty() || !texture.loadFromFile(element._image_path))
             return;
-        sprite.setTexture(this->_texture);
+        sprite.setTexture(texture);
         sprite.setPosition(std::get<1>(element._position), std::get<0>(element._position));
-        scaleX = static_cast<float>(std::get<1>(element._size)) / this->_texture.getSize().x;
-        scaleY = static_cast<float>(std::get<0>(element._size)) / this->_texture.getSize().y;
+        scaleX = static_cast<float>(std::get<1>(element._size)) / texture.getSize().x;
+        scaleY = static_cast<float>(std::get<0>(element._size)) / texture.getSize().y;
         sprite.setScale(scaleX, scaleY);
         this->_window->draw(sprite);
     }

@@ -27,7 +27,6 @@ namespace arc {
 
             std::tuple<int, int> convertPositionToChar(int percentX, int percentY);
 
-            std::map<std::string, int> _colorPairs;
             WINDOW *_window;
             int _maxY;
             int _maxX;

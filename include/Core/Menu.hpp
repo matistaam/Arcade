@@ -9,7 +9,7 @@
 #include "Includes.hpp"
 
 namespace arc {
-    class Menu : public IScoreManager {
+    class Menu {
         public:
             Menu();
             ~Menu();

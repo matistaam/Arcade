@@ -12,8 +12,6 @@ namespace arc {
     {
         this->_width = 800;
         this->_height = 600;
-        
-        // Initialize SFML
         this->_window = new sf::RenderWindow(sf::VideoMode(this->_width, this->_height), "Arcade");
         if (!this->_window)
             throw GraphicalError("Window creation failed");
@@ -23,16 +21,6 @@ namespace arc {
     }
 
     SFML::~SFML()
-    {
-        close();
-    }
-
-    void SFML::init()
-    {
-        // Initialization now happens in constructor
-    }
-
-    void SFML::close()
     {
         if (this->_window) {
             this->_window->close();

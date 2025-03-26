@@ -2,7 +2,7 @@
 ** EPITECH PROJECT, 2025
 ** B-OOP-400-LYN-4-1-arcade-youssef.mehili
 ** File description:
-** ACore
+** Core
 */
 
 #include "Includes.hpp"
@@ -14,7 +14,7 @@ namespace arc {
     typedef void (*destroy_game_t)(IGame*);
     typedef const char* (*get_type_t)();
 
-    ACore::ACore(std::string path) : _menu(), _currentLibIndex(0), _handle(nullptr), _gameHandle(nullptr), _inGame(false), _isPaused(false)
+    Core::Core(std::string path) : _menu(), _currentLibIndex(0), _handle(nullptr), _gameHandle(nullptr), _inGame(false), _isPaused(false)
     {
         create_graphical_t create = nullptr;
         get_type_t get_type = nullptr;
@@ -46,7 +46,6 @@ namespace arc {
             dlclose(this->_handle);
             throw InvalidLibraryError(path);
         }
-        // Initialization now happens in the graphical constructor
         this->_game = nullptr;
         if (lastSlash != std::string::npos)
             libName = libName.substr(lastSlash + 1);
@@ -61,13 +60,12 @@ namespace arc {
         }
     }
 
-    ACore::~ACore()
+    Core::~Core()
     {
         destroy_graphical_t destroy = nullptr;
         destroy_game_t destroy_game = nullptr;
 
         if (this->_graphical) {
-            // close() is now called in the graphical destructor
             destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
             if (destroy)
                 destroy(this->_graphical);
@@ -83,21 +81,19 @@ namespace arc {
             dlclose(this->_gameHandle);
     }
 
-    void ACore::setGraphical(IGraphical *Graphical)
+    void Core::setGraphical(IGraphical *Graphical)
     {
         destroy_graphical_t destroy = nullptr;
 
         if (this->_graphical) {
-            // close() is now called in the graphical destructor
             destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
             if (destroy)
                 destroy(this->_graphical);
         }
         this->_graphical = Graphical;
-        // Initialization now happens in the graphical constructor
     }
 
-    void ACore::setGame(IGame *Game)
+    void Core::setGame(IGame *Game)
     {
         std::vector<element_t> initialElements = {};
 
@@ -109,7 +105,7 @@ namespace arc {
         }
     }
 
-    void ACore::display(std::vector<element_t> elements)
+    void Core::display(std::vector<element_t> elements)
     {
         if (!this->_graphical)
             return;
@@ -122,7 +118,7 @@ namespace arc {
         this->_graphical->draw();
     }
 
-    std::string ACore::update()
+    std::string Core::update()
     {
         std::string event = "";
         std::vector<element_t> gameElements = {};
@@ -182,7 +178,7 @@ namespace arc {
         return ("");
     }
 
-    void ACore::loadGame(const std::string &name)
+    void Core::loadGame(const std::string &name)
     {
         create_game_t create = nullptr;
         destroy_game_t destroy_game = nullptr;
@@ -220,7 +216,7 @@ namespace arc {
         this->_inGame = true;
     }
 
-    void ACore::switchGraphicalLibrary(const std::string &name)
+    void Core::switchGraphicalLibrary(const std::string &name)
     {
         create_graphical_t create = nullptr;
         destroy_graphical_t destroy = nullptr;
@@ -229,9 +225,8 @@ namespace arc {
         IGraphical *newGraphical = nullptr;
         std::string lib_path = "lib/arcade_" + name + ".so";
         std::vector<element_t> gameElements = {};
-        
+
         if (this->_graphical) {
-            // close() is now called in the graphical destructor
             destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
             if (destroy)
                 destroy(this->_graphical);
@@ -264,7 +259,6 @@ namespace arc {
         }
         this->_handle = newHandle;
         this->_graphical = newGraphical;
-        // Initialization now happens in the graphical constructor
         for (size_t i = 0; i < this->_availableGraphicalLibs.size(); i++) {
             if (this->_availableGraphicalLibs[i] == name) {
                 this->_currentLibIndex = i;
@@ -279,7 +273,7 @@ namespace arc {
         }
     }
 
-    std::vector<std::string> ACore::getAvailableGames()
+    std::vector<std::string> Core::getAvailableGames()
     {
         DIR *dir = nullptr;
         struct dirent *entry = nullptr;
@@ -307,7 +301,7 @@ namespace arc {
         return (this->_availableGames);
     }
 
-    std::vector<std::string> ACore::getAvailableGraphicalLibs()
+    std::vector<std::string> Core::getAvailableGraphicalLibs()
     {
         DIR *dir = nullptr;
         struct dirent *entry = nullptr;

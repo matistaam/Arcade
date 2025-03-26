@@ -9,7 +9,7 @@ INCLUDE_DIRS			=	$(shell find include -type d)
 INCLUDE_FLAGS			=	$(addprefix -I, $(INCLUDE_DIRS))
 
 CXX						=	g++
-CXXFLAGS				=	-std=c++20 -Wall -Wextra -Werror -g3 $(INCLUDE_FLAGS) -fPIC
+CXXFLAGS				=	-std=c++20 -Wall -Wextra -Werror -g3 $(INCLUDE_FLAGS) -fPIC -fno-gnu-unique
 
 # Main executable
 NAME					=	arcade

@@ -13,8 +13,6 @@ namespace arc {
             Ncurses();
             ~Ncurses();
 
-            void init() override;
-            void close() override;
             std::string update() override;
             void draw() override;
 

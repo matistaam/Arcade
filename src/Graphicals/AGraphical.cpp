@@ -17,14 +17,6 @@ namespace arc {
     {
     }
 
-    void AGraphical::init()
-    {
-    }
-
-    void AGraphical::close()
-    {
-    }
-
     std::string AGraphical::update()
     {
         return ("");

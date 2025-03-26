@@ -10,7 +10,19 @@
 namespace arc {
     Snake::Snake() : _scoreManager(nullptr), _highScore(0), _rng(std::random_device{}())
     {
-        initGame();
+        int centerY = HEIGHT / 2;
+        int centerX = WIDTH / 2;
+
+        this->_score = 0;
+        this->_updateInterval = 150;
+        this->_gameOver = false;
+        this->_direction = LEFT;
+        this->_lastDirection = LEFT;
+        this->_lastUpdateTime = std::chrono::steady_clock::now();
+        this->_snake.clear();
+        for (int i = 0; i < INITIAL_SNAKE_SIZE; i++)
+            this->_snake.push_front(std::make_tuple(centerY, centerX - i));
+        spawnFood();
     }
 
     Snake::~Snake()
@@ -20,7 +32,7 @@ namespace arc {
     std::vector<element_t> Snake::handleEvents(std::string command)
     {
         if ((this->_gameOver && command == "r") || command == "r") {
-            initGame();
+            restartGame();
             return (createElements());
         }
         if (this->_gameOver)
@@ -53,7 +65,7 @@ namespace arc {
             this->_highScore = this->_scoreManager->getHighScore("snake");
     }
 
-    void Snake::initGame()
+    void Snake::restartGame()
     {
         int centerY = HEIGHT / 2;
         int centerX = WIDTH / 2;

@@ -14,8 +14,6 @@ namespace arc {
             SFML();
             ~SFML();
 
-            void init() override;
-            void close() override;
             std::string update() override;
             void draw() override;
 

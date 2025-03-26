@@ -18,5 +18,6 @@ namespace arc {
 
         protected:
             IScoreManager *_scoreManager;
+            std::vector<element_t> _elements;
     };
 }

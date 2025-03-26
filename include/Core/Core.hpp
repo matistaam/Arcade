@@ -2,7 +2,7 @@
 ** EPITECH PROJECT, 2025
 ** B-OOP-400-LYN-4-1-arcade-youssef.mehili
 ** File description:
-** ACore
+** Core
 */
 
 #pragma once
@@ -10,14 +10,14 @@
 
 namespace arc
 {
-    class ACore : public ICore {
+    class Core {
         public:
-        ACore(std::string path);
-        ~ACore();
+        Core(std::string path);
+        ~Core();
 
-        void setGraphical(IGraphical *Graphical) override;
-        void setGame(IGame *Game) override;
-        void display(std::vector<element_t> elements) override;
+        void setGraphical(IGraphical *Graphical);
+        void setGame(IGame *Game);
+        void display(std::vector<element_t> elements);
 
         std::string update();
         void loadGame(const std::string &name);
@@ -29,6 +29,8 @@ namespace arc
         std::vector<std::string> _availableGraphicalLibs;
 
         private:
+            IGraphical *_graphical;
+            IGame *_game;
             Menu _menu;
             size_t _currentLibIndex;
             void *_handle;

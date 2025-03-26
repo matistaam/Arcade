@@ -14,8 +14,6 @@ namespace arc {
             AGraphical(std::string path);
             ~AGraphical();
 
-            void init() override;
-            void close() override;
             std::string update() override;
             void draw() override;
 
@@ -24,6 +22,8 @@ namespace arc {
 
         protected:
             std::tuple<int, int> convertPositionToPixels(int percentX, int percentY);
+
+            std::vector<element_t> _elements;
             int _width = 800;
             int _height = 600;
     };

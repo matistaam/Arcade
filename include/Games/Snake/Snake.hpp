@@ -24,7 +24,7 @@ namespace arc {
                 LEFT
             };
         private:
-            void initGame();
+            void restartGame();
             void moveSnake();
             void handleCollisions();
             void spawnFood();

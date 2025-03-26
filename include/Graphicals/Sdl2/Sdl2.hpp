@@ -14,8 +14,6 @@ namespace arc {
             SDL();
             ~SDL();
 
-            void init() override;
-            void close() override;
             std::string update() override;
             void draw() override;
 

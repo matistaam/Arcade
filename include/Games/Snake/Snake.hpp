@@ -11,7 +11,7 @@
 namespace arc {
     class Snake : public AGame {
         public:
-            Snake();
+            Snake(std::string username, int highScore);
             ~Snake();
 
             std::vector<element_t> handleEvents(std::string command) override;
@@ -36,6 +36,7 @@ namespace arc {
             static const int CELL_SIZE = 20;
             static const int INITIAL_SNAKE_SIZE = 4;
 
+            std::string _username;
             int _score;
             int _highScore;
             int _updateInterval;

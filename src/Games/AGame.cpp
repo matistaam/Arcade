@@ -8,7 +8,7 @@
 #include "Includes.hpp"
 
 namespace arc {
-    AGame::AGame(std::string username, int highScore) : _username(""), _highScore(highScore)
+    AGame::AGame(std::string username, int highScore) : _username(username), _highScore(highScore)
     {
     }
 

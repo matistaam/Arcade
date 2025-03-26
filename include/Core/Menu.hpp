@@ -14,9 +14,6 @@ namespace arc {
             Menu();
             ~Menu();
 
-            int getHighScore(const std::string &game) const override;
-            void updateHighScore(const std::string &game, int score) override;
-
             std::vector<element_t> getElements() const;
             std::string getSelectedGame() const;
 

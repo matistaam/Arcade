@@ -8,7 +8,7 @@
 #include "Includes.hpp"
 
 namespace arc {
-    Snake::Snake() : _rng(std::random_device{}())
+    Snake::Snake(std::string username, int highScore) : AGame(username, highScore), _rng(std::random_device{}())
     {
         int centerY = HEIGHT / 2;
         int centerX = WIDTH / 2;
@@ -58,12 +58,6 @@ namespace arc {
         return (createElements());
     }
 
-    void Snake::setScoreManager(IScoreManager *scoreManager)
-    {
-        this->_scoreManager = scoreManager;
-        if (this->_scoreManager)
-            this->_highScore = this->_scoreManager->getHighScore("snake");
-    }
 
     void Snake::restartGame()
     {
@@ -156,8 +150,7 @@ namespace arc {
     {
         if (this->_score > this->_highScore)
             this->_highScore = this->_score;
-        if (this->_scoreManager)
-            this->_scoreManager->updateHighScore("snake", this->_score);
+        // reimplementer la sauvegarde du highscore
     }
 
     bool Snake::isPositionInSnake(int y, int x) const
@@ -239,9 +232,9 @@ namespace arc {
 }
 
 extern "C" {
-    arc::IGame *create()
+    arc::IGame *create(const std::string &username, int highScore)
     {
-        return (new arc::Snake());
+        return (new arc::Snake(username, highScore));
     }
 
     void destroy(arc::IGame *instance)

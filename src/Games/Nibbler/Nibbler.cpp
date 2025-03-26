@@ -10,6 +10,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <queue>
 
 namespace arc {
     Nibbler::Nibbler() : AGame()
@@ -19,36 +20,24 @@ namespace arc {
         this->_score = 0;
         this->_cellSize = 20;
         this->_initialFoodCount = 0;
+        this->_stopped = false;
         
-        // Set initial direction (right)
-        this->_direction = Direction::RIGHT;
+        // Initialize clock
+        this->_maxClockValue = 100;
+        this->_clockValue = this->_maxClockValue;
+        this->_turnsWithoutFood = 0;
+        this->_clockUpdateInterval = std::chrono::milliseconds(1000); // 1 second initially
+        this->_lastClockUpdateTime = std::chrono::steady_clock::now();
         
         // Load map from file
-        if (!loadMap("assets/NibblerMaps/nibbler_map_01.txt")) {
+        if (!this->loadMap("assets/NibblerMaps/nibbler_map_01.txt")) {
             std::cerr << "Failed to load map, using default configuration" << std::endl;
-            // Set default dimensions if map loading fails
-            this->_width = 40;
-            this->_height = 30;
-            
-            // Initialize walls with default configuration
-            initializeWalls();
-            
-            // Place default food
-            placeFood(10);
-            this->_initialFoodCount = 10;
-            
-            // Initialize snake at the center of the grid with default direction (right)
-            size_t centerX = this->_width / 2;
-            size_t centerY = this->_height / 2;
-            this->_direction = Direction::RIGHT;
-            this->_snake.push_back(std::make_pair(centerX, centerY));
-            this->_snake.push_back(std::make_pair(centerX - 1, centerY));
-            this->_snake.push_back(std::make_pair(centerX - 2, centerY));
+            // TODO: Implement a map loading error screen
         }
         
         // Initialize game timer
         this->_lastUpdateTime = std::chrono::steady_clock::now();
-        this->_updateInterval = std::chrono::milliseconds(200); // Snake speed
+        this->_updateInterval = std::chrono::milliseconds(150); // Snake speed
     }
 
     Nibbler::~Nibbler()
@@ -66,6 +55,7 @@ namespace arc {
         this->_map.clear();
         this->_walls.clear();
         this->_turnWalls.clear();
+        this->_tSections.clear();
         this->_food.clear();
         this->_snake.clear();
 
@@ -94,11 +84,13 @@ namespace arc {
                     if (this->_map[y][x] == '>') {
                         headPos = std::make_pair(x, y);
                         this->_direction = Direction::RIGHT;
+                        this->_lastDirection = Direction::RIGHT;
                         headFound = true;
                         break;
                     } else if (this->_map[y][x] == '<') {
                         headPos = std::make_pair(x, y);
                         this->_direction = Direction::LEFT;
+                        this->_lastDirection = Direction::LEFT;
                         headFound = true;
                         break;
                     }
@@ -117,6 +109,10 @@ namespace arc {
                     switch (tile) {
                         case '#': // Normal Wall
                             this->_walls.push_back(pos);
+                            break;
+                        case 'T': // T-section
+                            this->_walls.push_back(pos);
+                            this->_tSections.push_back(pos);
                             break;
                         case 'U': // Up direction wall
                             this->_walls.push_back(pos);
@@ -163,86 +159,23 @@ namespace arc {
             return false;
         }
         
+        // Clear the direction queue when loading a new map
+        while (!this->_directionQueue.empty()) {
+            this->_directionQueue.pop();
+        }
+        
         return true;
     }
 
-    void Nibbler::initializeWalls()
+    bool Nibbler::isTSection(const std::pair<int, int>& position)
     {
-        // This is only used if map loading fails
-        this->_walls.clear();
-        this->_turnWalls.clear();
-        
-        // Create walls around the perimeter
-        for (size_t x = 0; x < this->_width; x++) {
-            this->_walls.push_back(std::make_pair(x, 0));
-            this->_walls.push_back(std::make_pair(x, this->_height - 1));
-        }
-        
-        for (size_t y = 0; y < this->_height; y++) {
-            this->_walls.push_back(std::make_pair(0, y));
-            this->_walls.push_back(std::make_pair(this->_width - 1, y));
-        }
-        
-        // Add some inner walls (specific to Nibbler level design)
-        this->_walls.push_back(std::make_pair(this->_width / 3, this->_height / 3));
-        this->_walls.push_back(std::make_pair(this->_width / 3 + 1, this->_height / 3));
-        this->_walls.push_back(std::make_pair(this->_width * 2 / 3, this->_height * 2 / 3));
-        this->_walls.push_back(std::make_pair(this->_width * 2 / 3 + 1, this->_height * 2 / 3));
-    }
-
-    void Nibbler::placeFood(int count)
-    {
-        // Only add random food if needed
-        if (this->_food.size() >= static_cast<size_t>(count)) {
-            return;
-        }
-        
-        int foodToAdd = count - this->_food.size();
-        
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<size_t> xDist(1, this->_width - 2);
-        std::uniform_int_distribution<size_t> yDist(1, this->_height - 2);
-        
-        for (int i = 0; i < foodToAdd; i++) {
-            bool validPosition = false;
-            std::pair<int, int> newFood;
-            
-            while (!validPosition) {
-                newFood = std::make_pair(xDist(gen), yDist(gen));
-                validPosition = true;
-                
-                // Check if food is not on a wall
-                for (auto& wall : this->_walls) {
-                    if (wall.first == newFood.first && wall.second == newFood.second) {
-                        validPosition = false;
-                        break;
-                    }
-                }
-                
-                // Check if food is not on the snake
-                if (validPosition) {
-                    for (auto& segment : this->_snake) {
-                        if (segment.first == newFood.first && segment.second == newFood.second) {
-                            validPosition = false;
-                            break;
-                        }
-                    }
-                }
-                
-                // Check if food is not on another food
-                if (validPosition) {
-                    for (auto& existingFood : this->_food) {
-                        if (existingFood.first == newFood.first && existingFood.second == newFood.second) {
-                            validPosition = false;
-                            break;
-                        }
-                    }
-                }
+        // Check if this position is in _tSections vector
+        for (auto& tSection : this->_tSections) {
+            if (tSection.first == position.first && tSection.second == position.second) {
+                return true;
             }
-            
-            this->_food.push_back(newFood);
         }
+        return false;
     }
 
     void Nibbler::handleWallCollision(std::pair<int, int>& newHead)
@@ -278,17 +211,30 @@ namespace arc {
                             break;
                     }
                     
-                    // Check if the new position is also a wall (T-junction)
+                    // Check if the new position is also a wall
                     for (auto& checkWall : this->_walls) {
                         if (newHead.first == checkWall.first && newHead.second == checkWall.second) {
-                            // Hit a T-junction, restore head to original position
-                            newHead = this->_snake.front();
+                            // Hit another wall when trying to turn, check if it's a T-section
+                            if (this->isTSection(checkWall)) {
+                                // If directly hitting a T-section, stop the snake
+                                newHead = this->_snake.front();
+                                this->_stopped = true;
+                            } else {
+                                // For regular walls, prevent stopping (undo the move but don't set stopped flag)
+                                newHead = this->_snake.front();
+                                // The snake will continue in its original direction in the next update
+                            }
                             break;
                         }
                     }
-                } else {
-                    // Regular wall (T-junction) - snake stops moving until new direction input
+                } else if (this->isTSection(wall)) {
+                    // Direct hit on a T-section - snake stops moving
                     newHead = this->_snake.front();
+                    this->_stopped = true;
+                } else {
+                    // Regular wall - don't stop, just prevent movement in this direction
+                    newHead = this->_snake.front();
+                    // The snake will continue in its original direction in the next update
                 }
                 
                 // We found our wall collision, no need to check others
@@ -305,6 +251,7 @@ namespace arc {
         // Check self-collision (starting from the 3rd segment)
         for (size_t i = 3; i < this->_snake.size(); i++) {
             if (head.first == this->_snake[i].first && head.second == this->_snake[i].second) {
+                std::cout << "Collision between " << this->_snake[i].first << " and " << this->_snake[i].second << "with i = " << i << std::endl;
                 return true;
             }
         }
@@ -312,9 +259,106 @@ namespace arc {
         return false;
     }
 
-    bool Nibbler::checkWinCondition() 
+    bool Nibbler::checkWinCondition()
     {
         return this->_food.empty();
+    }
+
+    void Nibbler::updateClock()
+    {
+        auto currentTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            currentTime - this->_lastClockUpdateTime);
+        
+        // Update clock based on current interval
+        if (elapsedTime >= this->_clockUpdateInterval) {
+            this->_lastClockUpdateTime = currentTime;
+            this->_clockValue--;
+            
+            // Check if clock is empty
+            if (this->_clockValue <= 0) {
+                this->_clockValue = 0;
+                this->_gameState = GameState::GAME_OVER;
+            }
+        }
+    }
+
+    bool Nibbler::isOppositeDirection(Direction dir1, Direction dir2)
+    {
+        return (dir1 == Direction::UP && dir2 == Direction::DOWN) ||
+               (dir1 == Direction::DOWN && dir2 == Direction::UP) ||
+               (dir1 == Direction::LEFT && dir2 == Direction::RIGHT) ||
+               (dir1 == Direction::RIGHT && dir2 == Direction::LEFT);
+    }
+
+    bool Nibbler::wouldHitWall(Direction newDirection, std::pair<int, int> position)
+    {
+        // Calculate the position after moving in the new direction
+        std::pair<int, int> potentialHead = position;
+        
+        switch (newDirection) {
+            case Direction::UP:
+                potentialHead.second--;
+                break;
+            case Direction::DOWN:
+                potentialHead.second++;
+                break;
+            case Direction::LEFT:
+                potentialHead.first--;
+                break;
+            case Direction::RIGHT:
+                potentialHead.first++;
+                break;
+        }
+        
+        // Check if the potential head position would be a wall
+        for (auto& wall : this->_walls) {
+            if (potentialHead.first == wall.first && potentialHead.second == wall.second) {
+                // We found a wall at the potential position
+                
+                // Check if it's a turn wall (these are allowed)
+                auto it = this->_turnWalls.find(wall);
+                if (it != this->_turnWalls.end()) {
+                    return false; // Turn walls are allowed
+                }
+                
+                // It's a regular wall or T-section, direction change would cause a collision
+                return true;
+            }
+        }
+        
+        // No wall collision
+        return false;
+    }
+
+    bool Nibbler::wouldHitWall(Direction newDirection)
+    {
+        return wouldHitWall(newDirection, this->_snake.front());
+    }
+
+    void Nibbler::processDirectionQueue()
+    {
+        // Nothing to process if queue is empty
+        if (this->_directionQueue.empty()) {
+            return;
+        }
+        
+        // Get the next direction from queue
+        Direction nextDirection = this->_directionQueue.front();
+        
+        // Check if we can change to this direction without hitting a wall
+        if (!this->isOppositeDirection(nextDirection, this->_lastDirection) && 
+            !this->wouldHitWall(nextDirection)) {
+            
+            // Change direction
+            this->_direction = nextDirection;
+            this->_directionQueue.pop();
+            
+            // If snake was stopped at a T-section, allow it to move again
+            if (this->_stopped) {
+                this->_stopped = false;
+            }
+        }
     }
 
     void Nibbler::updateGame()
@@ -331,6 +375,17 @@ namespace arc {
         
         // Don't update if game is not running
         if (this->_gameState != GameState::RUNNING) {
+            return;
+        }
+        
+        // Update clock on each game update
+        this->updateClock();
+        
+        // Process the direction queue
+        this->processDirectionQueue();
+        
+        // If snake is stopped at a T-section, wait for player input
+        if (this->_stopped) {
             return;
         }
         
@@ -353,6 +408,7 @@ namespace arc {
                 newHead.first++;
                 break;
         }
+        this->_lastDirection = this->_direction;
         
         // Handle wall collisions and direction changes
         handleWallCollision(newHead);
@@ -363,9 +419,8 @@ namespace arc {
         }
         
         // Check if the new head position is the same as the current head position
-        // This happens at T-junctions where the snake can't turn
+        // This happens when the snake has hit a wall and couldn't move
         if (newHead.first == head.first && newHead.second == head.second) {
-            // Snake is stopped at a T-junction - waiting for player input
             return;
         }
         
@@ -380,6 +435,16 @@ namespace arc {
                 this->_score += 10;
                 it = this->_food.erase(it);
                 foodEaten = true;
+                
+                // Reset clock-related counters when food is eaten
+                this->_turnsWithoutFood = 0;
+                
+                // Add time to the clock
+                this->_clockValue = std::min(this->_clockValue + 20, this->_maxClockValue);
+                
+                // Reset clock update interval
+                this->_clockUpdateInterval = std::chrono::milliseconds(1000);
+                
                 // Snake grows, so we don't remove the tail
                 break;
             } else {
@@ -390,6 +455,17 @@ namespace arc {
         // Remove the tail if no food was eaten
         if (!foodEaten) {
             this->_snake.pop_back();
+            
+            // Increment turns without food and adjust clock speed
+            this->_turnsWithoutFood++;
+            
+            // Make the clock tick faster the longer we go without food
+            // Every 5 turns without food, increase clock tick rate
+            if (this->_turnsWithoutFood % 5 == 0 && this->_turnsWithoutFood > 0) {
+                // Decrease update interval by 10%, with a minimum of 100ms
+                long newInterval = static_cast<long>(this->_clockUpdateInterval.count() * 0.9);
+                this->_clockUpdateInterval = std::chrono::milliseconds(std::max(100L, newInterval));
+            }
         }
         
         // Check for win condition
@@ -406,20 +482,73 @@ namespace arc {
 
     void Nibbler::processInput(const std::string& command)
     {
-        if (this->_gameState == GameState::RUNNING) {
-            if (command == "UP" && this->_direction != Direction::DOWN) {
-                this->_direction = Direction::UP;
-            } else if (command == "DOWN" && this->_direction != Direction::UP) {
-                this->_direction = Direction::DOWN;
-            } else if (command == "LEFT" && this->_direction != Direction::RIGHT) {
-                this->_direction = Direction::LEFT;
-            } else if (command == "RIGHT" && this->_direction != Direction::LEFT) {
-                this->_direction = Direction::RIGHT;
-            }
-        } else if (this->_gameState == GameState::GAME_OVER || this->_gameState == GameState::WIN) {
-            if (command == "RETURN") {
-                // Restart game
-                *this = Nibbler();
+        // Handle reset command if game over or won
+        if ((this->_gameState == GameState::GAME_OVER || this->_gameState == GameState::WIN) 
+            && command == "ENTER") {
+            
+            // Reset the game by recreating the Nibbler object
+            *this = Nibbler();
+            return;
+        }
+        
+        // Only process movement inputs if the game is still running
+        if (this->_gameState != GameState::RUNNING)
+            return;
+
+        Direction newDirection = this->_direction; // Default to current direction
+        bool validInput = false;
+
+        if (command == "UP" && this->_lastDirection != Direction::DOWN) {
+            newDirection = Direction::UP;
+            validInput = true;
+        } else if (command == "DOWN" && this->_lastDirection != Direction::UP) {
+            newDirection = Direction::DOWN;
+            validInput = true;
+        } else if (command == "LEFT" && this->_lastDirection != Direction::RIGHT) {
+            newDirection = Direction::LEFT;
+            validInput = true;
+        } else if (command == "RIGHT" && this->_lastDirection != Direction::LEFT) {
+            newDirection = Direction::RIGHT;
+            validInput = true;
+        }
+
+        // If we got a valid input and the direction queue isn't too full
+        if (validInput && this->_directionQueue.size() < this->_maxQueueSize) {
+            // First check if we have a valid move right now
+            if (!this->wouldHitWall(newDirection)) {
+                // Apply it immediately if we're stopped
+                if (this->_stopped) {
+                    this->_direction = newDirection;
+                    this->_stopped = false;
+                } else {
+                    // Otherwise, queue it for the next move
+                    this->_directionQueue.push(newDirection);
+                }
+            } else {
+                // Check if this direction would be valid from the next position
+                std::pair<int, int> nextPos = this->_snake.front();
+                
+                // Calculate the next position based on current direction
+                switch (this->_direction) {
+                    case Direction::UP:
+                        nextPos.second--;
+                        break;
+                    case Direction::DOWN:
+                        nextPos.second++;
+                        break;
+                    case Direction::LEFT:
+                        nextPos.first--;
+                        break;
+                    case Direction::RIGHT:
+                        nextPos.first++;
+                        break;
+                }
+                
+                // Check if the move would be valid from the next position
+                if (!this->wouldHitWall(newDirection, nextPos) && 
+                    !this->isOppositeDirection(newDirection, this->_direction)) {
+                    this->_directionQueue.push(newDirection);
+                }
             }
         }
     }
@@ -486,6 +615,23 @@ namespace arc {
         foodCountElement._color = "6"; // Cyan
         elements.push_back(foodCountElement);
         
+        // Clock display - add new element
+        element_t clockElement;
+        clockElement._type = TEXT;
+        clockElement._text = "Time: " + std::to_string(this->_clockValue);
+        clockElement._position = std::make_tuple(10, 70);
+        
+        // Change color based on clock value
+        if (this->_clockValue > 70) {
+            clockElement._color = "2"; // Green for plenty of time
+        } else if (this->_clockValue > 30) {
+            clockElement._color = "3"; // Yellow for medium time
+        } else {
+            clockElement._color = "1"; // Red for low time
+        }
+        
+        elements.push_back(clockElement);
+        
         // Direction indicator
         element_t directionElement;
         directionElement._type = TEXT;
@@ -504,9 +650,53 @@ namespace arc {
                 directionElement._text += "RIGHT";
                 break;
         }
-        directionElement._position = std::make_tuple(10, 70);
+        directionElement._position = std::make_tuple(10, 100);
         directionElement._color = "6"; // Cyan
         elements.push_back(directionElement);
+        
+        // Turns without food indicator
+        element_t turnsElement;
+        turnsElement._type = TEXT;
+        turnsElement._text = "Hunger: " + std::to_string(this->_turnsWithoutFood);
+        turnsElement._position = std::make_tuple(10, 130);
+        turnsElement._color = this->_turnsWithoutFood > 10 ? "1" : "6"; // Red if hungry
+        elements.push_back(turnsElement);
+        
+        // Add queue indicator
+        element_t queueElement;
+        queueElement._type = TEXT;
+        queueElement._text = "Queue: ";
+        
+        // Copy the queue to display it without modifying the original
+        std::queue<Direction> queueCopy = this->_directionQueue;
+        while (!queueCopy.empty()) {
+            Direction dir = queueCopy.front();
+            
+            switch (dir) {
+                case Direction::UP:
+                    queueElement._text += "↑ ";
+                    break;
+                case Direction::DOWN:
+                    queueElement._text += "↓ ";
+                    break;
+                case Direction::LEFT:
+                    queueElement._text += "← ";
+                    break;
+                case Direction::RIGHT:
+                    queueElement._text += "→ ";
+                    break;
+            }
+            
+            queueCopy.pop();
+        }
+        
+        if (queueElement._text == "Queue: ") {
+            queueElement._text += "empty";
+        }
+        
+        queueElement._position = std::make_tuple(10, 160);
+        queueElement._color = "6"; // Cyan
+        elements.push_back(queueElement);
         
         // Game state messages
         if (this->_gameState == GameState::GAME_OVER) {
@@ -516,7 +706,22 @@ namespace arc {
             gameOverElement._position = std::make_tuple(this->_height * this->_cellSize / 2, 
                                                        this->_width * this->_cellSize / 4);
             gameOverElement._color = "5"; // Magenta
+            gameOverElement._font_size = 32;
             elements.push_back(gameOverElement);
+            
+            // Add reason for game over
+            element_t reasonElement;
+            reasonElement._type = TEXT;
+            if (this->_clockValue <= 0) {
+                reasonElement._text = "You ran out of time!";
+            } else {
+                reasonElement._text = "You crashed into yourself!";
+            }
+            reasonElement._position = std::make_tuple(this->_height * this->_cellSize / 2 + 40, 
+                                                    this->_width * this->_cellSize / 4);
+            reasonElement._color = "1"; // Red
+            reasonElement._font_size = 24;
+            elements.push_back(reasonElement);
         } else if (this->_gameState == GameState::WIN) {
             element_t winElement;
             winElement._type = TEXT;
@@ -524,6 +729,7 @@ namespace arc {
             winElement._position = std::make_tuple(this->_height * this->_cellSize / 2, 
                                                   this->_width * this->_cellSize / 4);
             winElement._color = "2"; // Green
+            winElement._font_size = 32;
             elements.push_back(winElement);
         }
         

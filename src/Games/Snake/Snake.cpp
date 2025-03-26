@@ -13,8 +13,8 @@ namespace arc {
         int centerY = HEIGHT / 2;
         int centerX = WIDTH / 2;
 
-        std::cout << highScore << std::endl;
-        std::cout << _highScore << std::endl;
+        this->_username = username;
+        this->_highScore = highScore;
         this->_score = 0;
         this->_updateInterval = 150;
         this->_gameOver = false;
@@ -150,8 +150,34 @@ namespace arc {
 
     void Snake::updateHighScore()
     {
-        if (this->_score > this->_highScore)
+        std::ifstream infile("accounts.txt");
+        std::ofstream outfile("accounts_tmp.txt");
+        std::string line = "";
+
+        if (this->_score > this->_highScore) {
             this->_highScore = this->_score;
+            while (std::getline(infile, line)) {
+                std::size_t pos = line.find(this->_username + ":");
+                if (pos != std::string::npos) {
+                    std::size_t snakePos = line.find("snake=");
+                    if (snakePos != std::string::npos) {
+                        std::size_t endPos = line.find(':', snakePos);
+                        std::string updatedLine = line.substr(0, snakePos + 6) +
+                        std::to_string(this->_highScore) +
+                        (endPos != std::string::npos ? line.substr(endPos) : "");
+                        outfile << updatedLine << std::endl;
+                    } else {
+                        outfile << line << std::endl;
+                    }
+                } else {
+                    outfile << line << std::endl;
+                }
+            }
+            infile.close();
+            outfile.close();
+            std::remove("accounts.txt");
+            std::rename("accounts_tmp.txt", "accounts.txt");
+        }
     }
 
     bool Snake::isPositionInSnake(int y, int x) const
@@ -205,7 +231,6 @@ namespace arc {
         food._color = "1";
         elements.push_back(food);
         highScoreText._type = TEXT;
-        std::cout << _highScore << std::endl;
         highScoreText._text = "Highest Score: " + std::to_string(this->_highScore);
         highScoreText._position = std::make_tuple(50, 2);
         highScoreText._color = "5";

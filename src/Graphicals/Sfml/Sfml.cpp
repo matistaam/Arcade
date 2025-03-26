@@ -12,6 +12,14 @@ namespace arc {
     {
         this->_width = 800;
         this->_height = 600;
+        
+        // Initialize SFML
+        this->_window = new sf::RenderWindow(sf::VideoMode(this->_width, this->_height), "Arcade");
+        if (!this->_window)
+            throw GraphicalError("Window creation failed");
+        if (!this->_font.loadFromFile("assets/fonts/ByteBounce.ttf"))
+            throw GraphicalError("Font loading failed");
+        this->_window->setFramerateLimit(60);
     }
 
     SFML::~SFML()
@@ -21,12 +29,7 @@ namespace arc {
 
     void SFML::init()
     {
-        this->_window = new sf::RenderWindow(sf::VideoMode(this->_width, this->_height), "Arcade");
-        if (!this->_window)
-            throw GraphicalError("Window creation failed");
-        if (!this->_font.loadFromFile("assets/fonts/ByteBounce.ttf"))
-            throw GraphicalError("Font loading failed");
-        this->_window->setFramerateLimit(60);
+        // Initialization now happens in constructor
     }
 
     void SFML::close()

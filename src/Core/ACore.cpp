@@ -46,7 +46,7 @@ namespace arc {
             dlclose(this->_handle);
             throw InvalidLibraryError(path);
         }
-        this->_graphical->init();
+        // Initialization now happens in the graphical constructor
         this->_game = nullptr;
         if (lastSlash != std::string::npos)
             libName = libName.substr(lastSlash + 1);
@@ -67,7 +67,7 @@ namespace arc {
         destroy_game_t destroy_game = nullptr;
 
         if (this->_graphical) {
-            this->_graphical->close();
+            // close() is now called in the graphical destructor
             destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
             if (destroy)
                 destroy(this->_graphical);
@@ -88,14 +88,13 @@ namespace arc {
         destroy_graphical_t destroy = nullptr;
 
         if (this->_graphical) {
-            this->_graphical->close();
+            // close() is now called in the graphical destructor
             destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
             if (destroy)
                 destroy(this->_graphical);
         }
         this->_graphical = Graphical;
-        if (this->_graphical)
-            this->_graphical->init();
+        // Initialization now happens in the graphical constructor
     }
 
     void ACore::setGame(IGame *Game)
@@ -256,7 +255,7 @@ namespace arc {
             throw GraphicalError(std::string("Failed to create graphical instance from '") + lib_path + "'");
         }
         if (this->_graphical) {
-            this->_graphical->close();
+            // close() is now called in the graphical destructor
             destroy = (destroy_graphical_t)dlsym(this->_handle, "destroy");
             if (destroy)
                 destroy(this->_graphical);
@@ -265,7 +264,7 @@ namespace arc {
             dlclose(this->_handle);
         this->_handle = newHandle;
         this->_graphical = newGraphical;
-        this->_graphical->init();
+        // Initialization now happens in the graphical constructor
         for (size_t i = 0; i < this->_availableGraphicalLibs.size(); i++) {
             if (this->_availableGraphicalLibs[i] == name) {
                 this->_currentLibIndex = i;

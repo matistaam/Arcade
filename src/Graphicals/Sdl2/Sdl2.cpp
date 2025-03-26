@@ -12,15 +12,8 @@ namespace arc {
     {
         this->_width = 800;
         this->_height = 600;
-    }
-
-    SDL::~SDL()
-    {
-        close();
-    }
-
-    void SDL::init()
-    {
+        
+        // Initialize SDL and components
         if (SDL_Init(SDL_INIT_VIDEO) < 0)
             throw GraphicalError(std::string("SDL initialization failed: ") + SDL_GetError());
         if (TTF_Init() < 0)
@@ -35,6 +28,16 @@ namespace arc {
         this->_font = TTF_OpenFont("assets/fonts/ByteBounce.ttf", 24);
         if (!this->_font)
             throw GraphicalError(std::string("Font loading failed: ") + TTF_GetError());
+    }
+
+    SDL::~SDL()
+    {
+        close();
+    }
+
+    void SDL::init()
+    {
+        // Initialization now happens in constructor
     }
 
     void SDL::close()

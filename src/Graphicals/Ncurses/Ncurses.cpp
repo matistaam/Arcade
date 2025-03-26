@@ -9,18 +9,7 @@
 namespace arc {
     Ncurses::Ncurses() : AGraphical(""), _isInitialized(false)
     {
-    }
-
-    Ncurses::~Ncurses()
-    {
-        if (this->_isInitialized)
-            close();
-    }
-
-    void Ncurses::init()
-    {
-        if (this->_isInitialized)
-            return;
+        // Initialize NCurses
         if (initscr() == NULL)
             throw GraphicalError("NCurses initialization failed");
         if (start_color() == ERR)
@@ -54,6 +43,17 @@ namespace arc {
         this->_colorPairs["CYAN"] = 7;
         this->_colorPairs["WHITE"] = 8;
         this->_isInitialized = true;
+    }
+
+    Ncurses::~Ncurses()
+    {
+        if (this->_isInitialized)
+            close();
+    }
+
+    void Ncurses::init()
+    {
+        // Initialization now happens in constructor
     }
 
     void Ncurses::close()

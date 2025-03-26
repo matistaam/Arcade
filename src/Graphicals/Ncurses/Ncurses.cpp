@@ -4,52 +4,74 @@
 ** File description:
 ** Ncurses
 */
-
 #include "Includes.hpp"
 
-namespace arc
-{
-    Ncurses::Ncurses() : AGraphical("")
+namespace arc {
+    Ncurses::Ncurses() : AGraphical(""), _isInitialized(false)
     {
     }
 
     Ncurses::~Ncurses()
     {
-        close();
+        if (this->_isInitialized)
+            close();
     }
 
     void Ncurses::init()
     {
-        if (!initscr())
+        if (this->_isInitialized)
+            return;
+        if (initscr() == NULL)
             throw GraphicalError("NCurses initialization failed");
+        if (start_color() == ERR)
+            throw GraphicalError("NCurses color initialization failed");
+        if (cbreak() == ERR)
+            throw GraphicalError("NCurses cbreak mode configuration failed");
         if (noecho() == ERR)
             throw GraphicalError("NCurses echo mode configuration failed");
-        if (curs_set(0) == ERR)
-            throw GraphicalError("NCurses cursor configuration failed");
         if (keypad(stdscr, TRUE) == ERR)
             throw GraphicalError("NCurses keypad configuration failed");
         if (nodelay(stdscr, TRUE) == ERR)
             throw GraphicalError("NCurses nodelay configuration failed");
-        if (start_color() == ERR)
-            throw GraphicalError("NCurses color initialization failed");
+        if (curs_set(0) == ERR)
+            throw GraphicalError("NCurses cursor configuration failed");
+        getmaxyx(stdscr, this->_maxY, this->_maxX);
+        this->_width = this->_maxX;
+        this->_height = this->_maxY;
+        this->_window = newwin(this->_maxY, this->_maxX, 0, 0);
         init_pair(1, COLOR_RED, COLOR_BLACK);
         init_pair(2, COLOR_GREEN, COLOR_BLACK);
         init_pair(3, COLOR_YELLOW, COLOR_BLACK);
         init_pair(4, COLOR_BLUE, COLOR_BLACK);
         init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
         init_pair(6, COLOR_CYAN, COLOR_BLACK);
-        refresh();
+        this->_colorPairs["BLACK"] = 1;
+        this->_colorPairs["RED"] = 2;
+        this->_colorPairs["GREEN"] = 3;
+        this->_colorPairs["YELLOW"] = 4;
+        this->_colorPairs["BLUE"] = 5;
+        this->_colorPairs["MAGENTA"] = 6;
+        this->_colorPairs["CYAN"] = 7;
+        this->_colorPairs["WHITE"] = 8;
+        this->_isInitialized = true;
     }
 
     void Ncurses::close()
     {
+        if (!this->_isInitialized)
+            return;
+        delwin(this->_window);
         endwin();
+        this->_isInitialized = false;
     }
 
     std::string Ncurses::update()
     {
-        int ch = getch();
+        int ch = 0;
 
+        if (!this->_isInitialized)
+            return ("");
+        ch = getch();
         if (ch == ERR)
             return ("");
         if (ch == KEY_RESIZE)
@@ -224,8 +246,7 @@ namespace arc
     }
 }
 
-extern "C"
-{
+extern "C" {
     arc::IGraphical *create()
     {
         return (new arc::Ncurses());

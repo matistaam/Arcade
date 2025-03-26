@@ -4,7 +4,6 @@
 ** File description:
 ** Ncurses
 */
-
 #pragma once
 #include "Includes.hpp"
 
@@ -19,6 +18,7 @@ namespace arc {
             std::string update() override;
             void draw() override;
 
+        private:
             void draw_text(element_t element);
             void draw_image(element_t element);
             void draw_circle(element_t element);
@@ -26,5 +26,11 @@ namespace arc {
             void draw_border(element_t element);
 
             std::tuple<int, int> convertPositionToChar(int percentX, int percentY);
+
+            std::map<std::string, int> _colorPairs;
+            WINDOW *_window;
+            int _maxY;
+            int _maxX;
+            bool _isInitialized;
     };
 }

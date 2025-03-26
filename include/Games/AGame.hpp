@@ -11,13 +11,14 @@
 namespace arc {
     class AGame : public IGame {
         public:
-            AGame();
+            AGame(std::string username, int highScore);
             ~AGame();
 
-            virtual void setScoreManager(IScoreManager *scoreManager);
+            virtual std::vector<element_t> handleEvents(std::string command) = 0;
 
         protected:
-            IScoreManager *_scoreManager;
             std::vector<element_t> _elements;
+            std::string _username;
+            int _highScore;
     };
 }

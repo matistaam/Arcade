@@ -9,13 +9,12 @@
 #include "Includes.hpp"
 
 namespace arc {
-    class Snake : public AGame, public IScorableGame {
+    class Snake : public AGame {
         public:
             Snake();
-            ~Snake() override;
+            ~Snake();
 
             std::vector<element_t> handleEvents(std::string command) override;
-            void setScoreManager(IScoreManager *scoreManager) override;
 
             enum Direction {
                 UP,
@@ -29,9 +28,7 @@ namespace arc {
             void handleCollisions();
             void spawnFood();
             void updateHighScore();
-
             bool isPositionInSnake(int y, int x) const;
-
             std::vector<element_t> createElements();
 
             static const int WIDTH = 40;
@@ -39,7 +36,6 @@ namespace arc {
             static const int CELL_SIZE = 20;
             static const int INITIAL_SNAKE_SIZE = 4;
 
-            IScoreManager *_scoreManager;
             int _score;
             int _highScore;
             int _updateInterval;

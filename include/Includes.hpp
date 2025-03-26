@@ -29,8 +29,6 @@
 #include "ArcadeException.hpp"
 #include "IGraphical.hpp"
 #include "AGraphical.hpp"
-#include "Core/IScoreManager.hpp"
-#include "Games/IScorableGame.hpp"
 #include "IGame.hpp"
 #include "AGame.hpp"
 #include "Menu.hpp"

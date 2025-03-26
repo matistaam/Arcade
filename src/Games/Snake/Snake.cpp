@@ -8,7 +8,7 @@
 #include "Includes.hpp"
 
 namespace arc {
-    Snake::Snake() : _scoreManager(nullptr), _highScore(0), _rng(std::random_device{}())
+    Snake::Snake() : _rng(std::random_device{}())
     {
         int centerY = HEIGHT / 2;
         int centerX = WIDTH / 2;
@@ -214,7 +214,8 @@ namespace arc {
         highScoreText._text = "Highest Score: " + std::to_string(this->_highScore);
         highScoreText._position = std::make_tuple(50, 2);
         highScoreText._color = "5";
-        elements.push_back(highScoreText);scoreText._type = TEXT;
+        elements.push_back(highScoreText);
+        scoreText._type = TEXT;
         scoreText._text = "Score: " + std::to_string(this->_score);
         scoreText._position = std::make_tuple(50, 5);
         scoreText._color = "5";

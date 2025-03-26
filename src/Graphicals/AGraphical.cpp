@@ -17,15 +17,6 @@ namespace arc {
     {
     }
 
-    std::string AGraphical::update()
-    {
-        return ("");
-    }
-
-    void AGraphical::draw()
-    {
-    }
-
     void AGraphical::clearElements()
     {
         this->_elements.clear();

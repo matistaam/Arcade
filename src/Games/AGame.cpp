@@ -8,16 +8,11 @@
 #include "Includes.hpp"
 
 namespace arc {
-    AGame::AGame() : _scoreManager(nullptr)
+    AGame::AGame(std::string username, int highScore) : _username(""), _highScore(highScore)
     {
     }
 
     AGame::~AGame()
     {
-    }
-
-    void AGame::setScoreManager(IScoreManager *scoreManager)
-    {
-        this->_scoreManager = scoreManager;
     }
 }

@@ -7,10 +7,19 @@
 #include "Includes.hpp"
 
 namespace arc {
-    Ncurses::Ncurses() : AGraphical(""), _isInitialized(false)
+    Ncurses::Ncurses() : AGraphical(""), _screen(nullptr), _isInitialized(false)
     {
-        if (initscr() == NULL)
+        // Set locale for proper wide character handling
+        setlocale(LC_ALL, "");
+        
+        // Initialize the screen and store the pointer
+        _screen = newterm(nullptr, stdout, stdin);
+        if (_screen == nullptr)
             throw GraphicalError("NCurses initialization failed");
+            
+        // Set the screen as current
+        set_term(_screen);
+        
         if (start_color() == ERR)
             throw GraphicalError("NCurses color initialization failed");
         if (cbreak() == ERR)
@@ -40,7 +49,15 @@ namespace arc {
     {
         if (this->_isInitialized) {
             delwin(this->_window);
-            endwin();
+            
+            // Use the stored screen to clean up properly
+            if (_screen != nullptr) {
+                set_term(_screen);
+                endwin();
+                delscreen(_screen);
+                _screen = nullptr;
+            }
+            
             this->_isInitialized = false;
         }
     }

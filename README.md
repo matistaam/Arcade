@@ -17,42 +17,48 @@ A modular arcade gaming platform that supports multiple display libraries and ga
 - Progressive speed increase as score grows
 - Per-user high score tracking
 - Customizable snake and food colors
-- Wrap-around wall collision system
+- Screen boundary teleportation - snake appears on opposite side when crossing screen edge
 - Dynamic food spawning with collision detection
+- Self-collision detection for game over condition
 - Game over and restart functionality
 
 ### Nibbler
-- Maze-based gameplay with custom map support
-- Directional wall mechanics for guided movement
-- Strategic food placement and collection
-- Advanced collision detection system
-- Multiple map layouts via text files
-- Win condition based on food collection
-- Scoring system based on completion time
-- Real-time direction indicator
+- Advanced maze-based gameplay with custom map file support
+- Advanced input queue system for precision control
+- T-junction decision points requiring player interaction
+- Dynamic time-based scoring system with hunger mechanics
+- Adaptive clock speed that increases challenge over time
+- Visual input queue display showing planned movements
+- Comprehensive game state display (time, score, hunger)
+- Multiple special wall types (turning walls, T-sections)
+- Detailed visual feedback for game progress and status
+- Win condition based on complete food collection
 
 ## 📋 Supported Display Libraries
 ### Graphical Libraries
 - SFML (Simple and Fast Multimedia Library)
-  - Hardware accelerated rendering
-  - High-quality text rendering with ByteBounce font
-  - Smooth circle and rectangle drawing
-  - Texture-based image support
-  - Window event handling
+  - Hardware accelerated rendering with 60 FPS frame limiting
+  - High-quality vector-based text rendering with ByteBounce font
+  - Smooth anti-aliased circle and rectangle primitives
+  - Texture-based image support with proportional scaling
+  - Efficient keyboard and window event handling
+  - Dynamic color palette management
 
 - SDL2 (Simple DirectMedia Layer)
-  - Hardware accelerated graphics
-  - Custom TTF font integration
-  - Optimized image loading and rendering
-  - Efficient shape drawing primitives
-  - Event-driven input handling
+  - Hardware accelerated graphics with optimized rendering pipeline
+  - Custom TTF font integration with dynamic size support
+  - Optimized image loading and hardware-accelerated textures
+  - CPU-efficient shape drawing primitives using Bresenham's algorithm
+  - Comprehensive input event handling with keyboard mapping
+  - Resource management with automatic cleanup
 
 - NCurses (Text-based interface)
-  - Terminal-based display with color support
-  - Character-based rendering optimized for text displays
-  - Border and special character support
-  - Low resource footprint
-  - Responsive input handling
+  - Terminal-optimized display with 6-color palette support
+  - Character-based rendering with adaptive screen dimensions
+  - Smart border drawing with centered content positioning
+  - Resource-efficient rendering for low-end systems
+  - Unicode character support with setlocale integration
+  - Optimized screen refresh to minimize terminal flicker
 
 ## 🛠️ Installation
 ### Dependencies
@@ -106,13 +112,13 @@ make re
 | Arrow Left | Move left |
 | Arrow Right | Move right |
 | R | Restart game |
+| ENTER | Restart after game over (Nibbler) |
 
 ## 📁 Project Structure
 ```
 arcade/
 ├── assets/           # Game resources
 │   ├── fonts/       # Font files
-│   ├── menu.jpg    # Menu background
 │   └── NibblerMaps/ # Nibbler game maps
 ├── doc/             # Documentation
 ├── include/         # Header files
@@ -148,14 +154,16 @@ arcade/
 - Real-time display updates
 - Custom font rendering
 - Shape and image drawing
+- Consistent color palette across libraries
 
 ### Game Framework
-- Consistent game loop
-- Event handling system
-- Score tracking
-- Pause functionality
-- State management
-- Collision detection
+- Consistent game loop with frame timing
+- Event-driven input handling
+- High score tracking and persistence
+- Pause menu integration
+- Game state management with transitions
+- Advanced collision detection systems
+- Direction-based movement with input queuing
 
 ## 📚 Documentation
 See `doc/library_implementation_guide.md` for detailed information about:

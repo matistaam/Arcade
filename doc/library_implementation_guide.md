@@ -46,11 +46,10 @@ namespace arc {
             void draw_rectangle(element_t element);
             void draw_border(element_t element);  // Optional for border support
 
-        protected:
+        private:
             // Position conversion helpers
             std::tuple<int, int> convertPositionToPixels(int percentX, int percentY);
 
-        private:
             // Library-specific members for window/renderer
             int _width = 800;
             int _height = 600;
@@ -60,8 +59,8 @@ namespace arc {
 
 ### 3. Required Method Implementations
 
-#### init()
-- Initialize your graphics context
+#### Constructor
+- Initialize your graphics context in the constructor
 - Set up windows, renderers, or other required resources
 - Set window dimensions (default: 800x600)
 - Set framerate limit (60 FPS recommended)
@@ -71,7 +70,7 @@ namespace arc {
 - Initialize color support (required for all libraries)
 - Throw GraphicalError with descriptive message on failure
 
-#### close()
+#### Destructor
 - Clean up all resources in reverse order of initialization
 - Close windows and destroy contexts
 - Free allocated memory
@@ -142,7 +141,7 @@ For a new game, create:
 
 ### 2. Class Structure
 Your game must:
-1. Inherit from `arc::AGame` and optionally `arc::IScorableGame` for score tracking
+1. Inherit from `arc::AGame` 
 2. Implement all required virtual methods
 3. Provide `create()`, `destroy()` and `get_type()` external C functions
 4. Include proper state management and timing controls
@@ -150,17 +149,16 @@ Your game must:
 Example header structure:
 ```cpp
 namespace arc {
-    class YourGame : public AGame, public IScorableGame {
+    class YourGame : public AGame {
         public:
-            YourGame();
-            ~YourGame() override;
+            YourGame(std::string username, int highScore);
+            ~YourGame();
 
             std::vector<element_t> handleEvents(std::string command) override;
-            void setScoreManager(IScoreManager *scoreManager) override;
 
         private:
             // Game logic methods
-            void initGame();
+            void restartGame();
             void updateGame();
             bool checkCollision();
             std::vector<element_t> createElements();
@@ -171,7 +169,7 @@ namespace arc {
             static const int CELL_SIZE = 20;
 
             // Game state
-            IScoreManager *_scoreManager;
+            std::string _username;
             int _score;
             int _highScore;
             int _updateInterval;
@@ -184,17 +182,21 @@ namespace arc {
 ### 3. Required Method Implementations
 
 #### Constructor
-- Initialize game state (RUNNING by default)
-- Set up initial score and high score tracking
-- Initialize game elements and positions
-- Set up timing control (recommended: 16ms for 60 FPS)
-- Load any required assets or map files
+- The constructor takes username and highScore parameters:
+  ```cpp
+  YourGame(std::string username, int highScore) : AGame(username, highScore)
+  ```
+- Initialize game state variables (_score, _gameOver, etc.)
+- Set up initial timers with std::chrono::steady_clock
+- Set up game elements (snake segments, walls, food, etc.)
+- Load any required maps or assets
 
 #### handleEvents(std::string command)
-- Process the input command through processInput()
-- Update game state based on elapsed time
-- Handle collisions and game rules
-- Return vector of elements for rendering
+- Process the input command (UP, DOWN, LEFT, RIGHT, etc.)
+- Update game state based on elapsed time using std::chrono
+- Handle movement, collisions, and scoring
+- Check win/lose conditions
+- Return a vector of elements for rendering
 
 ### 4. Game State Management
 
@@ -211,8 +213,8 @@ namespace arc {
 ### 5. External C Functions
 ```cpp
 extern "C" {
-    arc::IGame *create() {
-        return (new arc::YourGame());
+    arc::IGame *create(const std::string &username, int highScore) {
+        return (new arc::YourGame(username, highScore));
     }
 
     void destroy(arc::IGame *instance) {
@@ -228,28 +230,27 @@ extern "C" {
 ### 6. Element Structure
 Use the `element_t` struct for rendering:
 ```cpp
-struct element_s {
-    ELEMENT_TYPE _type;         // TEXT, IMAGE, CIRCLE, RECTANGLE, BUTTON
-    std::string _text;          // Text content for TEXT elements
-    std::tuple<int, int> _position;  // (x, y) position
-    std::string _color;         // Color identifier (1-6)
+typedef struct element_s {
+    ELEMENT_TYPE _type;        // TEXT, IMAGE, CIRCLE, RECTANGLE, BUTTON, BORDER
+    std::string _text;         // Text content for TEXT elements
+    std::tuple<int, int> _position;  // Position (interpreted differently per type)
+    std::string _color;        // Color identifier (1-6)
     std::tuple<int, int> _size;      // Width/height or radius
-    std::string _image_path;    // Path for IMAGE elements
-};
+    std::string _image_path;   // Path for IMAGE elements
+    int _font_size = 24;       // Font size for TEXT elements
+} element_t;
 ```
 
 Color codes:
-- "1": Red
-- "2": Green
-- "3": Yellow
-- "4": Blue
-- "5": Magenta
-- "6": Cyan
-Default: White
+- "1": Red (RGB: 255, 0, 0)
+- "2": Green (RGB: 0, 255, 0)
+- "3": Yellow (RGB: 255, 255, 0)
+- "4": Blue (RGB: 0, 0, 255)
+- "5": Magenta (RGB: 255, 0, 255)
+- "6": Cyan (RGB: 0, 255, 255)
+Default: White (RGB: 255, 255, 255)
 
-For TEXT elements, position represents the top-left corner.
-For CIRCLE elements, position represents the center and size.x is used as diameter.
-For RECTANGLE elements, position represents the center and size represents width/height.
+Position values are percentages of screen dimensions (0-100), which each library will convert to pixel coordinates. This allows for consistent layouts across different graphics libraries.
 
 ## Building and Loading Libraries
 

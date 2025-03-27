@@ -111,7 +111,7 @@ package "Exceptions" {
 }
 
 ' Core components
-package "Core" {
+package "Core Components" {
     class Core {
         -_graphical: IGraphical*
         -_game: IGame*
@@ -180,7 +180,7 @@ package "Core" {
 }
 
 ' Graphical interfaces and classes
-package "Graphicals" {
+package "Graphical Libraries" {
     interface IGraphical {
         +~IGraphical()
         +getEvents(): string
@@ -408,3 +408,4 @@ ElementType -- ELEMENT_TYPE
 
 @enduml
 ```
+

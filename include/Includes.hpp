@@ -31,6 +31,7 @@
 #include "AGraphical.hpp"
 #include "IGame.hpp"
 #include "AGame.hpp"
+#include "DlLoader.hpp"
 #include "Menu.hpp"
 #include "Core.hpp"
 #include "Nibbler.hpp"

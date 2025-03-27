@@ -12,28 +12,28 @@ namespace arc
 {
     class Core {
         public:
-        Core(std::string path);
-        ~Core();
+            Core(std::string path);
+            ~Core();
 
-        void setGraphical(IGraphical *Graphical);
-        void setGame(IGame *Game);
-        void display(std::vector<element_t> elements);
+            void setGraphical(IGraphical *Graphical);
+            void setGame(IGame *Game);
+            void display(std::vector<element_t> elements);
 
-        std::string update();
-        void loadGame(const std::string &name);
-        void switchGraphicalLibrary(const std::string &name);
-        std::vector<std::string> getAvailableGames();
-        std::vector<std::string> getAvailableGraphicalLibs();
+            std::string update();
+            void loadGame(const std::string &name);
+            void switchGraphicalLibrary(const std::string &name);
+            std::vector<std::string> getAvailableGames();
+            std::vector<std::string> getAvailableGraphicalLibs();
 
-        std::vector<std::string> _availableGames;
-        std::vector<std::string> _availableGraphicalLibs;
+            std::vector<std::string> _availableGames;
+            std::vector<std::string> _availableGraphicalLibs;
 
         private:
             IGraphical *_graphical;
             IGame *_game;
             Menu _menu;
             size_t _currentLibIndex;
-            DlLoader _dlLoader;  // Added DlLoader member variable
+            DlLoader _dlLoader;
             bool _inGame;
             bool _isPaused;
     };

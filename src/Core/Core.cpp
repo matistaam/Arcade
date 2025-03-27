@@ -13,18 +13,15 @@ namespace arc {
         std::string libName = path;
         size_t lastSlash = libName.find_last_of('/');
 
-        this->_availableGraphicalLibs = _dlLoader.getAvailableGraphicalLibs();
-        this->_availableGames = _dlLoader.getAvailableGames();
+        this->_availableGraphicalLibs = this->_dlLoader.getAvailableGraphicalLibs();
+        this->_availableGames = this->_dlLoader.getAvailableGames();
         this->_menu.setAvailableGames(this->_availableGames);
-        
         try {
-            this->_graphical = _dlLoader.loadGraphicalLibrary(path);
+            this->_graphical = this->_dlLoader.loadGraphicalLibrary(path);
         } catch (const std::exception &e) {
             throw;
         }
-        
         this->_game = nullptr;
-        
         if (lastSlash != std::string::npos)
             libName = libName.substr(lastSlash + 1);
         if (libName.substr(0, 7) == "arcade_" && libName.substr(libName.length() - 3) == ".so") {
@@ -41,21 +38,19 @@ namespace arc {
     Core::~Core()
     {
         if (this->_graphical) {
-            _dlLoader.unloadGraphicalLibrary(this->_graphical);
+            this->_dlLoader.unloadGraphicalLibrary(this->_graphical);
             this->_graphical = nullptr;
         }
-        
         if (this->_game) {
-            _dlLoader.unloadGame(this->_game);
+            this->_dlLoader.unloadGame(this->_game);
             this->_game = nullptr;
         }
     }
 
     void Core::setGraphical(IGraphical *Graphical)
     {
-        if (this->_graphical) {
-            _dlLoader.unloadGraphicalLibrary(this->_graphical);
-        }
+        if (this->_graphical)
+            this->_dlLoader.unloadGraphicalLibrary(this->_graphical);
         this->_graphical = Graphical;
     }
 
@@ -76,11 +71,10 @@ namespace arc {
         if (!this->_graphical)
             return;
         this->_graphical->clearElements();
-        if (!this->_inGame || this->_isPaused) {
+        if (!this->_inGame || this->_isPaused)
             this->_graphical->setElements(this->_menu.getElements());
-        } else {
+        else
             this->_graphical->setElements(elements);
-        }
         this->_graphical->draw();
     }
 
@@ -150,10 +144,9 @@ namespace arc {
         int highScore = 0;
 
         if (this->_game) {
-            _dlLoader.unloadGame(this->_game);
+            this->_dlLoader.unloadGame(this->_game);
             this->_game = nullptr;
         }
-
         std::ifstream file("accounts.txt");
         if (file.is_open()) {
             std::string line;
@@ -173,9 +166,8 @@ namespace arc {
             }
             file.close();
         }
-
         try {
-            this->_game = _dlLoader.loadGame(name, username, highScore);
+            this->_game = this->_dlLoader.loadGame(name, username, highScore);
             this->_inGame = true;
         } catch (const std::exception &e) {
             throw;
@@ -188,26 +180,22 @@ namespace arc {
         std::string lib_path = "lib/arcade_" + name + ".so";
 
         if (this->_graphical) {
-            _dlLoader.unloadGraphicalLibrary(this->_graphical);
+            this->_dlLoader.unloadGraphicalLibrary(this->_graphical);
             this->_graphical = nullptr;
         }
-
         if (name.empty())
             return;
-
         try {
-            this->_graphical = _dlLoader.loadGraphicalLibrary(lib_path);
+            this->_graphical = this->_dlLoader.loadGraphicalLibrary(lib_path);
         } catch (const std::exception &e) {
             throw;
         }
-
         for (size_t i = 0; i < this->_availableGraphicalLibs.size(); i++) {
             if (this->_availableGraphicalLibs[i] == name) {
                 this->_currentLibIndex = i;
                 break;
             }
         }
-
         if (this->_game && this->_inGame && !this->_isPaused) {
             gameElements = this->_game->handleEvents("");
             display(gameElements);
@@ -218,13 +206,13 @@ namespace arc {
 
     std::vector<std::string> Core::getAvailableGames()
     {
-        this->_availableGames = _dlLoader.getAvailableGames();
-        return this->_availableGames;
+        this->_availableGames = this->_dlLoader.getAvailableGames();
+        return (this->_availableGames);
     }
 
     std::vector<std::string> Core::getAvailableGraphicalLibs()
     {
-        this->_availableGraphicalLibs = _dlLoader.getAvailableGraphicalLibs();
-        return this->_availableGraphicalLibs;
+        this->_availableGraphicalLibs = this->_dlLoader.getAvailableGraphicalLibs();
+        return (this->_availableGraphicalLibs);
     }
 }

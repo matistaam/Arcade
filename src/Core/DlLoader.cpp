@@ -36,39 +36,33 @@ namespace arc {
             dlclose(this->_graphicalHandle);
             this->_graphicalHandle = nullptr;
         }
-
         this->_graphicalHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
         if (!this->_graphicalHandle)
             throw LibraryError(std::string(path) + ": " + std::string(dlerror()));
-        
         get_type = (get_type_t)dlsym(this->_graphicalHandle, "get_type");
         if (!get_type) {
             dlclose(this->_graphicalHandle);
             this->_graphicalHandle = nullptr;
             throw InvalidLibraryError(path);
         }
-        
         if (std::string(get_type()) != "graphical") {
             dlclose(this->_graphicalHandle);
             this->_graphicalHandle = nullptr;
             throw InvalidLibraryError(path + ": not a graphical library");
         }
-        
         create = (create_graphical_t)dlsym(this->_graphicalHandle, "create");
         if (!create) {
             dlclose(this->_graphicalHandle);
             this->_graphicalHandle = nullptr;
             throw InvalidLibraryError(path);
         }
-        
         graphical = create();
         if (!graphical) {
             dlclose(this->_graphicalHandle);
             this->_graphicalHandle = nullptr;
             throw InvalidLibraryError(path);
         }
-        
-        return graphical;
+        return (graphical);
     }
 
     void DlLoader::unloadGraphicalLibrary(IGraphical *graphical)
@@ -80,7 +74,6 @@ namespace arc {
             if (destroy)
                 destroy(graphical);
         }
-        
         if (this->_graphicalHandle) {
             dlclose(this->_graphicalHandle);
             this->_graphicalHandle = nullptr;
@@ -98,33 +91,28 @@ namespace arc {
             dlclose(this->_gameHandle);
             this->_gameHandle = nullptr;
         }
-
         this->_gameHandle = dlopen(lib_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
         if (!this->_gameHandle)
             throw GameError(std::string("Cannot load game library '") + lib_path + "': " + std::string(dlerror()));
-        
         get_type = (get_type_t)dlsym(this->_gameHandle, "get_type");
         if (!get_type || std::string(get_type()) != "game") {
             dlclose(this->_gameHandle);
             this->_gameHandle = nullptr;
             throw GameError(std::string("Invalid game library '") + lib_path + "'");
         }
-        
         create = (create_game_t)dlsym(this->_gameHandle, "create");
         if (!create) {
             dlclose(this->_gameHandle);
             this->_gameHandle = nullptr;
             throw GameError(std::string("Invalid game library '") + lib_path + "'");
         }
-        
         game = create(username, highScore);
         if (!game) {
             dlclose(this->_gameHandle);
             this->_gameHandle = nullptr;
             throw GameError(std::string("Failed to create game instance from '") + lib_path + "'");
         }
-        
-        return game;
+        return (game);
     }
 
     void DlLoader::unloadGame(IGame *game)
@@ -136,7 +124,6 @@ namespace arc {
             if (destroy)
                 destroy(game);
         }
-        
         if (this->_gameHandle) {
             dlclose(this->_gameHandle);
             this->_gameHandle = nullptr;
@@ -154,23 +141,21 @@ namespace arc {
 
         dir = opendir("lib");
         if (dir == nullptr)
-            return availableGraphicalLibs;
-            
+            return (availableGraphicalLibs);
         while ((entry = readdir(dir)) != nullptr) {
             filename = entry->d_name;
             if ((filename.substr(0, 7) == "arcade_") && (filename.substr(filename.length() - 3) == ".so")) {
                 handle = dlopen(("lib/" + filename).c_str(), RTLD_LAZY | RTLD_GLOBAL);
                 if (handle) {
                     get_type = (get_type_t)dlsym(handle, "get_type");
-                    if (get_type && std::string(get_type()) == "graphical") {
+                    if (get_type && std::string(get_type()) == "graphical")
                         availableGraphicalLibs.push_back(filename.substr(7, filename.length() - 10));
-                    }
                     dlclose(handle);
                 }
             }
         }
         closedir(dir);
-        return availableGraphicalLibs;
+        return (availableGraphicalLibs);
     }
 
     std::vector<std::string> DlLoader::getAvailableGames()
@@ -184,8 +169,7 @@ namespace arc {
 
         dir = opendir("lib");
         if (dir == nullptr)
-            return availableGames;
-            
+            return (availableGames);
         while ((entry = readdir(dir)) != nullptr) {
             filename = entry->d_name;
             if ((filename.substr(0, 7) == "arcade_") && (filename.substr(filename.length() - 3) == ".so")) {
@@ -199,6 +183,6 @@ namespace arc {
             }
         }
         closedir(dir);
-        return availableGames;
+        return (availableGames);
     }
 }

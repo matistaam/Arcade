@@ -33,8 +33,7 @@ namespace arc
             IGame *_game;
             Menu _menu;
             size_t _currentLibIndex;
-            void *_handle;
-            void *_gameHandle;
+            DlLoader _dlLoader;  // Added DlLoader member variable
             bool _inGame;
             bool _isPaused;
     };

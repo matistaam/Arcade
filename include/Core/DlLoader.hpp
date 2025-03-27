@@ -10,29 +10,28 @@
 #include <string>
 #include <vector>
 #include <dlfcn.h>
+#include "ArcadeException.hpp"
+#include "IGraphical.hpp"
+#include "IGame.hpp"
 
 namespace arc {
-    class IGraphical;
-    class IGame;
-
     class DlLoader {
         public:
             DlLoader();
             ~DlLoader();
 
+            // Graphical library management
             IGraphical *loadGraphicalLibrary(const std::string &path);
-            void switchGraphicalLibrary(const std::string &name);
-            void closeGraphicalLibrary();
+            void unloadGraphicalLibrary(IGraphical *graphical);
             std::vector<std::string> getAvailableGraphicalLibs();
 
+            // Game library management
             IGame *loadGame(const std::string &name, const std::string &username, int highScore);
-            void closeGameLibrary();
+            void unloadGame(IGame *game);
             std::vector<std::string> getAvailableGames();
 
         private:
-            void *_handle;
+            void *_graphicalHandle;
             void *_gameHandle;
-            IGraphical *_graphical;
-            IGame *_game;
     };
 }

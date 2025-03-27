@@ -9,17 +9,14 @@
 namespace arc {
     Ncurses::Ncurses() : AGraphical(""), _screen(nullptr), _isInitialized(false)
     {
-        // Set locale for proper wide character handling
         setlocale(LC_ALL, "");
-        
-        // Initialize the screen and store the pointer
-        _screen = newterm(nullptr, stdout, stdin);
-        if (_screen == nullptr)
+
+        this->_screen = newterm(nullptr, stdout, stdin);
+        if (this->_screen == nullptr)
             throw GraphicalError("NCurses initialization failed");
-            
-        // Set the screen as current
-        set_term(_screen);
-        
+
+        set_term(this->_screen);
+
         if (start_color() == ERR)
             throw GraphicalError("NCurses color initialization failed");
         if (cbreak() == ERR)
@@ -49,15 +46,14 @@ namespace arc {
     {
         if (this->_isInitialized) {
             delwin(this->_window);
-            
-            // Use the stored screen to clean up properly
-            if (_screen != nullptr) {
-                set_term(_screen);
+
+            if (this->_screen != nullptr) {
+                set_term(this->_screen);
                 endwin();
-                delscreen(_screen);
-                _screen = nullptr;
+                delscreen(this->_screen);
+                this->_screen = nullptr;
             }
-            
+
             this->_isInitialized = false;
         }
     }

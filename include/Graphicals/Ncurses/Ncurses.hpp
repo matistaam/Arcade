@@ -27,7 +27,7 @@ namespace arc {
             WINDOW *_window;
             int _maxY;
             int _maxX;
-            SCREEN *_screen;  // Store reference to the screen
+            SCREEN *_screen;
             bool _isInitialized;
     };
 }

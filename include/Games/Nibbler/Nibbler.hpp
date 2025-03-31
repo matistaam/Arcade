@@ -78,7 +78,7 @@ namespace arc {
             void handleWallCollision(std::pair<int, int>& newHead); // Method for handling directional walls
             bool isTSection(const std::pair<int, int>& position); // Method to check if position is a T-section
             void updateGame();
-            void updateClock(); 
+            void updateClock();
             void processInput(const std::string& command);
             void processDirectionQueue(); // New method to handle the direction queue
             std::vector<element_t> createGameElements();

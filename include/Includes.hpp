@@ -17,6 +17,7 @@
 #include <fstream>
 #include <sstream>
 #include <dlfcn.h>
+#include <optional>
 
 // Graphics libraries includes
 #include <ncurses.h>
@@ -36,6 +37,7 @@
 #include "Menu.hpp"
 #include "Core.hpp"
 #include "Nibbler.hpp"
+#include "NewNibbler.hpp"
 #include "Snake.hpp"
 #include "Ncurses.hpp"
 #include "Sdl2.hpp"

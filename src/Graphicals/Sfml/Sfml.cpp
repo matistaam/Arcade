@@ -86,6 +86,8 @@ namespace arc {
                         draw_text(element);
                         break;
                     case BORDER:
+                        if (element._display == true)
+                            draw_rectangle(element);
                         break;
                 }
             }

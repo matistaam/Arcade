@@ -37,5 +37,6 @@ namespace arc {
         std::tuple<int, int> _size;
         std::string _image_path;
         int _font_size = 24;
+        bool _display = true;
     } element_t;
 }

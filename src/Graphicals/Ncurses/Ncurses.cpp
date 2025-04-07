@@ -146,7 +146,8 @@ namespace arc {
                         draw_text(element);
                         break;
                     case BORDER:
-                        draw_border(element);
+                        if (element._display)
+                            draw_border(element);
                         break;
                 }
             }

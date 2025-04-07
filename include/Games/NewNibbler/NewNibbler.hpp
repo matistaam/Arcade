@@ -34,6 +34,10 @@ namespace arc {
                 WIN
             };
 
+            std::size_t _map_width = 40;
+            std::size_t _map_height = 30;
+            std::size_t _cell_size = 20;
+
             // Game elements
             std::vector<std::pair<int, int>> _snake;
             std::vector<std::pair<int, int>> _walls;
@@ -50,10 +54,20 @@ namespace arc {
             std::optional<Direction> _inputQueue; // Queue of size one to store previous input when relevant
             GameState _gameState;
 
+            // Time management
+            std::chrono::steady_clock::time_point _lastUpdateTime;
+            std::chrono::milliseconds _updateInterval;
+
             bool loadMap(const std::string& mapPath);
             void initialize();
             void processInput(const std::string& command);
-
+            void updateGame();
+            void handleWallCollision(std::pair<int, int>& newHead);
+            bool isTSection(const std::pair<int, int>& position);
+            bool checkWinCondition();
+            bool checkSelfCollision();
+            bool isOppositeDirection(Direction dir1, Direction dir2);
+            bool wouldHitWall(Direction testDirection, std::pair<int, int> position);
 
             std::vector<element_t> createGameElements();
     };

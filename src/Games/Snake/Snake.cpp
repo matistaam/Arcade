@@ -207,7 +207,7 @@ namespace arc {
         border._position = std::make_tuple(0, 0);
         border._size = std::make_tuple(HEIGHT + 2, WIDTH + 2);
         border._color = "6";
-        border._display = false;
+        border._display = true;
         elements.push_back(border);
         background._type = IMAGE;
         background._image_path = "assets/snake_background.png";

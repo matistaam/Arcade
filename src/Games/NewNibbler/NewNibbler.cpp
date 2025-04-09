@@ -134,21 +134,21 @@ namespace arc{
         }
 
         // Convert command string to direction
-        Direction immediateDirection = this->_direction; // Default to current direction
+        Direction newInput = this->_direction; // Default to current direction
         bool validInput = false;
 
         // Convert command string to direction
         if (command == "UP" && this->_lastDirection != Direction::DOWN) {
-            immediateDirection = Direction::UP;
+            newInput = Direction::UP;
             validInput = true;
         } else if (command == "DOWN" && this->_lastDirection != Direction::UP) {
-            immediateDirection = Direction::DOWN;
+            newInput = Direction::DOWN;
             validInput = true;
         } else if (command == "LEFT" && this->_lastDirection != Direction::RIGHT) {
-            immediateDirection = Direction::LEFT;
+            newInput = Direction::LEFT;
             validInput = true;
         } else if (command == "RIGHT" && this->_lastDirection != Direction::LEFT) {
-            immediateDirection = Direction::RIGHT;
+            newInput = Direction::RIGHT;
             validInput = true;
         }
 
@@ -157,73 +157,15 @@ namespace arc{
             return;
         }
 
-        // CHECK FOR QUEUED INPUT
-        if (this->_inputQueue) {
-            // Apply the queued input
-            Direction queuedDirection = *this->_inputQueue;
-            this->_inputQueue = std::nullopt; // Clear the queue
-
-            if (!this->isOppositeDirection(queuedDirection, this->_lastDirection) && 
-                !this->wouldHitWall(queuedDirection, this->_snake.front())) {
-                this->_direction = queuedDirection;
-            }
-
-            // Now check if the immediate input would work next turn
-            std::pair<int, int> nextPos = this->_snake.front();
-            // Calculate next position based on current direction
-            switch (this->_direction) {
-                case Direction::UP:
-                    nextPos.second--;
-                    break;
-                case Direction::DOWN:
-                    nextPos.second++;
-                    break;
-                case Direction::LEFT:
-                    nextPos.first--;
-                    break;
-                case Direction::RIGHT:
-                    nextPos.first++;
-                    break;
-            }
-
-            // Check if the immediate input would be valid from the next position
-            if (!this->wouldHitWall(immediateDirection, nextPos) && 
-                !this->isOppositeDirection(immediateDirection, this->_direction)) {
-                this->_inputQueue = immediateDirection; // Queue for next turn
-            }
-            return;
-        }
-
-        // NO QUEUED INPUT, CHECK IF IMMEDIATE INPUT WORKS
-        if (!this->wouldHitWall(immediateDirection, this->_snake.front())) {
-            // Immediate input works, apply it
-            this->_direction = immediateDirection;
+        // First try to apply the input immediately if possible
+        if (!this->wouldHitWall(newInput, this->_snake.front())) {
+            // Can apply immediately
+            this->_direction = newInput;
+            // Clear any queued input since we've made an immediate turn
+            this->_inputQueue = std::nullopt;
         } else {
-            // Immediate input doesn't work, check if it would work next turn
-            std::pair<int, int> nextPos = this->_snake.front();
-
-            // Calculate next position based on current direction
-            switch (this->_direction) {
-                case Direction::UP:
-                    nextPos.second--;
-                    break;
-                case Direction::DOWN:
-                    nextPos.second++;
-                    break;
-                case Direction::LEFT:
-                    nextPos.first--;
-                    break;
-                case Direction::RIGHT:
-                    nextPos.first++;
-                    break;
-            }
-
-            // Check if it would be valid from the next position
-            if (!this->wouldHitWall(immediateDirection, nextPos) && 
-                !this->isOppositeDirection(immediateDirection, this->_direction)) {
-                this->_inputQueue = immediateDirection; // Queue it for next turn
-            }
-            // If it doesn't work next turn either, ignore it
+            // Can't apply immediately, so queue it (overwriting any existing queued input)
+            this->_inputQueue = newInput;
         }
     }
 
@@ -238,6 +180,8 @@ namespace arc{
             return;
         }
 
+        this->_lastUpdateTime = currentTime;
+
         if (this->_gameState != GameState::RUNNING) {
             std::cout << "Exit 2" << std::endl;
             return;
@@ -247,19 +191,31 @@ namespace arc{
         std::pair<int, int> head = this->_snake.front();
         std::pair<int, int> newHead = head;
 
+        // Check if we have a queued input and if it can be applied now
+        if (this->_inputQueue) {
+            Direction queuedDirection = *this->_inputQueue;
+            
+            // Check if the queued direction is valid at this position
+            if (!this->wouldHitWall(queuedDirection, head)) {
+                // Apply the queued input
+                this->_direction = queuedDirection;
+                this->_inputQueue = std::nullopt; // Clear the queue
+            }
+        }
+
         // Move head based on direction
         switch (this->_direction) {
             case Direction::UP:
-                newHead.second--;
-                break;
-            case Direction::DOWN:
-                newHead.second++;
-                break;
-            case Direction::LEFT:
                 newHead.first--;
                 break;
-            case Direction::RIGHT:
+            case Direction::DOWN:
                 newHead.first++;
+                break;
+            case Direction::LEFT:
+                newHead.second--;
+                break;
+            case Direction::RIGHT:
+                newHead.second++;
                 break;
         }
         this->_lastDirection = this->_direction;
@@ -371,43 +327,36 @@ namespace arc{
     {
         for (auto& wall : this->_walls) {
             if (newHead.first == wall.first && newHead.second == wall.second) {
-                // Check if it is a turnwall
+                std::cout << "Collision detected at: (" << newHead.first << ", " << newHead.second << ")" << std::endl;
+
                 auto it = this->_turnWalls.find(wall);
                 if (it != this->_turnWalls.end()) {
-                    std::cout << "Hit turnwall" << std::endl;
-                    // Retrieve the new direction encoded in the turnwall
+                    std::cout << "Turn wall detected. Changing direction." << std::endl;
                     Direction newDirection = it->second;
 
-                    // Restore snake head (undo the move)
                     newHead = this->_snake.front();
-
                     this->_direction = newDirection;
 
                     switch (this->_direction) {
                         case Direction::UP:
-                            newHead.second--;
-                            break;
-                        case Direction::DOWN:
-                            newHead.second++;
-                            break;
-                        case Direction::LEFT:
                             newHead.first--;
                             break;
-                        case Direction::RIGHT:
+                        case Direction::DOWN:
                             newHead.first++;
                             break;
+                        case Direction::LEFT:
+                            newHead.second--;
+                            break;
+                        case Direction::RIGHT:
+                            newHead.second++;
+                            break;
                     }
-
-                    // TODO: maybe check if new position is another wall ?
-                } else if (this->isTSection(wall)) {
-                    // If snake runs into a T-section, it stops moving
+                } else {
+                    std::cout << "Regular wall detected. Stopping snake." << std::endl;
                     newHead = this->_snake.front();
                     this->_snakeStopped = true;
-                } else {
-                    // Regular wall just prevents movement in this direction, snake will continue straight
-                    newHead = this->_snake.front();
                 }
-                break;
+                return;
             }
         }
     }
@@ -456,16 +405,16 @@ namespace arc{
 
         switch (testDirection) {
             case Direction::UP:
-                potentialPos.second--;
-                break;
-            case Direction::DOWN:
-                potentialPos.second++;
-                break;
-            case Direction::LEFT:
                 potentialPos.first--;
                 break;
-            case Direction::RIGHT:
+            case Direction::DOWN:
                 potentialPos.first++;
+                break;
+            case Direction::LEFT:
+                potentialPos.second--;
+                break;
+            case Direction::RIGHT:
+                potentialPos.second++;
                 break;
         }
 

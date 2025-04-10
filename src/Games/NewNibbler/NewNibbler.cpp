@@ -27,6 +27,10 @@ namespace arc{
         this->_snakeStopped = false;
         this->_cell_size = 20;
 
+        // Initialize clock timer
+        this->_timeRemaining = 60.0f;        // 100 seconds to complete the level
+        this->_clockSpeedMultiplier = 1.0f;   // Normal speed to start
+        
         // Load the map
         // TODO: implement a map iteration system
         if (!this->loadMap("assets/NibblerMaps/nibbler_map_01.txt")){
@@ -36,7 +40,8 @@ namespace arc{
         // Initialize game timer
         this->_lastUpdateTime = std::chrono::steady_clock::now();
         this->_updateInterval = std::chrono::milliseconds(150); // Snake speed
-
+        this->_lastFoodEatenTime = std::chrono::steady_clock::now();
+        this->_lastClockUpdateTime = std::chrono::steady_clock::now();
     }
 
     bool NewNibbler::loadMap(const std::string& mapPath)
@@ -174,16 +179,38 @@ namespace arc{
         auto currentTime = std::chrono::steady_clock::now();
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - this->_lastUpdateTime);
 
-        // TODO: maybe implement the skip in the processInput method
         if (elapsedTime < this->_updateInterval) {
             return;
         }
 
         this->_lastUpdateTime = currentTime;
 
-        if (this->_gameState != GameState::RUNNING) {
+        // Stop updating the clock if the game is won or over
+        if (this->_gameState == GameState::WIN || this->_gameState == GameState::GAME_OVER) {
             return;
         }
+
+        // Update the clock timer
+        auto clockElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - this->_lastClockUpdateTime);
+        float elapsedSeconds = clockElapsed.count() / 1000.0f;
+        this->_lastClockUpdateTime = currentTime;
+
+        // Decrease time remaining based on elapsed time and current multiplier
+        this->_timeRemaining -= elapsedSeconds * this->_clockSpeedMultiplier;
+
+        // Check if time has run out
+        if (this->_timeRemaining <= 0) {
+            this->_timeRemaining = 0;
+            this->_gameState = GameState::GAME_OVER;
+            return;
+        }
+
+        // Increase clock speed if no food has been eaten for a while
+        auto timeSinceLastFood = std::chrono::duration_cast<std::chrono::seconds>(
+            currentTime - this->_lastFoodEatenTime).count();
+        
+        // Every 5 seconds without eating, increase clock speed multiplier
+        this->_clockSpeedMultiplier = 1.0f + (timeSinceLastFood / 5.0f) * 1.5f; // Increases by 1.5 every 5 seconds
 
         // Get current head position
         std::pair<int, int> head = this->_snake.front();
@@ -239,7 +266,10 @@ namespace arc{
                 it = this->_food.erase(it);
                 foodEaten = true;
 
-                // TODO: handle clock
+                // Reset the food eaten timer and clock speed multiplier
+                this->_lastFoodEatenTime = currentTime;
+                this->_clockSpeedMultiplier = 1.0f;
+
                 break;
             } else {
                 ++it;
@@ -248,8 +278,6 @@ namespace arc{
 
         if (!foodEaten) {
             this->_snake.pop_back();
-
-            // TODO: Handle clock speed
         }
 
         if (this->checkWinCondition()) {
@@ -268,6 +296,8 @@ namespace arc{
         element_t wallElement = {};
         element_t snakeElement = {};
         element_t foodElement = {};
+        element_t timerElement = {};
+        element_t gameOverElement = {};
 
         int elementY = 0;
         int elementX = 0;
@@ -314,6 +344,71 @@ namespace arc{
             foodElement._size = std::make_tuple(18, 18);
             foodElement._color = "1"; // Red
             elements.push_back(foodElement);
+        }
+
+        // Check game state and display appropriate message or timer
+        if (this->_gameState == GameState::GAME_OVER) {
+            // Display game over message
+            gameOverElement._type = TEXT;
+            gameOverElement._position = std::make_tuple(75, 30); // Adjusted position for first line
+            gameOverElement._text = "GAME OVER";
+            gameOverElement._color = "1"; // Red for game over
+            gameOverElement._font_size = 32;
+            elements.push_back(gameOverElement);
+
+            element_t restartElement = {};
+            restartElement._type = TEXT;
+            restartElement._position = std::make_tuple(75, 40); // Position for second line
+            restartElement._text = "Press 'r' to restart";
+            restartElement._color = "1"; // Red for game over
+            restartElement._font_size = 24;
+            elements.push_back(restartElement);
+        } else if (this->_gameState == GameState::WIN) {
+            // Display win message
+            gameOverElement._type = TEXT;
+            gameOverElement._position = std::make_tuple(75, 30); // Adjusted position for first line
+            gameOverElement._text = "YOU WIN!";
+            gameOverElement._color = "2"; // Green for win
+            gameOverElement._font_size = 32;
+            elements.push_back(gameOverElement);
+
+            element_t restartElement = {};
+            restartElement._type = TEXT;
+            restartElement._position = std::make_tuple(75, 40); // Position for second line
+            restartElement._text = "Press 'r' to play again";
+            restartElement._color = "2"; // Green for win
+            restartElement._font_size = 24;
+            elements.push_back(restartElement);
+        } else {
+            // Game is still running, display timer
+            timerElement._type = TEXT;
+            timerElement._position = std::make_tuple(80, 50);
+
+            // Change color based on time remaining
+            if (this->_timeRemaining > 50) {
+                timerElement._color = "2";  // Green when plenty of time
+            } else if (this->_timeRemaining > 25) {
+                timerElement._color = "3";  // Yellow when time is getting low
+            } else {
+                timerElement._color = "1";  // Red when time is critical
+            }
+
+            // Format timer text with clear spacing
+            std::string timerText = "Time: " + std::to_string(static_cast<int>(this->_timeRemaining));
+
+            // Add indicator for speed multiplier with only one digit after decimal point
+            if (this->_clockSpeedMultiplier > 1.1f) {
+                // Format speed with exactly one decimal place
+                std::stringstream speedStream;
+                speedStream << std::fixed << std::setprecision(1) << this->_clockSpeedMultiplier;
+                timerText += "  Speed: x" + speedStream.str();
+            } else {
+                timerText += "  Speed: Normal";
+            }
+
+            timerElement._text = timerText;
+            timerElement._font_size = 32;
+            elements.push_back(timerElement);
         }
 
         return elements;

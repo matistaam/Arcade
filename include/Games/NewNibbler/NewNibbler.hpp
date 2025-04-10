@@ -51,12 +51,18 @@ namespace arc {
             // Game state
             Direction _direction;
             Direction _lastDirection;
-            std::optional<Direction> _inputQueue; // Queue of size one to store previous input when relevant
+            std::optional<Direction> _inputQueue;
             GameState _gameState;
 
             // Time management
             std::chrono::steady_clock::time_point _lastUpdateTime;
             std::chrono::milliseconds _updateInterval;
+
+            // Clock timer variables
+            float _timeRemaining;
+            float _clockSpeedMultiplier;
+            std::chrono::steady_clock::time_point _lastFoodEatenTime;
+            std::chrono::steady_clock::time_point _lastClockUpdateTime;
 
             bool loadMap(const std::string& mapPath);
             void initialize();

@@ -37,7 +37,6 @@
 #include "Menu.hpp"
 #include "Core.hpp"
 #include "Nibbler.hpp"
-#include "NewNibbler.hpp"
 #include "Snake.hpp"
 #include "Ncurses.hpp"
 #include "Sdl2.hpp"

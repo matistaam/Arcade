@@ -29,25 +29,22 @@ GRAPHICAL_LIBS			=	$(NCURSES_LIB) $(SDL_LIB) $(SFML_LIB)
 
 # Games configuration
 SNAKE_LIB				=	$(LIB_DIR)/arcade_snake.so
-NIBBLER_LIB				=	$(LIB_DIR)/arcade_nibbler.so
-NEWNIBBLER_LIB			=	$(LIB_DIR)/arcade_newnibbler.so
-GAMES_LIBS				=	$(SNAKE_LIB) $(NIBBLER_LIB) $(NEWNIBBLER_LIB)
+Nibbler_LIB			=	$(LIB_DIR)/arcade_Nibbler.so
+GAMES_LIBS				=	$(SNAKE_LIB) $(Nibbler_LIB)
 
 # Source files for libraries
 NCURSES_SRC				=	$(shell find src/Graphicals/Ncurses -name "*.cpp") src/Graphicals/AGraphical.cpp src/ArcadeException.cpp
 SDL_SRC					=	$(shell find src/Graphicals/Sdl2 -name "*.cpp") src/Graphicals/AGraphical.cpp src/ArcadeException.cpp
 SFML_SRC				=	$(shell find src/Graphicals/Sfml -name "*.cpp") src/Graphicals/AGraphical.cpp src/ArcadeException.cpp
 SNAKE_SRC				=	$(shell find src/Games/Snake -name "*.cpp") src/Games/AGame.cpp src/ArcadeException.cpp src/Core/Menu.cpp
-NIBBLER_SRC				=	$(shell find src/Games/Nibbler -name "*.cpp") src/Games/AGame.cpp src/ArcadeException.cpp src/Core/Menu.cpp
-NEWNIBBLER_SRC			=	$(shell find src/Games/NewNibbler -name "*.cpp") src/Games/AGame.cpp src/ArcadeException.cpp src/Core/Menu.cpp
+Nibbler_SRC			=	$(shell find src/Games/Nibbler -name "*.cpp") src/Games/AGame.cpp src/ArcadeException.cpp src/Core/Menu.cpp
 
 # Object files for libraries
 NCURSES_OBJ				=	$(NCURSES_SRC:.cpp=.o)
 SDL_OBJ					=	$(SDL_SRC:.cpp=.o)
 SFML_OBJ				=	$(SFML_SRC:.cpp=.o)
 SNAKE_OBJ				=	$(SNAKE_SRC:.cpp=.o)
-NIBBLER_OBJ				=	$(NIBBLER_SRC:.cpp=.o)
-NEWNIBBLER_OBJ			=	$(NEWNIBBLER_SRC:.cpp=.o)
+Nibbler_OBJ			=	$(Nibbler_SRC:.cpp=.o)
 
 # Library flags
 NCURSES_FLAGS			=	-lncurses
@@ -89,12 +86,8 @@ $(SNAKE_LIB): $(SNAKE_OBJ)
 	@echo "Linking Snake game..."
 	@$(CXX) -shared $^ -o $@
 
-$(NIBBLER_LIB): $(NIBBLER_OBJ)
+$(Nibbler_LIB): $(Nibbler_OBJ)
 	@echo "Linking Nibbler game..."
-	@$(CXX) -shared $^ -o $@
-
-$(NEWNIBBLER_LIB): $(NEWNIBBLER_OBJ)
-	@echo "Linking NewNibbler game..."
 	@$(CXX) -shared $^ -o $@
 
 %.o: %.cpp
@@ -103,7 +96,7 @@ $(NEWNIBBLER_LIB): $(NEWNIBBLER_OBJ)
 
 clean:
 	@echo "Cleaning object files..."
-	@$(RM) $(OBJ_CORE) $(NCURSES_OBJ) $(SDL_OBJ) $(SFML_OBJ) $(SNAKE_OBJ) $(NIBBLER_OBJ) $(NEWNIBBLER_OBJ)
+	@$(RM) $(OBJ_CORE) $(NCURSES_OBJ) $(SDL_OBJ) $(SFML_OBJ) $(SNAKE_OBJ) $(Nibbler_OBJ)
 
 fclean: clean
 	@echo "Cleaning executable and libraries..."

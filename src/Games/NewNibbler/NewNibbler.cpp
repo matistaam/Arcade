@@ -26,11 +26,12 @@ namespace arc{
         this->_inputQueue = std::nullopt;
         this->_snakeStopped = false;
         this->_cell_size = 20;
+        this->_currentScore = 0;
 
         // Initialize clock timer
-        this->_timeRemaining = 60.0f;        // 100 seconds to complete the level
-        this->_clockSpeedMultiplier = 1.0f;   // Normal speed to start
-        
+        this->_timeRemaining = 60.0f;
+        this->_clockSpeedMultiplier = 1.0f;
+
         // Load the map
         // TODO: implement a map iteration system
         if (!this->loadMap("assets/NibblerMaps/nibbler_map_01.txt")){
@@ -39,7 +40,7 @@ namespace arc{
 
         // Initialize game timer
         this->_lastUpdateTime = std::chrono::steady_clock::now();
-        this->_updateInterval = std::chrono::milliseconds(150); // Snake speed
+        this->_updateInterval = std::chrono::milliseconds(150);
         this->_lastFoodEatenTime = std::chrono::steady_clock::now();
         this->_lastClockUpdateTime = std::chrono::steady_clock::now();
     }
@@ -245,7 +246,7 @@ namespace arc{
         }
         this->_lastDirection = this->_direction;
 
-        // change the value of newHead based on the potential wall it hit
+        // Change the value of newHead based on the potential wall it hit
         this->handleWallCollision(newHead);
 
         // Check if newHead position is the same as current head position
@@ -257,12 +258,12 @@ namespace arc{
         // Add newHead to the front
         this->_snake.insert(this->_snake.begin(), newHead);
 
-        // Check if food was eaten
         bool foodEaten = false;
 
         for (auto it = this->_food.begin(); it != this->_food.end(); ) {
             if (newHead.first == it->first && newHead.second == it->second) {
-                // TODO: handle score
+                // Increment score when food is eaten
+                this->_currentScore += 1;
                 it = this->_food.erase(it);
                 foodEaten = true;
 
@@ -281,7 +282,14 @@ namespace arc{
         }
 
         if (this->checkWinCondition()) {
+            // Add the remaining time to the score when the player wins
+            this->_currentScore += static_cast<int>(this->_timeRemaining);
             this->_gameState = GameState::WIN;
+
+            // Update high score if current score is higher
+            if (this->_currentScore > this->_highScore) {
+                this->_highScore = this->_currentScore;
+            }
         }
 
         if (this->checkSelfCollision()) {
@@ -297,6 +305,8 @@ namespace arc{
         element_t snakeElement = {};
         element_t foodElement = {};
         element_t timerElement = {};
+        element_t speedElement = {};
+        element_t scoreElement = {};
         element_t gameOverElement = {};
 
         int elementY = 0;
@@ -332,7 +342,7 @@ namespace arc{
             } else {
                 snakeElement._color = "4"; // Blue for body
             }
-            elements.push_back(snakeElement); // Add snake element to the elements vector
+            elements.push_back(snakeElement);
         }
 
         // Add all food items
@@ -350,7 +360,7 @@ namespace arc{
         if (this->_gameState == GameState::GAME_OVER) {
             // Display game over message
             gameOverElement._type = TEXT;
-            gameOverElement._position = std::make_tuple(75, 30); // Adjusted position for first line
+            gameOverElement._position = std::make_tuple(75, 30);
             gameOverElement._text = "GAME OVER";
             gameOverElement._color = "1"; // Red for game over
             gameOverElement._font_size = 32;
@@ -358,7 +368,7 @@ namespace arc{
 
             element_t restartElement = {};
             restartElement._type = TEXT;
-            restartElement._position = std::make_tuple(75, 40); // Position for second line
+            restartElement._position = std::make_tuple(75, 40);
             restartElement._text = "Press 'r' to restart";
             restartElement._color = "1"; // Red for game over
             restartElement._font_size = 24;
@@ -366,23 +376,34 @@ namespace arc{
         } else if (this->_gameState == GameState::WIN) {
             // Display win message
             gameOverElement._type = TEXT;
-            gameOverElement._position = std::make_tuple(75, 30); // Adjusted position for first line
+            gameOverElement._position = std::make_tuple(75, 30); 
             gameOverElement._text = "YOU WIN!";
             gameOverElement._color = "2"; // Green for win
             gameOverElement._font_size = 32;
             elements.push_back(gameOverElement);
 
+            // Add score display
+            element_t scoreElement = {};
+            scoreElement._type = TEXT;
+            scoreElement._position = std::make_tuple(75, 40);
+            scoreElement._text = "Final Score: " + std::to_string(this->_currentScore);
+            scoreElement._color = "2"; // Green for win
+            scoreElement._font_size = 24;
+            elements.push_back(scoreElement);
+
+            // Add restart prompt
             element_t restartElement = {};
             restartElement._type = TEXT;
-            restartElement._position = std::make_tuple(75, 40); // Position for second line
+            restartElement._position = std::make_tuple(75, 50);
             restartElement._text = "Press 'r' to play again";
-            restartElement._color = "2"; // Green for win
+            restartElement._color = "2"; 
             restartElement._font_size = 24;
             elements.push_back(restartElement);
         } else {
-            // Game is still running, display timer
+            // Game is still running, display timer and score as separate elements
             timerElement._type = TEXT;
-            timerElement._position = std::make_tuple(80, 50);
+            timerElement._position = std::make_tuple(75, 30);
+            timerElement._text = "Time: " + std::to_string(static_cast<int>(this->_timeRemaining));
 
             // Change color based on time remaining
             if (this->_timeRemaining > 50) {
@@ -393,22 +414,31 @@ namespace arc{
                 timerElement._color = "1";  // Red when time is critical
             }
 
-            // Format timer text with clear spacing
-            std::string timerText = "Time: " + std::to_string(static_cast<int>(this->_timeRemaining));
-
-            // Add indicator for speed multiplier with only one digit after decimal point
-            if (this->_clockSpeedMultiplier > 1.1f) {
-                // Format speed with exactly one decimal place
-                std::stringstream speedStream;
-                speedStream << std::fixed << std::setprecision(1) << this->_clockSpeedMultiplier;
-                timerText += "  Speed: x" + speedStream.str();
-            } else {
-                timerText += "  Speed: Normal";
-            }
-
-            timerElement._text = timerText;
             timerElement._font_size = 32;
             elements.push_back(timerElement);
+
+            speedElement._type = TEXT;
+            speedElement._position = std::make_tuple(75, 40);
+
+            if (this->_clockSpeedMultiplier > 1.1f) {
+                std::stringstream speedStream;
+                speedStream << std::fixed << std::setprecision(1) << this->_clockSpeedMultiplier;
+                speedElement._text = "Speed: x" + speedStream.str();
+                speedElement._color = "3"; // Yellow for increased speed
+            } else {
+                speedElement._text = "Speed: Normal";
+                speedElement._color = "2"; // Green for normal speed
+            }
+
+            speedElement._font_size = 24;
+            elements.push_back(speedElement);
+
+            scoreElement._type = TEXT;
+            scoreElement._position = std::make_tuple(75, 50);
+            scoreElement._text = "Score: " + std::to_string(this->_currentScore);
+            scoreElement._color = "6"; // Cyan for score
+            scoreElement._font_size = 24;
+            elements.push_back(scoreElement);
         }
 
         return elements;

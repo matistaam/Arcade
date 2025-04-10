@@ -53,6 +53,7 @@ namespace arc {
             Direction _lastDirection;
             std::optional<Direction> _inputQueue;
             GameState _gameState;
+            int _currentScore;
 
             // Time management
             std::chrono::steady_clock::time_point _lastUpdateTime;

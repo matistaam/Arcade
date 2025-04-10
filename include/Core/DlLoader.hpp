@@ -15,12 +15,12 @@ namespace arc {
             DlLoader();
             ~DlLoader();
 
-            IGraphical *loadGraphicalLibrary(const std::string &path);
-            void unloadGraphicalLibrary(IGraphical *graphical);
+            std::shared_ptr<IGraphical> loadGraphicalLibrary(const std::string &path);
+            void unloadGraphicalLibrary(std::shared_ptr<IGraphical> graphical);
             std::vector<std::string> getAvailableGraphicalLibs();
 
-            IGame *loadGame(const std::string &name, const std::string &username, int highScore);
-            void unloadGame(IGame *game);
+            std::shared_ptr<IGame> loadGame(const std::string &name, const std::string &username, int highScore);
+            void unloadGame(std::shared_ptr<IGame> game);
             std::vector<std::string> getAvailableGames();
 
         private:

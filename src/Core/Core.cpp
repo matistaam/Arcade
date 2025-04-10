@@ -39,22 +39,22 @@ namespace arc {
     {
         if (this->_graphical) {
             this->_dlLoader.unloadGraphicalLibrary(this->_graphical);
-            this->_graphical = nullptr;
+            this->_graphical.reset();
         }
         if (this->_game) {
             this->_dlLoader.unloadGame(this->_game);
-            this->_game = nullptr;
+            this->_game.reset();
         }
     }
 
-    void Core::setGraphical(IGraphical *Graphical)
+    void Core::setGraphical(std::shared_ptr<IGraphical> Graphical)
     {
         if (this->_graphical)
             this->_dlLoader.unloadGraphicalLibrary(this->_graphical);
         this->_graphical = Graphical;
     }
 
-    void Core::setGame(IGame *Game)
+    void Core::setGame(std::shared_ptr<IGame> Game)
     {
         std::vector<element_t> initialElements = {};
 

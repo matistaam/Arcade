@@ -15,8 +15,8 @@ namespace arc
             Core(std::string path);
             ~Core();
 
-            void setGraphical(IGraphical *Graphical);
-            void setGame(IGame *Game);
+            void setGraphical(std::shared_ptr<IGraphical> Graphical);
+            void setGame(std::shared_ptr<IGame> Game);
             void display(std::vector<element_t> elements);
 
             std::string update();
@@ -29,8 +29,8 @@ namespace arc
             std::vector<std::string> _availableGraphicalLibs;
 
         private:
-            IGraphical *_graphical;
-            IGame *_game;
+            std::shared_ptr<IGraphical> _graphical;
+            std::shared_ptr<IGame> _game;
             Menu _menu;
             size_t _currentLibIndex;
             DlLoader _dlLoader;

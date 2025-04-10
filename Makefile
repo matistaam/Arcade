@@ -29,22 +29,22 @@ GRAPHICAL_LIBS			=	$(NCURSES_LIB) $(SDL_LIB) $(SFML_LIB)
 
 # Games configuration
 SNAKE_LIB				=	$(LIB_DIR)/arcade_snake.so
-Nibbler_LIB			=	$(LIB_DIR)/arcade_Nibbler.so
-GAMES_LIBS				=	$(SNAKE_LIB) $(Nibbler_LIB)
+NIBBLER_LIB				=	$(LIB_DIR)/arcade_nibbler.so
+GAMES_LIBS				=	$(SNAKE_LIB) $(NIBBLER_LIB) $(NEWNIBBLER_LIB)
 
 # Source files for libraries
 NCURSES_SRC				=	$(shell find src/Graphicals/Ncurses -name "*.cpp") src/Graphicals/AGraphical.cpp src/ArcadeException.cpp
 SDL_SRC					=	$(shell find src/Graphicals/Sdl2 -name "*.cpp") src/Graphicals/AGraphical.cpp src/ArcadeException.cpp
 SFML_SRC				=	$(shell find src/Graphicals/Sfml -name "*.cpp") src/Graphicals/AGraphical.cpp src/ArcadeException.cpp
 SNAKE_SRC				=	$(shell find src/Games/Snake -name "*.cpp") src/Games/AGame.cpp src/ArcadeException.cpp src/Core/Menu.cpp
-Nibbler_SRC			=	$(shell find src/Games/Nibbler -name "*.cpp") src/Games/AGame.cpp src/ArcadeException.cpp src/Core/Menu.cpp
+NIBBLER_SRC				=	$(shell find src/Games/Nibbler -name "*.cpp") src/Games/AGame.cpp src/ArcadeException.cpp src/Core/Menu.cpp
 
 # Object files for libraries
 NCURSES_OBJ				=	$(NCURSES_SRC:.cpp=.o)
 SDL_OBJ					=	$(SDL_SRC:.cpp=.o)
 SFML_OBJ				=	$(SFML_SRC:.cpp=.o)
 SNAKE_OBJ				=	$(SNAKE_SRC:.cpp=.o)
-Nibbler_OBJ			=	$(Nibbler_SRC:.cpp=.o)
+NIBBLER_OBJ				=	$(NIBBLER_SRC:.cpp=.o)
 
 # Library flags
 NCURSES_FLAGS			=	-lncurses

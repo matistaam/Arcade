@@ -16,6 +16,7 @@ namespace arc {
 
             std::vector<element_t> handleEvents(std::string command) override;
 
+        private:
             enum Direction {
                 UP,
                 RIGHT,
@@ -23,7 +24,6 @@ namespace arc {
                 LEFT
             };
 
-        private:
             void restartGame();
             void moveSnake();
             void handleCollisions();

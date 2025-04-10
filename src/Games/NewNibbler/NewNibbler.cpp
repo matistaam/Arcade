@@ -176,14 +176,12 @@ namespace arc{
 
         // TODO: maybe implement the skip in the processInput method
         if (elapsedTime < this->_updateInterval) {
-            std::cout << "Exit 1" << std::endl;
             return;
         }
 
         this->_lastUpdateTime = currentTime;
 
         if (this->_gameState != GameState::RUNNING) {
-            std::cout << "Exit 2" << std::endl;
             return;
         }
 
@@ -194,7 +192,7 @@ namespace arc{
         // Check if we have a queued input and if it can be applied now
         if (this->_inputQueue) {
             Direction queuedDirection = *this->_inputQueue;
-            
+
             // Check if the queued direction is valid at this position
             if (!this->wouldHitWall(queuedDirection, head)) {
                 // Apply the queued input
@@ -226,7 +224,6 @@ namespace arc{
         // Check if newHead position is the same as current head position
         if (newHead.first == head.first && newHead.second == head.second) {
             // Snake has hit a wall and couldn't move
-            std::cout << "Exit 3" << std::endl;
             return;
         }
 
@@ -262,7 +259,6 @@ namespace arc{
         if (this->checkSelfCollision()) {
             this->_gameState = GameState::GAME_OVER;
         }
-        std::cout << "Exit 4" << std::endl;
     }
 
     std::vector<element_t> NewNibbler::createGameElements()
@@ -327,15 +323,16 @@ namespace arc{
     {
         for (auto& wall : this->_walls) {
             if (newHead.first == wall.first && newHead.second == wall.second) {
-                std::cout << "Collision detected at: (" << newHead.first << ", " << newHead.second << ")" << std::endl;
 
                 auto it = this->_turnWalls.find(wall);
                 if (it != this->_turnWalls.end()) {
-                    std::cout << "Turn wall detected. Changing direction." << std::endl;
+
                     Direction newDirection = it->second;
 
                     newHead = this->_snake.front();
                     this->_direction = newDirection;
+                    this->_lastDirection = newDirection;
+                    this->_inputQueue = std::nullopt;
 
                     switch (this->_direction) {
                         case Direction::UP:
@@ -352,7 +349,6 @@ namespace arc{
                             break;
                     }
                 } else {
-                    std::cout << "Regular wall detected. Stopping snake." << std::endl;
                     newHead = this->_snake.front();
                     this->_snakeStopped = true;
                 }
@@ -421,14 +417,6 @@ namespace arc{
         // Check if this position is a wall
         for (auto& wall : this->_walls) {
             if (potentialPos.first == wall.first && potentialPos.second == wall.second) {
-                // NOT SURE ABOUT THIS
-                // Exception for turn walls which are allowed
-                auto it = this->_turnWalls.find(wall);
-                if (it != this->_turnWalls.end()) {
-                    return false;
-                }
-
-                // Regular wall or T-section would cause collision
                 return true;
             }
         }

@@ -12,6 +12,7 @@
 #include <thread>
 #include <list>
 #include <random>
+#include <memory>
 #include <dirent.h>
 #include <fstream>
 #include <sstream>

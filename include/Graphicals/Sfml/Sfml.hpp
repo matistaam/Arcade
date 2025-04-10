@@ -24,7 +24,7 @@ namespace arc {
 
         private:
             std::tuple<int, int> convertPositionToPixels(int percentX, int percentY);
-            sf::RenderWindow *_window;
+            std::unique_ptr<sf::RenderWindow> _window;
             sf::Font _font;
             sf::Texture _texture;
             int _width;

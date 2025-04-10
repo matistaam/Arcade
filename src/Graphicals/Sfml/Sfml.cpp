@@ -12,7 +12,7 @@ namespace arc {
     {
         this->_width = 800;
         this->_height = 600;
-        this->_window = new sf::RenderWindow(sf::VideoMode(this->_width, this->_height), "Arcade");
+        this->_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(this->_width, this->_height), "Arcade");
         if (!this->_window)
             throw GraphicalError("Window creation failed");
         if (!this->_font.loadFromFile("assets/fonts/ByteBounce.ttf"))
@@ -22,11 +22,8 @@ namespace arc {
 
     SFML::~SFML()
     {
-        if (this->_window) {
+        if (this->_window)
             this->_window->close();
-            delete this->_window;
-            this->_window = nullptr;
-        }
     }
 
     std::string SFML::getEvents()

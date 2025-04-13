@@ -14,8 +14,8 @@ namespace arc {
             AGraphical(std::string path);
             ~AGraphical();
 
-            virtual std::string getEvents() = 0;
-            virtual void draw() = 0;
+            virtual std::string getEvents() override = 0;
+            virtual void draw() override = 0;
 
             void clearElements() override;
             void setElements(const std::vector<element_t> &elements) override;

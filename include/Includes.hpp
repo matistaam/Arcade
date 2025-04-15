@@ -18,6 +18,7 @@
 #include <sstream>
 #include <dlfcn.h>
 #include <optional>
+#include <iomanip>
 
 // Graphics libraries includes
 #include <ncurses.h>
